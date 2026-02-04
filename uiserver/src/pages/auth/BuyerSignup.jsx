@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { login } from '../../api/auth';
+import { registerBuyer } from '../../api/auth';
 import { useAuth } from '../../context/AuthContext';
 
-function Login() {
+function BuyerSignup() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
@@ -15,17 +16,23 @@ function Login() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+
+        if (password !== confirmPassword) {
+            setError('Passwords do not match');
+            return;
+        }
+
+        if (password.length < 8) {
+            setError('Password must be at least 8 characters');
+            return;
+        }
+
         setLoading(true);
 
         try {
-            const user = await login(email, password);
+            const user = await registerBuyer(email, password);
             saveUser(user);
-
-            if (user.role === 'BUYER') {
-                navigate('/buyer/dashboard');
-            } else {
-                navigate('/seller/dashboard');
-            }
+            navigate('/buyer/dashboard');
         } catch (err) {
             setError(err.message);
         } finally {
@@ -36,8 +43,8 @@ function Login() {
     return (
         <div style={styles.container}>
             <div style={styles.card}>
-                <h1 style={styles.title}>Welcome to PRYM</h1>
-                <p style={styles.subtitle}>Sign in to your account</p>
+                <h1 style={styles.title}>Join PRYM</h1>
+                <p style={styles.subtitle}>Create a Buyer Account</p>
 
                 {error && <div style={styles.error}>{error}</div>}
 
@@ -64,16 +71,25 @@ function Login() {
                         />
                     </div>
 
+                    <div style={styles.inputGroup}>
+                        <label style={styles.label}>Confirm Password</label>
+                        <input
+                            type="password"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            style={styles.input}
+                            required
+                        />
+                    </div>
+
                     <button type="submit" style={styles.button} disabled={loading}>
-                        {loading ? 'Signing in...' : 'Sign In'}
+                        {loading ? 'Creating Account...' : 'Sign Up as Buyer'}
                     </button>
                 </form>
 
                 <div style={styles.links}>
-                    <p>Don't have an account?</p>
-                    <Link to="/register/buyer" style={styles.link}>Sign up as Buyer</Link>
-                    <span style={styles.separator}> | </span>
-                    <Link to="/register/seller" style={styles.link}>Sign up as Seller</Link>
+                    <p>Already have an account? <Link to="/login" style={styles.link}>Sign in</Link></p>
+                    <p>Want to sell? <Link to="/register/seller" style={styles.link}>Sign up as Seller</Link></p>
                 </div>
             </div>
         </div>
@@ -105,9 +121,10 @@ const styles = {
         fontSize: '28px'
     },
     subtitle: {
-        color: '#666',
+        color: '#4a7c59',
         textAlign: 'center',
-        marginBottom: '24px'
+        marginBottom: '24px',
+        fontWeight: '500'
     },
     form: {
         display: 'flex',
@@ -156,10 +173,7 @@ const styles = {
         color: '#4a7c59',
         textDecoration: 'none',
         fontWeight: '500'
-    },
-    separator: {
-        color: '#ccc'
     }
 };
 
-export default Login;
+export default BuyerSignup;
