@@ -31,6 +31,17 @@ Full stack webapp with:
 
 ## Setup
 you need two seperate terminals running, one for frontend and one for backend
+### 0) Clone the Repository
+
+1. Clone the repo:
+   ```bash
+   git clone https://github.com/hvpham-yorku/project-group-1-prym.git
+   ```
+
+2. Move into the project folder:
+   ```bash
+   cd project-group-1-prym
+   ```
 ### 1) Backend Setup (Spring Boot)
 
 1. Go into the backend folder:
