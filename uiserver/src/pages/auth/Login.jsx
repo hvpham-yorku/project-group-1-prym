@@ -19,15 +19,26 @@ function Login() {
 
         try {
             const user = await login(email, password);
-            saveUser(user);
+          
 
-            if (user.role === 'BUYER') {
+	if (!user || typeof user !== 'object') {
+		throw new Error('Invalid login response (missing user).'); }
+	
+
+            
+	if (user.role === 'BUYER') {
+		saveUser(user);
                 navigate('/buyer/dashboard');
-            } else {
+            } else if (user.role === 'SELLER') {
+		saveUser(user);
                 navigate('/seller/dashboard');
             }
+else {
+//Explicitly reject unexpected roles
+throw new Error('Your account role is not supported. Please contact support'); }
         } catch (err) {
-            setError(err.message);
+		const message = err instanceof Error ? err.message : 'Login failed. Please try again.';
+            setError(message);
         } finally {
             setLoading(false);
         }
