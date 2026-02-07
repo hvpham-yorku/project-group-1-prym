@@ -1,13 +1,18 @@
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-
+import { logout } from '../api/auth';
 function BuyerDashboard() {
-    const { user, logout } = useAuth();
+    const { user, clearUser } = useAuth();
     const navigate = useNavigate();
 
-    const handleLogout = () => {
-        logout();
-        navigate('/login');
+ const handleLogout = async () => {
+        try {
+            await logout();
+            clearUser();
+            navigate('/login');
+        } catch (error) {
+            console.error('Logout failed:', error);
+        }
     };
 
     return (
