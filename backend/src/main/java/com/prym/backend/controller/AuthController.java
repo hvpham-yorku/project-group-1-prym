@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-
+import org.springframework.http.ResponseCookie;
 @RestController //handles API requests
 @RequestMapping("/api/auth") //sets the base path, helps us to avoid writing the full path when using @Postmapping
 public class AuthController {
@@ -113,13 +113,15 @@ public class AuthController {
         return ResponseEntity.status(401).body(Map.of("error", "Session expired"));
     }
 
-    private void addSessionCookie(HttpServletResponse response, String sessionId) {
-        Cookie cookie = new Cookie("SESSION_ID", sessionId);
-        cookie.setHttpOnly(true);  // JavaScript can't access it (security)
-        cookie.setPath("/");       // Available for all paths
-        cookie.setMaxAge(7 * 24 * 60 * 60); // 7 days in seconds
-        response.addCookie(cookie);
-    }
+private void addSessionCookie(HttpServletResponse response, String sessionId) {
+    ResponseCookie cookie = ResponseCookie.from("SESSION_ID", sessionId)
+            .httpOnly(true)
+            .path("/")
+            .maxAge(7 * 24 * 60 * 60)
+            .sameSite("Lax")
+            .build();
+    response.addHeader("Set-Cookie", cookie.toString());
+}
 
     private Map<String, Object> buildUserResponse(User user) {
         Map<String, Object> response = new HashMap<>();

@@ -5,16 +5,16 @@ function SellerDashboard() {
     const { user, clearUser } = useAuth();
     const navigate = useNavigate();
 
-   const handleLogout = async () => {
-        try {
-            await logout();
-            clearUser();
-            navigate('/login');
-        } catch (error) {
-            console.error('Logout failed:', error);
-        }
-    };
-
+const handleLogout = async () => {
+    try {
+        await logout();
+    } catch (error) {
+        console.error('Logout failed:', error);
+    } finally {
+        clearUser();
+        navigate('/login');
+    }
+};
     return (
         <div style={styles.container}>
             <div style={styles.card}>
