@@ -1,5 +1,6 @@
 package com.prym.backend.controller;
 
+import com.prym.backend.dto.SellerProfileUpdateDTO;
 import com.prym.backend.model.User; 
 import com.prym.backend.repository.UserRepository; 
 
@@ -31,6 +32,38 @@ public class SellerController {
 			if(existingUser.getRole() == User.Role.BUYER) {
 				return ResponseEntity.status(403).body(null);
 			} else {
+				return ResponseEntity.ok(existingUser);
+			}
+		}
+	}
+	
+	@PatchMapping("/{id}")
+	public ResponseEntity<User> updateSeller(@PathVariable Long id, @RequestBody SellerProfileUpdateDTO dto){
+		
+		Optional<User> user = this.userRepository.findById(id);
+		
+		if(user.isEmpty()) { //if user does not exist
+			return ResponseEntity.notFound().build();
+		} else {
+			User existingUser = user.get(); //to get the User from Optional<User>
+			
+			if(existingUser.getRole() == User.Role.BUYER) {
+				return ResponseEntity.status(403).body(null);
+			} else {
+				
+				if(dto.getName() != null) {
+					existingUser.setName(dto.getName());
+				}
+				if(dto.getEmail() != null) {
+					existingUser.setEmail(dto.getEmail());
+				}
+				if(dto.getAddress() != null) {
+					existingUser.setAddress(dto.getAddress());
+				}
+				if(dto.getPhoneNumber() != null) {
+					existingUser.setPhoneNumber(dto.getPhoneNumber());
+				}
+				userRepository.save(existingUser);
 				return ResponseEntity.ok(existingUser);
 			}
 		}

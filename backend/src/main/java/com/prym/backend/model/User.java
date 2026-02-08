@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 @Data//lombok generates all the getters, setters, and toString function without needing to type them out!
 @NoArgsConstructor //this is the beauty of lombok, by using this tag it generates the default constructor without having to type it
 @AllArgsConstructor//this tag generates the constructor that takes in all arguments, reduced about 10 lines of code into 1!
+
 public class User {
 
     @Id
@@ -40,4 +41,9 @@ public class User {
     public enum Role { //enum is safer to use than strings
         BUYER, SELLER
     }
+    
+    private String Name;
+    private String phoneNumber;
+    private String address;
+    private String description;
 }
