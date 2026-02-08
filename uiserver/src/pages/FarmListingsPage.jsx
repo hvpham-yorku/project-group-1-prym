@@ -1,32 +1,12 @@
-const farms = [{
-	id: 1, 
-	name: 'farm1',
-},
-{
-	id: 2, 
-	name: 'farm2',	
-},
-{
-	id: 3,
-	name: 'farm3',
-},
-{
-	id: 4,
-	name: 'farm4',
-},
-{ 
-	id: 5,
-	name: 'farm5',
-},
-{
-	id: 6,
-	name: 'farm6',
-}];
-
+import {farms} from '../assets/data.js';
 
 function FarmListingsPage(){
 	const listItems = farms.map(farm => 
-		<li key={farm.id}><a href='/farmlistingspage/farmlisting'><button style={styles.button}>{farm.name}</button></a></li>
+		<li key={farm.id}>
+			<div style={styles.listing}>
+				<a href='/farmlistingspage/farmlisting'><button style={styles.button}>{farm.name}</button></a>
+			</div>
+		</li>
 	);
 	
 	return (
@@ -46,17 +26,23 @@ const styles = {
 		alignItems: 'center',
 		backgroundColor: '#f5f5f0',
 	},
+	listing: {
+		display: 'flex',
+		flexDirection: 'row',
+		backgroundColor: 'green',
+		margin: 10,
+		borderRadius: 8,
+	},
 	button: {
 		backgroundColor: 'white',
 		color: '#4a7c59',
 		fontSize: 50,
 		fontFamily: 'Roboto',
-		margin: 10,
 		border: 'solid',
 		borderColor: '#333',
 		borderRadius: 8,
-		width: 1300,
-		height: 200,
+		width: 1500,
+		height: 300,
 		cursor: 'pointer',	
 	},
 	header: {
