@@ -4,43 +4,78 @@ export async function registerBuyer(email, password) {
     const response = await fetch(`${API_URL}/register/buyer`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ email, password })
     });
 
+ const data = await response.json();
+
     if (!response.ok) {
-        const error = await response.text();
-        throw new Error(error);
+        throw new Error(data.error || 'Registration failed');
     }
 
-    return response.json();
+    return data;
 }
 
 export async function registerSeller(email, password) {
     const response = await fetch(`${API_URL}/register/seller`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ email, password })
     });
 
+      const data = await response.json();
+
     if (!response.ok) {
-        const error = await response.text();
-        throw new Error(error);
+        throw new Error(data.error || 'Registration failed');
     }
 
-    return response.json();
+    return data;
 }
 
 export async function login(email, password) {
     const response = await fetch(`${API_URL}/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ email, password })
     });
 
+    const data = await response.json();
+
     if (!response.ok) {
-        const error = await response.text();
-        throw new Error(error);
+        throw new Error(data.error || 'Login failed');
     }
 
-    return response.json();
+    return data;
+}
+export async function logout() {
+    const response = await fetch(`${API_URL}/logout`, {
+        method: 'POST',
+        credentials: 'include'
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data.error || 'Logout failed');
+    }
+
+    return data;
+}
+
+export async function getCurrentUser() {
+    const response = await fetch(`${API_URL}/me`, {
+        method: 'GET',
+        credentials: 'include'
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data.error || 'Not logged in');
+    }
+
+    return data;
 }
