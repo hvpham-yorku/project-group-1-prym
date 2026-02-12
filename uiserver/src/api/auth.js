@@ -1,14 +1,14 @@
 const API_URL = 'http://localhost:8080/api/auth';
 
-export async function registerBuyer(email, password) {
+export async function registerBuyer(userData) {
     const response = await fetch(`${API_URL}/register/buyer`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify(userData)
     });
 
- const data = await response.json();
+    const data = await response.json();
 
     if (!response.ok) {
         throw new Error(data.error || 'Registration failed');
@@ -17,15 +17,15 @@ export async function registerBuyer(email, password) {
     return data;
 }
 
-export async function registerSeller(email, password) {
+export async function registerSeller(userData) {
     const response = await fetch(`${API_URL}/register/seller`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify(userData)
     });
 
-      const data = await response.json();
+    const data = await response.json();
 
     if (!response.ok) {
         throw new Error(data.error || 'Registration failed');
@@ -50,6 +50,7 @@ export async function login(email, password) {
 
     return data;
 }
+
 export async function logout() {
     const response = await fetch(`${API_URL}/logout`, {
         method: 'POST',
