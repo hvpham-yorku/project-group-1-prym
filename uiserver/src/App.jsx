@@ -5,6 +5,8 @@ import BuyerSignup from './pages/auth/BuyerSignup';
 import SellerSignup from './pages/auth/SellerSignup';
 import BuyerDashboard from './pages/BuyerDashboard';
 import SellerDashboard from './pages/SellerDashboard';
+import FarmListingsPage from './pages/FarmListingsPage';
+import FarmListing from './pages/FarmListing';
 
 function ProtectedRoute({ children, allowedRole }) {
     const { user } = useAuth();
@@ -43,6 +45,9 @@ function AppRoutes() {
 
             <Route path="/" element={<Navigate to="/login" />} />
             <Route path="*" element={<Navigate to="/login" />} />
+			
+			<Route path="/farmlistingspage" element={<FarmListingsPage />} />
+			<Route path="/farmlistingspage/farmlisting" element={<FarmListing />} />
         </Routes>
     );
 }
