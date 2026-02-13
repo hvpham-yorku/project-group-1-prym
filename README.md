@@ -30,8 +30,8 @@ Full stack webapp with:
 ---
 
 ## Setup
-you need two seperate terminals running, one for frontend and one for backend
-[Link to wiki setup](https://github.com/hvpham-yorku/project-group-1-prym.wiki.git)
+For more detailed information, check out our [Wiki](../../wiki):
+- [Project Setup](../../wiki/Setup)
 
 Open it in your browser:
 - `http://localhost:5173`
