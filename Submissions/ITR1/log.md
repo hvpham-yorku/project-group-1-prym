@@ -63,7 +63,7 @@ Authentication and Security Files - Sufyan
 
 Development Tasks Per User Story:
 
-
+- 
 
 Time Allocated vs Time Spent:
 
