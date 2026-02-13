@@ -31,6 +31,22 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @Column(unique = true, nullable = false)
+    private String username;
+
+    @Column(nullable = false)
+    private String firstName;
+
+    @Column(nullable = false)
+    private String lastName;
+
+    @Column(nullable = false)
+    private String phoneNumber;
+
+    @Lob  // Large Object tag for storing image data 
+    @Column(columnDefinition = "LONGTEXT")
+    private String profilePicture;  // Store as Base64 string
+
     private LocalDateTime createdAt;
 
     @PrePersist

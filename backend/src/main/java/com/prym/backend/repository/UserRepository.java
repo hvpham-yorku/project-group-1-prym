@@ -12,4 +12,5 @@ public interface UserRepository extends JpaRepository<User, Long> { //extending 
     Optional<User> findByEmail(String email); //Spring generates and auto SQL query SELECT * FROM users WHERE email = ?
     
     boolean existsByEmail(String email); //returns true if email exists and false otherwise
+    boolean existsByUsername(String username); //check if username is taken
 }
