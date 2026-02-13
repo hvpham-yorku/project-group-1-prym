@@ -121,21 +121,21 @@ For detailed documentation, visit the [Project Wiki](../../wiki)
 | Task | Assigned To | Time Allocated | Time Spent |
 |------|-------------|----------------|------------|
 | Team Jira Setup + Maintenance | Jacob | | |
-| PRD Update | Sufyan | | 1 hour |
-| README File | Sufyan | | 20 minutes |
+| PRD Update | Sufyan | 1 hour | 1 hour |
+| README File | Sufyan | 30 minutes | 20 minutes |
 | Project Map Design | Katelyn | 1 Day | 1 Day |
 | Implement Basic UI Vue Server | Jacob | | |
 | Implement Basic Database Backend | Sufyan | | 1 day |
-| Buyer Account Creation | Sufyan | | 0.5 day |
-| Buyer/Seller Login | Sufyan | | 0.5 day |
+| Seller Account Creation | Sufyan | 1 day | 0.5 day |
+| Buyer Account Creation | Sufyan | 1 day | 0.5 day |
+| Buyer/Seller Login | Sufyan | 1.5 days | 1 day |
+| Authentication and Security Files | Sufyan | | 0.5 day |
 | Basic UI Decorations | Jacob | | |
 | Buyer Profile Modification | Shayan | | |
-| Seller Account Creation | Sufyan | | 0.5 day |
 | Farm Listings | Katelyn | | 3 hours |
 | Basic Tests | Jacob | | |
 | Mock Farm Listing Data | Katelyn | | 20 min |
 | Mock Seller Account Data | Harleen | | |
 | Mock Buyer Account Data | Shayan | | |
 | Seller Profile Modifications | Harleen | | |
-| Authentication and Security Files | Sufyan | | 0.5 day |
 | Architecture Diagram | Jacob | | |
