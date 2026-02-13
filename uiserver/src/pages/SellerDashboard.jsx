@@ -1,7 +1,9 @@
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '../api/auth';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { getSellerProfile } from '../api/seller';
+import { updateSellerProfile } from '../api/seller';
 
 function SellerDashboard() {
     const { user, clearUser } = useAuth();
@@ -23,16 +25,67 @@ function SellerDashboard() {
 	const[formData, setFormData] = useState({
 		firstName: user?.firstName || '',
 		lastName: user?.lastName || '',
+		userName: user?.username || '',
 		email: user?.email || '',
 		phoneNumber: user?.phoneNumber || ''
 	})
 	
 	const[activeSection, setActiveSection] = useState("Dashboard");
 	
+	const[profile, setProfile] = useState(null);
+	const[loading, setLoading] = useState(true);
+	const[error, setError] = useState('');
+	
+	useEffect(()=>{
+		const fetchProfile = async() =>{
+			try{
+				setLoading(true);
+				const data = await getSellerProfile(user.id);
+				setProfile(data);
+				setFormData({
+					firstName: data.firstName || '',
+					lastName: data.lastName ||'',
+					username: data.username ||'',
+					email: data.email ||'',
+					phoneNumber: data.phoneNumber ||''
+				});
+			}
+			catch (err){
+				setError("Failed to load profile.");
+				console.error(err);
+			}
+			finally{
+				setLoading(false);
+			}
+		};
+		fetchProfile();
+	}, [user.id]);
+	
+	const handleSave = async () => {
+	    try {
+	        const payload = {
+	            firstName: formData.firstName,
+	            lastName: formData.lastName,
+	            email: formData.email,
+	            userName: formData.username,
+	            phoneNumber: formData.phoneNumber
+	        };
+	        const updated = await updateSellerProfile(user.id, payload);
+	        
+	        //Update the local state
+	        setProfile(updated);  
+	        setIsEditing(false); 
+	        window.location.reload(); 
+	        
+	    } catch (err) {
+	        console.error("Save error:", err);
+	        alert("Failed to save profile. Check the console for errors.");
+	    }
+	};
 
     return (
 		<div>
-			<Nav setActiveSection = {setActiveSection} />
+			<Nav setActiveSection = {setActiveSection} handleLogout = {handleLogout} />
 			
      	    <div style={styles.container}>
         	    <div style={styles.card}>
@@ -61,35 +114,128 @@ function SellerDashboard() {
                     	)}
   	               </div>
 
-    	            <h1 style={styles.title}>Seller Dashboard</h1>
-        	        <p style={styles.welcome}>Welcome, {user?.username}!</p>
-            	    <p style={styles.name}>{user?.firstName} {user?.lastName}</p>
+    	            <h1 style={styles.title}>Your Profile</h1>
+        	        <p style={styles.welcome}>
+						Welcome, {isEditing ? formData.firstName:user?.username}!
+					</p>
+            	    <p style={styles.name}>
+						{isEditing ? `${formData.firstName} ${formData.lastName}` : `${user?.firstName} ${user?.lastName}`}
+					</p>
                 	<p style={styles.info}>You are logged in as a <strong>SELLER</strong></p>
                 
    	           		{/* User Info Card */}
     	            <div style={styles.infoCard}>
         	            <div style={styles.infoRow}>
-            	            <span style={styles.infoLabel}>Email:</span>
-                	        <span style={styles.infoValue}>{user?.email}</span>
-                    	</div>
-   	          	        <div style={styles.infoRow}>
-    	                    <span style={styles.infoLabel}>Phone:</span>
-        	                <span style={styles.infoValue}>{user?.phoneNumber}</span>
-            	        </div>
-     	            </div>
-
-              		<button onClick={handleLogout} style={styles.button}>
-                    	Logout
-                	</button>
-				</>
-				)}
-            </div>
+							
+							<span style={styles.infoLabel}>First Name:</span>
+								{isEditing?(
+									<input
+										type = "text"
+										value={formData.firstName}
+										onChange={(e) => setFormData({...formData, firstName: e.target.value})}
+									/>
+								):(
+									<span style = {styles.infoValue}>
+										{user?.firstName}
+									</span>
+								)}
+						</div>	
+						
+						<div style={styles.infoRow}>
+						   <span style={styles.infoLabel}>Last Name:</span>
+						   {isEditing ? (
+						     <input
+						       type="text"
+						       value={formData.lastName}
+						       onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+						     />
+						   ) : (
+						     <span style={styles.infoValue}>{user?.lastName}</span>
+						   )}
+						 </div>
+						 
+						 <div style={styles.infoRow}>
+						     <span style={styles.infoLabel}>Username:</span>
+						     {isEditing ? (
+						       <input
+						         type="text"
+						         value={formData.username}
+						         onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+						       />
+						     ) : (
+						       <span style={styles.infoValue}>{user?.username}</span>
+						     )}
+						   </div>
+						   
+						   <div style={styles.infoRow}>
+						       <span style={styles.infoLabel}>Phone:</span>
+						       {isEditing ? (
+						         <input
+						           type="tel"
+						           value={formData.phoneNumber}
+						           onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+						         />
+						       ) : (
+						         <span style={styles.infoValue}>{user?.phoneNumber}</span>
+						       )}
+						     </div>
+							 
+							 {/* Email - read only */}
+							   <div style={styles.infoRow}>
+							     <span style={styles.infoLabel}>Email:</span>
+							     <span style={styles.infoValue}>{user?.email}</span>
+							   </div>
+						</div>
+					
+					<div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginTop: '20px' }}>
+					
+					{isEditing?(
+						<>
+							<button
+								style ={styles.button}
+								onClick={handleSave}>
+								Save
+							</button>
+							
+							<button
+								style = {styles.button}
+								onClick={()=>{
+									setFormData({
+										firstName:user?.firstName || '',
+										lastName:user?.lastName || '',
+										username:user?.username || '',
+										email:user?.email || '',
+										phoneNumber: user?.phoneNumber || ''
+									});
+									setIsEditing(false);
+								}}>
+								Discard
+							</button>
+						</>
+					):(
+						<>
+							<button
+								style={styles.button}
+								onClick={() => setIsEditing(true)}>
+								Edit Profile
+							</button>
+							<button
+								style={styles.button}
+								onClick={handleLogout}>
+								Logout
+							</button>
+						</>								
+					)}
+				</div>
+			</>
+			)}
+			</div>
         </div>
 	</div>
     );
 }
 
-function Nav({setActiveSection}, handleLogout ){
+function Nav({setActiveSection, handleLogout} ){
 	const [hamburgerOpen, setHamburgerOpen] = useState(false);
 	const toggleHamburger = () => {
 		setHamburgerOpen(!hamburgerOpen)
@@ -121,6 +267,21 @@ function Nav({setActiveSection}, handleLogout ){
 					zIndex: 999
 				}}>
 					<ul style = {{ listStyle : 'none', padding: 0}}>
+						<li>
+							<button
+								style={{
+									background:'none',
+									border:'none',
+									cursor:'pointer',
+									padding:0
+								}}
+								onClick={() => {
+									setActiveSection("Dashboard");
+									setHamburgerOpen(false);
+								}}>
+								Dashboard
+							</button>
+						</li>
 						<li>
 							<button
 								style={{
