@@ -3,15 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { getBuyerProfile, updateBuyerProfile } from '../api/buyer';
 import { useAuth } from '../context/AuthContext';
 
-// This page lets buyers view and edit their profile from the dashboard
+// This page lets buyers view and edit their meat preferences from the dashboard
 function BuyerProfile() {
     // Profile data from the backend
     const [profile, setProfile] = useState(null);
 
     // Form fields for edit mode
-    const [firstName, setFirstName] = useState('');
-    const [lastName, setLastName] = useState('');
-    const [phoneNumber, setPhoneNumber] = useState('');
     const [preferredCuts, setPreferredCuts] = useState('');
     const [quantity, setQuantity] = useState('');
 
@@ -31,9 +28,6 @@ function BuyerProfile() {
                 setProfile(data);
 
                 // Pre-fill the form fields with the current values
-                setFirstName(data.firstName);
-                setLastName(data.lastName);
-                setPhoneNumber(data.phoneNumber);
                 setPreferredCuts(data.preferredCuts || '');
                 setQuantity(data.quantity || '');
             } catch (err) {
@@ -53,15 +47,12 @@ function BuyerProfile() {
 
         try {
             const updated = await updateBuyerProfile(user.id, {
-                firstName,
-                lastName,
-                phoneNumber,
                 preferredCuts,
                 quantity
             });
 
-            setProfile(updated); // update the displayed profile with the new data
-            setIsEditing(false); // switch back to view mode
+            setProfile(updated);
+            setIsEditing(false);
         } catch (err) {
             setError(err.message);
         }
@@ -69,18 +60,12 @@ function BuyerProfile() {
 
     // Cancel editing and reset the form fields back to the current profile values
     const handleCancel = () => {
-        setFirstName(profile.firstName);
-        setLastName(profile.lastName);
-        setPhoneNumber(profile.phoneNumber);
         setPreferredCuts(profile.preferredCuts || '');
         setQuantity(profile.quantity || '');
         setIsEditing(false);
     };
 
-    // Show loading state while fetching
     if (loading) return <div style={styles.container}><p>Loading...</p></div>;
-
-    // Show error if profile couldn't be found
     if (!profile && error) return <div style={styles.container}><p style={{ color: '#c00' }}>{error}</p></div>;
 
     return (
@@ -89,25 +74,13 @@ function BuyerProfile() {
                 <button onClick={() => navigate('/buyer/dashboard')} style={styles.backButton}>
                     Back to Dashboard
                 </button>
-                <h1 style={styles.title}>My Profile</h1>
+                <h1 style={styles.title}>Meat Preferences</h1>
 
                 {error && <div style={styles.error}>{error}</div>}
 
-                {/* View mode — displays profile info as text */}
+                {/* View mode */}
                 {!isEditing ? (
                     <div>
-                        <div style={styles.field}>
-                            <span style={styles.fieldLabel}>First Name:</span>
-                            <span>{profile.firstName}</span>
-                        </div>
-                        <div style={styles.field}>
-                            <span style={styles.fieldLabel}>Last Name:</span>
-                            <span>{profile.lastName}</span>
-                        </div>
-                        <div style={styles.field}>
-                            <span style={styles.fieldLabel}>Phone Number:</span>
-                            <span>{profile.phoneNumber}</span>
-                        </div>
                         <div style={styles.field}>
                             <span style={styles.fieldLabel}>Preferred Cuts:</span>
                             <span>{profile.preferredCuts || 'Not set'}</span>
@@ -118,45 +91,12 @@ function BuyerProfile() {
                         </div>
 
                         <button onClick={() => setIsEditing(true)} style={styles.button}>
-                            Edit Profile
+                            Edit Preferences
                         </button>
                     </div>
                 ) : (
-                    /* Edit mode — form pre-filled with current values */
+                    /* Edit mode */
                     <form onSubmit={handleSave} style={styles.form}>
-                        <div style={styles.inputGroup}>
-                            <label style={styles.label}>First Name</label>
-                            <input
-                                type="text"
-                                value={firstName}
-                                onChange={(e) => setFirstName(e.target.value)}
-                                style={styles.input}
-                                required
-                            />
-                        </div>
-
-                        <div style={styles.inputGroup}>
-                            <label style={styles.label}>Last Name</label>
-                            <input
-                                type="text"
-                                value={lastName}
-                                onChange={(e) => setLastName(e.target.value)}
-                                style={styles.input}
-                                required
-                            />
-                        </div>
-
-                        <div style={styles.inputGroup}>
-                            <label style={styles.label}>Phone Number</label>
-                            <input
-                                type="tel"
-                                value={phoneNumber}
-                                onChange={(e) => setPhoneNumber(e.target.value)}
-                                style={styles.input}
-                                required
-                            />
-                        </div>
-
                         <div style={styles.inputGroup}>
                             <label style={styles.label}>Preferred Cuts</label>
                             <input
@@ -192,7 +132,6 @@ function BuyerProfile() {
     );
 }
 
-// Same styling as the other pages for consistency
 const styles = {
     container: {
         minHeight: '100vh',

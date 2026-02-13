@@ -3,11 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { createBuyerProfile } from '../api/buyer';
 import { useAuth } from '../context/AuthContext';
 
-// This page appears right after signup. The buyer fills in their profile details here.
+// This page appears right after signup so the buyer can set their meat preferences
 function BuyerProfileSetup() {
-    const [firstName, setFirstName] = useState('');
-    const [lastName, setLastName] = useState('');
-    const [phoneNumber, setPhoneNumber] = useState('');
     const [preferredCuts, setPreferredCuts] = useState('');
     const [quantity, setQuantity] = useState('');
     const [error, setError] = useState('');
@@ -17,17 +14,14 @@ function BuyerProfileSetup() {
     const { user } = useAuth(); // get the logged-in user so we can send their userId
 
     const handleSubmit = async (e) => {
-        e.preventDefault(); // prevent the page from refreshing
+        e.preventDefault();
         setError('');
         setLoading(true);
 
         try {
-            // send all the profile data to the backend
+            // send meat preferences to the backend
             await createBuyerProfile({
                 userId: user.id,
-                firstName,
-                lastName,
-                phoneNumber,
                 preferredCuts,
                 quantity
             });
@@ -44,45 +38,12 @@ function BuyerProfileSetup() {
     return (
         <div style={styles.container}>
             <div style={styles.card}>
-                <h1 style={styles.title}>Complete Your Profile</h1>
-                <p style={styles.subtitle}>Tell us about yourself</p>
+                <h1 style={styles.title}>Meat Preferences</h1>
+                <p style={styles.subtitle}>Tell us what you're looking for</p>
 
                 {error && <div style={styles.error}>{error}</div>}
 
                 <form onSubmit={handleSubmit} style={styles.form}>
-                    <div style={styles.inputGroup}>
-                        <label style={styles.label}>First Name</label>
-                        <input
-                            type="text"
-                            value={firstName}
-                            onChange={(e) => setFirstName(e.target.value)}
-                            style={styles.input}
-                            required
-                        />
-                    </div>
-
-                    <div style={styles.inputGroup}>
-                        <label style={styles.label}>Last Name</label>
-                        <input
-                            type="text"
-                            value={lastName}
-                            onChange={(e) => setLastName(e.target.value)}
-                            style={styles.input}
-                            required
-                        />
-                    </div>
-
-                    <div style={styles.inputGroup}>
-                        <label style={styles.label}>Phone Number</label>
-                        <input
-                            type="tel"
-                            value={phoneNumber}
-                            onChange={(e) => setPhoneNumber(e.target.value)}
-                            style={styles.input}
-                            required
-                        />
-                    </div>
-
                     <div style={styles.inputGroup}>
                         <label style={styles.label}>Preferred Cuts (e.g., Ribeye, Sirloin)</label>
                         <input
@@ -116,7 +77,6 @@ function BuyerProfileSetup() {
     );
 }
 
-// Same styling as BuyerSignup to keep the look consistent
 const styles = {
     container: {
         minHeight: '100vh',

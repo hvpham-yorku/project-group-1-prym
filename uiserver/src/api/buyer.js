@@ -6,27 +6,26 @@ const API_URL = 'http://localhost:8080/api/buyer';
 
 // Creates a new buyer profile after signup
 // Calls POST /api/buyer/profile
-// profileData contains: userId, firstName, lastName, phoneNumber, preferredCuts, quantity
+// profileData contains: userId, preferredCuts, quantity
 export async function createBuyerProfile(profileData) {
     const response = await fetch(`${API_URL}/profile`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' }, // tells the backend we're sending JSON
-        credentials: 'include', // sends the session cookie so Spring Security lets us through
-        body: JSON.stringify(profileData) // converts the JavaScript object to a JSON string
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(profileData)
     });
 
-    const data = await response.json(); // read the response from the backend
+    const data = await response.json();
 
     if (!response.ok) {
-        throw new Error(data.error || 'Failed to create profile'); // if something went wrong, throw an error
+        throw new Error(data.error || 'Failed to create profile');
     }
 
-    return data; // return the created buyer profile back to the React page
+    return data;
 }
 
 // Fetches an existing buyer profile by user ID
 // Calls GET /api/buyer/profile/{userId}
-// No body needed for GET requests, we just pass the userId in the URL
 export async function getBuyerProfile(userId) {
     const response = await fetch(`${API_URL}/profile/${userId}`, {
         method: 'GET',
@@ -44,7 +43,7 @@ export async function getBuyerProfile(userId) {
 
 // Updates an existing buyer profile
 // Calls PUT /api/buyer/profile/{userId}
-// profileData contains the updated fields
+// profileData contains: preferredCuts, quantity
 export async function updateBuyerProfile(userId, profileData) {
     const response = await fetch(`${API_URL}/profile/${userId}`, {
         method: 'PUT',
