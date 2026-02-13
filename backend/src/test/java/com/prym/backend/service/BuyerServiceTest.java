@@ -50,17 +50,13 @@ public class BuyerServiceTest {
         when(buyerRepository.save(any(Buyer.class))).thenAnswer(i -> i.getArgument(0));
 
         // Act: create the profile
-        Buyer result = buyerService.createBuyerProfile(1L, "Shayan", "Darajeh",
-                "123-456-7890", "Ribeye", "Half cow");
+        Buyer result = buyerService.createBuyerProfile(1L, "Ribeye", "Half cow");
 
         // Assert: check the profile was created correctly
         assertNotNull(result);
-        assertEquals("Shayan", result.getFirstName());
-        assertEquals("Darajeh", result.getLastName());
-        assertEquals("123-456-7890", result.getPhoneNumber());
         assertEquals("Ribeye", result.getPreferredCuts());
         assertEquals("Half cow", result.getQuantity());
-        verify(buyerRepository).save(any(Buyer.class)); // verify save was actually called
+        verify(buyerRepository).save(any(Buyer.class));
     }
 
     // Test 2: Creating a profile when the user doesn't exist
@@ -71,8 +67,7 @@ public class BuyerServiceTest {
 
         // Act + Assert: should throw an error
         assertThrows(RuntimeException.class, () -> {
-            buyerService.createBuyerProfile(999L, "Shayan", "Darajeh",
-                    "123-456-7890", "Ribeye", "Half cow");
+            buyerService.createBuyerProfile(999L, "Ribeye", "Half cow");
         });
     }
 
@@ -85,8 +80,7 @@ public class BuyerServiceTest {
 
         // Act + Assert: should throw an error
         assertThrows(RuntimeException.class, () -> {
-            buyerService.createBuyerProfile(1L, "Shayan", "Darajeh",
-                    "123-456-7890", "Ribeye", "Half cow");
+            buyerService.createBuyerProfile(1L, "Ribeye", "Half cow");
         });
     }
 
@@ -95,9 +89,6 @@ public class BuyerServiceTest {
     void getBuyerProfile_Success() {
         // Arrange: create a buyer and tell the fake repo to return it
         Buyer buyer = new Buyer();
-        buyer.setFirstName("Shayan");
-        buyer.setLastName("Darajeh");
-        buyer.setPhoneNumber("123-456-7890");
         buyer.setPreferredCuts("Ribeye");
         buyer.setQuantity("Half cow");
         when(buyerRepository.findByUserId(1L)).thenReturn(Optional.of(buyer));
@@ -107,8 +98,8 @@ public class BuyerServiceTest {
 
         // Assert: check the right profile came back
         assertNotNull(result);
-        assertEquals("Shayan", result.getFirstName());
-        assertEquals("Darajeh", result.getLastName());
+        assertEquals("Ribeye", result.getPreferredCuts());
+        assertEquals("Half cow", result.getQuantity());
     }
 
     // Test 5: Getting a profile that doesn't exist
@@ -128,22 +119,15 @@ public class BuyerServiceTest {
     void updateBuyerProfile_Success() {
         // Arrange: create an existing buyer with old values
         Buyer existingBuyer = new Buyer();
-        existingBuyer.setFirstName("Shayan");
-        existingBuyer.setLastName("Darajeh");
-        existingBuyer.setPhoneNumber("123-456-7890");
         existingBuyer.setPreferredCuts("Ribeye");
         existingBuyer.setQuantity("Half cow");
         when(buyerRepository.findByUserId(1L)).thenReturn(Optional.of(existingBuyer));
         when(buyerRepository.save(any(Buyer.class))).thenAnswer(i -> i.getArgument(0));
 
         // Act: update with new values
-        Buyer result = buyerService.updateBuyerProfile(1L, "NewFirst", "NewLast",
-                "999-999-9999", "T-Bone", "Whole cow");
+        Buyer result = buyerService.updateBuyerProfile(1L, "T-Bone", "Whole cow");
 
         // Assert: check the fields were updated
-        assertEquals("NewFirst", result.getFirstName());
-        assertEquals("NewLast", result.getLastName());
-        assertEquals("999-999-9999", result.getPhoneNumber());
         assertEquals("T-Bone", result.getPreferredCuts());
         assertEquals("Whole cow", result.getQuantity());
         verify(buyerRepository).save(any(Buyer.class));
@@ -157,7 +141,7 @@ public class BuyerServiceTest {
 
         // Act + Assert: should throw an error
         assertThrows(RuntimeException.class, () -> {
-            buyerService.updateBuyerProfile(999L, "A", "B", "C", "D", "E");
+            buyerService.updateBuyerProfile(999L, "Ribeye", "Half cow");
         });
     }
 }

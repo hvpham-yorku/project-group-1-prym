@@ -24,17 +24,13 @@ public class BuyerController {
     @PostMapping("/profile")
     public ResponseEntity<?> createProfile(@RequestBody Map<String, String> request) {
         try {
-            // Extract each field from the JSON request body
+            // Extract fields from the JSON request body
             Long userId = Long.parseLong(request.get("userId"));
-            String firstName = request.get("firstName");
-            String lastName = request.get("lastName");
-            String phoneNumber = request.get("phoneNumber");
             String preferredCuts = request.get("preferredCuts");
             String quantity = request.get("quantity");
 
-            // Pass everything to the service, which checks the rules and saves it
-            Buyer buyer = buyerService.createBuyerProfile(userId, firstName, lastName,
-                    phoneNumber, preferredCuts, quantity);
+            // Pass to the service, which checks the rules and saves it
+            Buyer buyer = buyerService.createBuyerProfile(userId, preferredCuts, quantity);
 
             return ResponseEntity.ok(buyer);
 
@@ -61,15 +57,11 @@ public class BuyerController {
     public ResponseEntity<?> updateProfile(@PathVariable Long userId, @RequestBody Map<String, String> request) {
         try {
             // Extract the updated fields from the JSON request body
-            String firstName = request.get("firstName");
-            String lastName = request.get("lastName");
-            String phoneNumber = request.get("phoneNumber");
             String preferredCuts = request.get("preferredCuts");
             String quantity = request.get("quantity");
 
             // Pass to the service, which finds the existing profile and updates it
-            Buyer buyer = buyerService.updateBuyerProfile(userId, firstName, lastName,
-                    phoneNumber, preferredCuts, quantity);
+            Buyer buyer = buyerService.updateBuyerProfile(userId, preferredCuts, quantity);
 
             return ResponseEntity.ok(buyer);
 

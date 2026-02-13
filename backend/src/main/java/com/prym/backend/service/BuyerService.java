@@ -23,9 +23,7 @@ public class BuyerService {
     }
 
     // Creates a new buyer profile linked to an existing user
-    // Called when a buyer fills out the profile setup form after signing up
-    public Buyer createBuyerProfile(Long userId, String firstName, String lastName,
-                                     String phoneNumber, String preferredCuts, String quantity) {
+    public Buyer createBuyerProfile(Long userId, String preferredCuts, String quantity) {
         // Rule 1: The user must exist in the database before we can create a buyer profile
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -38,9 +36,6 @@ public class BuyerService {
         // All rules passed. Create the buyer profile and link it to the user
         Buyer buyer = new Buyer();
         buyer.setUser(user);
-        buyer.setFirstName(firstName);
-        buyer.setLastName(lastName);
-        buyer.setPhoneNumber(phoneNumber);
         buyer.setPreferredCuts(preferredCuts);
         buyer.setQuantity(quantity);
 
@@ -55,18 +50,14 @@ public class BuyerService {
                 .orElseThrow(() -> new RuntimeException("Buyer profile not found"));
     }
 
-    // Updates an existing buyer's profile fields
+    // Updates an existing buyer's meat preferences
     // Called when a buyer edits their profile and clicks save
-    public Buyer updateBuyerProfile(Long userId, String firstName, String lastName,
-                                     String phoneNumber, String preferredCuts, String quantity) {
+    public Buyer updateBuyerProfile(Long userId, String preferredCuts, String quantity) {
         // Find the existing profile, can't update something that doesn't exist
         Buyer buyer = buyerRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Buyer profile not found"));
 
         // Overwrite the old values with the new ones
-        buyer.setFirstName(firstName);
-        buyer.setLastName(lastName);
-        buyer.setPhoneNumber(phoneNumber);
         buyer.setPreferredCuts(preferredCuts);
         buyer.setQuantity(quantity);
 
