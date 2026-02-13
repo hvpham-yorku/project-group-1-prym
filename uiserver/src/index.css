@@ -22,3 +22,7 @@ input:focus {
     outline: 2px solid #4a7c59;
     border-color: #4a7c59;
 }
+
+ul {
+    list-style-type: none;
+}
