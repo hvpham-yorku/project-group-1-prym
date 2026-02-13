@@ -10,11 +10,6 @@ Full stack webapp with:
 ## Table of Contents
 - [Requirements](#requirements)
 - [Setup](#setup)
-  - [1) Backend Setup (Spring Boot)](#1-backend-setup-spring-boot)
-  - [2) Frontend Setup (React + Vite)](#2-frontend-setup-react--vite)
-- [Running the Project](#running-the-project)
-
-
 ---
 
 
