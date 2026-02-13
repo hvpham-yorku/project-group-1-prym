@@ -160,7 +160,7 @@ public class AuthController {
         ResponseCookie cookie = ResponseCookie.from("SESSION_ID", sessionId)
                 .httpOnly(true)
                 .path("/")
-                .maxAge(7 * 24 * 60 * 60)
+                .maxAge(7 * 24 * 60 * 60) // Cookie expires in 7 days (7 days * 24 hours * 60 minutes * 60 seconds)
                 .sameSite("Lax")
                 .build();
         response.addHeader("Set-Cookie", cookie.toString());

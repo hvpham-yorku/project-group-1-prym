@@ -1,6 +1,7 @@
 const API_URL = 'http://localhost:8080/api/auth';
 
-export async function registerBuyer(userData) {
+export async function registerBuyer(userData) { // userData: { email, password, username, firstName, lastName, phoneNumber, profilePicture (optional) }
+
     const response = await fetch(`${API_URL}/register/buyer`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
