@@ -18,7 +18,23 @@ export const farms = [{
 	id: 5,
 	name: 'farm5',
 },
-{
+{ 
 	id: 6,
 	name: 'farm6',
+},
+{ 
+	id: 7,
+	name: 'farm7',
+},
+{ 
+	id: 8,
+	name: 'farm8',
+},
+{ 
+	id: 9,
+	name: 'farm9',
+},
+{
+	id: 10,
+	name: 'farm10',
 }];
