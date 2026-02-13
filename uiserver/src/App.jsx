@@ -4,6 +4,8 @@ import Login from './pages/auth/Login';
 import BuyerSignup from './pages/auth/BuyerSignup';
 import SellerSignup from './pages/auth/SellerSignup';
 import BuyerDashboard from './pages/BuyerDashboard';
+import BuyerProfileSetup from './pages/BuyerProfileSetup';
+import BuyerProfile from './pages/BuyerProfile';
 import SellerDashboard from './pages/SellerDashboard';
 import FarmListingsPage from './pages/FarmListingsPage';
 import FarmListing from './pages/FarmListing';
@@ -28,7 +30,7 @@ function AppRoutes() {
     return (
         <Routes>
             <Route path="/login" element={user ? <Navigate to={user.role === 'BUYER' ? '/buyer/dashboard' : '/seller/dashboard'} /> : <Login />} />
-            <Route path="/register/buyer" element={user ? <Navigate to="/buyer/dashboard" /> : <BuyerSignup />} />
+            <Route path="/register/buyer" element={user ? <Navigate to="/buyer/profile-setup" /> : <BuyerSignup />} />
             <Route path="/register/seller" element={user ? <Navigate to="/seller/dashboard" /> : <SellerSignup />} />
             
             <Route path="/buyer/dashboard" element={
@@ -37,6 +39,18 @@ function AppRoutes() {
                 </ProtectedRoute>
             } />
             
+            <Route path="/buyer/profile-setup" element={
+                <ProtectedRoute allowedRole="BUYER">
+                    <BuyerProfileSetup />
+                </ProtectedRoute>
+            } />
+
+            <Route path="/buyer/profile" element={
+                <ProtectedRoute allowedRole="BUYER">
+                    <BuyerProfile />
+                </ProtectedRoute>
+            } />
+
             <Route path="/seller/dashboard" element={
                 <ProtectedRoute allowedRole="SELLER">
                     <SellerDashboard />

@@ -85,7 +85,7 @@ function BuyerSignup() {
                 profilePicture: formData.profilePicture || null
             });
             saveUser(user);
-            navigate('/buyer/dashboard');
+            navigate('/buyer/profile-setup'); // redirect to profile setup instead of dashboard
         } catch (err) {
             setError(err.message);
         } finally {
