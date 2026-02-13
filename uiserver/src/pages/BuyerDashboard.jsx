@@ -51,7 +51,6 @@ function BuyerDashboard() {
                         <span style={styles.infoValue}>{user?.phoneNumber}</span>
                     </div>
                 </div>
-
                 <button onClick={() => navigate('/buyer/profile')} style={styles.profileButton}>
                     My Profile
                 </button>
