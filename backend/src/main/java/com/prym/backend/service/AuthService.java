@@ -18,18 +18,26 @@ public class AuthService {
         this.passwordEncoder = new BCryptPasswordEncoder();
     }
 
-    public User register(String email, String password, User.Role role) {
+    public User register(String email, String password, User.Role role, String username, String firstName,
+            String lastName, String phoneNumber, String profilePicture) {
         // Check if email already exists
         if (userRepository.existsByEmail(email)) {
             throw new RuntimeException("Email already registered");
         }
-
+        // Check if username already exists
+        if (userRepository.existsByUsername(username)) {
+            throw new RuntimeException("Username already taken");
+        }
         // Create new user with hashed password
         User user = new User();
         user.setEmail(email);
         user.setPasswordHash(passwordEncoder.encode(password));
         user.setRole(role);
-
+        user.setUsername(username);
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
+        user.setPhoneNumber(phoneNumber);
+        user.setProfilePicture(profilePicture);
         return userRepository.save(user);
     }
 
