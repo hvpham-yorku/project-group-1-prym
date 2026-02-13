@@ -1,4 +1,7 @@
-Meeting Minutesi
+Meeting Minutes:
+
+note: minutes were not taken during daily "stand up meetings"
+
 [February 3rd 2026]
 
 Agenda: discuss project and setting up.
@@ -17,6 +20,7 @@ Agenda: discuss project progress.
 - Discussing git commits: everyone will make sure to do a lot of small commits instead of one big one (commit every time you get something small working)
 - Make sure to be descriptive in pull requests!!
 
+[Feb 12th 2026]
 
 Task Assignments:
 
@@ -44,7 +48,7 @@ Time Allocated vs Time Spent:
 [Assigned: || Taken: ] Team Jira Setup + Maintenance - Jacob
 [Assigned: || Taken: ] PRD Update - Sufyan
 [Assigned: || Taken: ] README File - Sufyan 
-[Assigned: || Taken: 1 hour] Project Map Design - Katelyn
+[Assigned: 1 Day || Taken: 1 Day] Project Map Design - Katelyn
 [Assigned: || Taken: ] Implement Basic UI Vue Server - Jacob
 [Assigned: || Taken: ] Implement Basic Database Backend - Sufyan
 [Assigned: || Taken: ] Buyer Account Creation - Sufyan
@@ -52,7 +56,7 @@ Time Allocated vs Time Spent:
 [Assigned: || Taken: ] Basic UI Decorations - Jacob
 [Assigned: || Taken: ] Buyer Profile Modification - Shayan
 [Assigned: || Taken: ] Seller Account Creation - Sufyan
-[Assigned: || Taken: ] Farm Listings - Katelyn
+[Assigned: || Taken: 3 hours] Farm Listings - Katelyn
 [Assigned: || Taken: ] Basic Tests - Jacob
 [Assigned: || Taken: 20 min.] Mock Farm Listing Data - Katelyn
 [Assigned: || Taken: ] Mock Seller Account Data - Harleen
