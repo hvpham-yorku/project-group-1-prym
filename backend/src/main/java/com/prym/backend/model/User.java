@@ -57,9 +57,4 @@ public class User {
     public enum Role { //enum is safer to use than strings
         BUYER, SELLER
     }
-    
-    private String Name;
-    private String phoneNumber;
-    private String address;
-    private String description;
 }

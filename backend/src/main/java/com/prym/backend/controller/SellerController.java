@@ -51,17 +51,23 @@ public class SellerController {
 				return ResponseEntity.status(403).body(null);
 			} else {
 				
-				if(dto.getName() != null) {
-					existingUser.setName(dto.getName());
+				if(dto.getFirstName() != null) {
+					existingUser.setFirstName(dto.getFirstName());
+				}
+				if(dto.getLastName() != null) {
+					existingUser.setLastName(dto.getLastName());
 				}
 				if(dto.getEmail() != null) {
 					existingUser.setEmail(dto.getEmail());
 				}
-				if(dto.getAddress() != null) {
-					existingUser.setAddress(dto.getAddress());
+				if(dto.getUserName() != null) {
+					existingUser.setUsername(dto.getUserName());
 				}
 				if(dto.getPhoneNumber() != null) {
 					existingUser.setPhoneNumber(dto.getPhoneNumber());
+				}
+				if(dto.getProfilePicture() != null) {
+					existingUser.setProfilePicture(dto.getProfilePicture());
 				}
 				userRepository.save(existingUser);
 				return ResponseEntity.ok(existingUser);

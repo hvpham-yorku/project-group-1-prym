@@ -23,12 +23,27 @@ public class SellerDataInitializer implements CommandLineRunner {
 		System.out.println("Seller Data Initializer running...");
 		 
 		if(!this.userRepository.existsByEmail("seller1@test.com")) {
-			this.authService.register("seller1@test.com", "sellerPass1", User.Role.SELLER);
+			this.authService.register(
+					"seller1@test.com", 
+					"sellerPass1", 
+					User.Role.SELLER,
+					"seller1username",
+					"Seller",
+					"One",
+					"1234567890",
+					null);
 			System.out.println("Seller 1 created.");
 		}
 		
 		if(!this.userRepository.existsByEmail("seller2@test.com")) {
-			this.authService.register("seller2@test.com", "sellerPass2", User.Role.SELLER);
+			this.authService.register("seller2@test.com", 
+					"sellerPass2", 
+					User.Role.SELLER,
+					"seller2username",
+					"Seller",
+					"Two",
+					"1212121212",
+					null);
 			System.out.println("Seller 2 created.");
 		}
 		

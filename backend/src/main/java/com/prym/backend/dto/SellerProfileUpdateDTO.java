@@ -12,13 +12,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor //this is the beauty of lombok, by using this tag it generates the default constructor without having to type it
 @AllArgsConstructor//this tag generates the constructor that takes in all arguments, reduced about 10 lines of code into 1!
 
-//@RequestMapping("/api/sellers")
+@RequestMapping("/api/sellers")
 public class SellerProfileUpdateDTO {
 	
-	private String name;
+	private String userName;
+	private String firstName;
+	private String lastName;
 	private String email;
 	private String phoneNumber;
-	private String address;
+	private String profilePicture;
 	//id, password, createdAt are not allowed to be updated here
 
 }
