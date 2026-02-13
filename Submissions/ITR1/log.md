@@ -29,6 +29,17 @@ Agenda: discuss project progress.
 - Discussing git commits: everyone will make sure to do a lot of small commits instead of one big one (commit every time you get something small working)
 - Make sure to be descriptive in pull requests!!
 
+[February 9th 2026]
+
+Agenda: discuss project architecture & check in.
+
+- Went over architecture basics
+- Discussed ITER1 Deliverables
+- Went over some security discussions
+- User experience diagram created
+- Browser page visuals discussion initiated
+
+
 [Feb 12th 2026]
 
 Agenda: discuss project progress, discuss architechture diagram
@@ -38,18 +49,28 @@ Agenda: discuss project progress, discuss architechture diagram
 
 Changes On Plan:
 
-- Instead of two-page setup where second page is name, phone # AND prefernces, in later iterations create a seperate questionnaire for users on a different page to make it less confusing 
+- Instead of two-page setup where second page is name, phone # AND prefernces, in later iterations create a seperate questionnaire for users on a different page to make it less confusing
+
+
+[February 9th 2026]
+
+Agenda: discuss project wiki and testing structure
+
+- Went over architecture basics
+- Reviewed ITER1 Deliverables
+- Discussed user experience
+- Added link to wiki to log file and modified log file
+- Examined and commented on Jira progress
 
 Task Assignments:
-
-Team Jira Setup + Maintenance - Jacob
-PRD Update - Sufyan
-README File - Sufyan 
-Project Map Design - Katelyn
-Implement Basic UI Vue Server - Jacob
-Implement Basic Database Backend - Sufyan
-Buyer Account Creation - Sufyan
-Buyer/Seller Login - Sufyan
+- Team Jira Setup + Maintenance - Jacob
+- PRD Update - Sufyan
+- README File - Sufyan 
+- Project Map Design - Katelyn
+- Implement Basic UI Vue Server - Jacob
+- Implement Basic Database Backend - Sufyan
+- Buyer Account Creation - Sufyan
+- Buyer/Seller Login - Sufyan
 Basic UI Decorations - Jacob
 Buyer Profile Modification - Shayan
 Seller Account Creation - Sufyan
@@ -60,13 +81,13 @@ Mock Seller Account Data - Harleen
 Mock Buyer Account Data - Shayan
 Seller Profile Modifications - Harleen
 Authentication and Security Files - Sufyan
+Architecture Diagram - Jacob
 
 Development Tasks Per User Story:
-
-- 
+- User/Seller Account Creation
+- User/Seller Login
 
 Time Allocated vs Time Spent:
-
 [Assigned: || Taken: ] Team Jira Setup + Maintenance - Jacob
 [Assigned: || Taken: ] PRD Update - Sufyan
 [Assigned: || Taken: ] README File - Sufyan 
