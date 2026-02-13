@@ -125,7 +125,7 @@ For detailed documentation, visit the [Project Wiki](../../wiki)
 | README File | Sufyan | 30 minutes | 20 minutes |
 | Project Map Design | Katelyn | 1 Day | 1 Day |
 | Implement Basic UI Vue Server | Jacob | | |
-| Implement Basic Database Backend | Sufyan | | 1 day |
+| Implement Basic Database Backend | Sufyan | 1 day | 1 day |
 | Seller Account Creation | Sufyan | 1 day | 0.5 day |
 | Buyer Account Creation | Sufyan | 1 day | 0.5 day |
 | Buyer/Seller Login | Sufyan | 1.5 days | 1 day |
@@ -139,3 +139,5 @@ For detailed documentation, visit the [Project Wiki](../../wiki)
 | Mock Buyer Account Data | Shayan | | |
 | Seller Profile Modifications | Harleen | | |
 | Architecture Diagram | Jacob | | |
+**some of the tasks here were done in parallel, so there are a lot of cases where times overlap.**
+**some tasks were similar with minor changes like Buyer login and Seller login, you implement it for one and just copy it for the other while doing minor changes. So the allocated time for the tasks was split up evenly.**
