@@ -27,7 +27,7 @@ For detailed documentation, visit the [Project Wiki](../../wiki)
 **Agenda:** Discuss project and setting up
 
 - Jacob: setting up React front end
-- Front end achieved – back end still needed
+- Front end setup achieved – back end still needed
 
 ---
 
@@ -49,7 +49,7 @@ For detailed documentation, visit the [Project Wiki](../../wiki)
 **Agenda:** Discuss project architecture & check in
 
 - Went over architecture basics
-- Discussed ITER1 Deliverables
+- Discussed ITR1 Deliverables
 - Went over some security discussions
 - User experience diagram created
 - Browser page visuals discussion initiated
@@ -62,7 +62,7 @@ For detailed documentation, visit the [Project Wiki](../../wiki)
 
 - Jacob showing rudimentary design of architecture diagram
 - Discussing potential changes to implement in later iterations
-
+- Utilized a whiteboard to illustrate thoughts 
 ---
 
 ### February 13th, 2026
