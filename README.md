@@ -13,6 +13,7 @@ Full stack webapp with:
   - [1) Backend Setup (Spring Boot)](#1-backend-setup-spring-boot)
   - [2) Frontend Setup (React + Vite)](#2-frontend-setup-react--vite)
 - [Running the Project](#running-the-project)
+- [Testing](#testing)
 
 
 ---
@@ -90,6 +91,15 @@ npm run dev
 Open it in your browser:
 - `http://localhost:5173`
 
+---
 
+## Testing
 
+### Backend Tests
+
+From `backend/`:
+
+```bash
+./mvnw test -Dtest=LoginTest
+```
 
