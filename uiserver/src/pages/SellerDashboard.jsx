@@ -1,6 +1,7 @@
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '../api/auth';
+import { useState } from 'react';
 
 function SellerDashboard() {
     const { user, clearUser } = useAuth();
@@ -16,48 +17,160 @@ function SellerDashboard() {
             navigate('/login');
         }
     };
+	
+	const[isEditing, setIsEditing] = useState(false); 
+	
+	const[formData, setFormData] = useState({
+		firstName: user?.firstName || '',
+		lastName: user?.lastName || '',
+		email: user?.email || '',
+		phoneNumber: user?.phoneNumber || ''
+	})
+	
+	const[activeSection, setActiveSection] = useState("Dashboard");
+	
 
     return (
-        <div style={styles.container}>
-            <div style={styles.card}>
-                {/* Profile Picture */}
-                <div style={styles.profilePictureContainer}>
-                    {user?.profilePicture ? (
-                        <img 
-                            src={user.profilePicture} 
-                            alt="Profile" 
-                            style={styles.profilePicture} 
-                        />
-                    ) : (
-                        <div style={styles.profilePicturePlaceholder}>
-                            {user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}
-                        </div>
-                    )}
-                </div>
+		<div>
+			<Nav setActiveSection = {setActiveSection} />
+			
+     	    <div style={styles.container}>
+        	    <div style={styles.card}>
+				
+					{activeSection === "Dashboard" && (
+						<>
+							<h1 style = {styles.title}>Seller Dashboard</h1>
+							<p style = {styles.welcome}>Welcome, {user?.username} !</p>
+							<p style = {styles.info}>You are logged in as a <strong>SELLER</strong></p>
+						</>	
+					)}
+				
+				
+            	    {activeSection === "Profile" && ( <>
+                	<div style={styles.profilePictureContainer}>
+                    	{user?.profilePicture ? (
+                        	<img 
+                            	src={user.profilePicture} 
+                       	  	    alt="Profile" 
+                        	    style={styles.profilePicture} 
+      	                	  />
+        	            ) : (
+            	            <div style={styles.profilePicturePlaceholder}>
+                	            {user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}
+                    	    </div>
+                    	)}
+  	               </div>
 
-                <h1 style={styles.title}>Seller Dashboard</h1>
-                <p style={styles.welcome}>Welcome, {user?.username}!</p>
-                <p style={styles.name}>{user?.firstName} {user?.lastName}</p>
-                <p style={styles.info}>You are logged in as a <strong>SELLER</strong></p>
+    	            <h1 style={styles.title}>Seller Dashboard</h1>
+        	        <p style={styles.welcome}>Welcome, {user?.username}!</p>
+            	    <p style={styles.name}>{user?.firstName} {user?.lastName}</p>
+                	<p style={styles.info}>You are logged in as a <strong>SELLER</strong></p>
                 
-                {/* User Info Card */}
-                <div style={styles.infoCard}>
-                    <div style={styles.infoRow}>
-                        <span style={styles.infoLabel}>Email:</span>
-                        <span style={styles.infoValue}>{user?.email}</span>
-                    </div>
-                    <div style={styles.infoRow}>
-                        <span style={styles.infoLabel}>Phone:</span>
-                        <span style={styles.infoValue}>{user?.phoneNumber}</span>
-                    </div>
-                </div>
+   	           		{/* User Info Card */}
+    	            <div style={styles.infoCard}>
+        	            <div style={styles.infoRow}>
+            	            <span style={styles.infoLabel}>Email:</span>
+                	        <span style={styles.infoValue}>{user?.email}</span>
+                    	</div>
+   	          	        <div style={styles.infoRow}>
+    	                    <span style={styles.infoLabel}>Phone:</span>
+        	                <span style={styles.infoValue}>{user?.phoneNumber}</span>
+            	        </div>
+     	            </div>
 
-                <button onClick={handleLogout} style={styles.button}>
-                    Logout
-                </button>
+              		<button onClick={handleLogout} style={styles.button}>
+                    	Logout
+                	</button>
+				</>
+				)}
             </div>
         </div>
+	</div>
     );
+}
+
+function Nav({setActiveSection}, handleLogout ){
+	const [hamburgerOpen, setHamburgerOpen] = useState(false);
+	const toggleHamburger = () => {
+		setHamburgerOpen(!hamburgerOpen)
+	}
+	return (
+		<div>
+			<div style={{
+				position: 'absolute',
+				top:20,
+				left:20,
+				fontSize: '24px',
+				cursor: 'pointer',
+				zIndex: 1000
+			}}
+			onClick={toggleHamburger}>
+				☰
+			</div>
+				
+			{hamburgerOpen && (
+				<div className = "sidebar" style={{
+					width: '200px',
+					height: '100vh',
+					backgroundColor: '#ddd',
+					position: 'fixed',
+					top: 0,
+					left: 0,
+					padding: '20px',
+					paddingTop: '70px',
+					zIndex: 999
+				}}>
+					<ul style = {{ listStyle : 'none', padding: 0}}>
+						<li>
+							<button
+								style={{
+									background: 'none',
+									border : 'none',
+									cursor : 'pointer',
+									padding: 0
+								}}
+								onClick = {() => {
+									setActiveSection("Profile");
+									setHamburgerOpen(false);
+								}}>
+							Profile
+							</button>
+						</li>
+						<li>
+						<button
+								style={{
+									background: 'none',	
+									border : 'none',
+									cursor : 'pointer',
+									padding: 0
+								}}
+								onClick = {() => {
+									setActiveSection("Notifications");
+									setHamburgerOpen(false);
+								}}>
+							Notifications
+							</button>
+						</li>
+						<li>
+							<button
+								style={{
+									background :'none',
+									border : 'none',
+									cursor : 'pointer',
+									padding: 0
+								}}
+								onClick = {()=>{
+									handleLogout();
+									setHamburgerOpen(false);
+								}}>
+							Logout
+							</button>
+						</li>
+					</ul>
+				</div>
+			)}
+		</div>
+	);
 }
 
 const styles = {
