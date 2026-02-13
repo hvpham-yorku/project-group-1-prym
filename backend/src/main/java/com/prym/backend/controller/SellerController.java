@@ -1,79 +1,59 @@
 package com.prym.backend.controller;
 
-import com.prym.backend.dto.SellerProfileUpdateDTO;
-import com.prym.backend.model.User; 
-import com.prym.backend.repository.UserRepository; 
+import com.prym.backend.model.Seller;
+import com.prym.backend.service.SellerService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-import org.springframework.http.ResponseEntity; //HTTP response that backend sends back to the frontend
-import org.springframework.web.bind.annotation.*; //connects Java code to HTTP request from the website
-import java.util.Optional; //a container that may or may not hold any value
+import java.util.Map;
 
 @RestController
-@RequestMapping("/api/sellers")
-
+@RequestMapping("/api/seller")
 public class SellerController {
-	
-	private UserRepository userRepository;
-	
-	public SellerController(UserRepository userRepository) {
-		this.userRepository = userRepository;
-	}
-	
-	@GetMapping("/{id}")
-	public ResponseEntity<User> getSeller(@PathVariable Long id){
-		
-		Optional<User> user = this.userRepository.findById(id);
-		
-		if(user.isEmpty()) { //if user does not exist
-			return ResponseEntity.notFound().build();
-		} else {
-			User existingUser = user.get(); //to get the User from Optional<User>
-			
-			if(existingUser.getRole() == User.Role.BUYER) {
-				return ResponseEntity.status(403).body(null);
-			} else {
-				return ResponseEntity.ok(existingUser);
-			}
-		}
-	}
-	
-	@PatchMapping("/{id}")
-	public ResponseEntity<User> updateSeller(@PathVariable Long id, @RequestBody SellerProfileUpdateDTO dto){
-		
-		Optional<User> user = this.userRepository.findById(id);
-		
-		if(user.isEmpty()) { //if user does not exist
-			return ResponseEntity.notFound().build();
-		} else {
-			User existingUser = user.get(); //to get the User from Optional<User>
-			
-			if(existingUser.getRole() == User.Role.BUYER) {
-				return ResponseEntity.status(403).body(null);
-			} else {
-				
-				if(dto.getFirstName() != null) {
-					existingUser.setFirstName(dto.getFirstName());
-				}
-				if(dto.getLastName() != null) {
-					existingUser.setLastName(dto.getLastName());
-				}
-				if(dto.getEmail() != null) {
-					existingUser.setEmail(dto.getEmail());
-				}
-				if(dto.getUserName() != null) {
-					existingUser.setUsername(dto.getUserName());
-				}
-				if(dto.getPhoneNumber() != null) {
-					existingUser.setPhoneNumber(dto.getPhoneNumber());
-				}
-				if(dto.getProfilePicture() != null) {
-					existingUser.setProfilePicture(dto.getProfilePicture());
-				}
-				userRepository.save(existingUser);
-				return ResponseEntity.ok(existingUser);
-			}
-		}
-	}
-	
-	
+
+    private final SellerService sellerService;
+
+    public SellerController(SellerService sellerService) {
+        this.sellerService = sellerService;
+    }
+
+    @PostMapping("/signup")
+    public ResponseEntity<?> createSeller(@RequestBody Map<String, String> request) {
+        try {
+            Long userId = Long.parseLong(request.get("userId"));
+            String shopName = request.get("shopName");
+            String shopAddress = request.get("shopAddress");
+
+            Seller seller = sellerService.createSellerProfile(userId, shopName, shopAddress);
+            return ResponseEntity.ok(seller);
+
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/{userId}")
+    public ResponseEntity<?> getSeller(@PathVariable Long userId) {
+        try {
+            Seller seller = sellerService.getSellerProfile(userId);
+            return ResponseEntity.ok(seller);
+
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PatchMapping("/{userId}")
+    public ResponseEntity<?> updateSeller(@PathVariable Long userId, @RequestBody Map<String, String> request) {
+        try {
+            String shopName = request.get("shopName");
+            String shopAddress = request.get("shopAddress");
+
+            Seller updatedSeller = sellerService.updateSellerProfile(userId, shopName, shopAddress);
+            return ResponseEntity.ok(updatedSeller);
+
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
 }
