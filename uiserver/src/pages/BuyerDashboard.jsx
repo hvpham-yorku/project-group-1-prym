@@ -23,6 +23,10 @@ const handleLogout = async () => {
                 <p style={styles.welcome}>Welcome, {user?.email}!</p>
                 <p style={styles.info}>You are logged in as a <strong>BUYER</strong></p>
                 
+                <button onClick={() => navigate('/buyer/profile')} style={styles.profileButton}>
+                    My Profile
+                </button>
+
                 <button onClick={handleLogout} style={styles.button}>
                     Logout
                 </button>
@@ -59,6 +63,16 @@ const styles = {
     info: {
         color: '#666',
         marginBottom: '24px'
+    },
+    profileButton: {
+        padding: '12px 24px',
+        backgroundColor: '#4a7c59',
+        color: 'white',
+        border: 'none',
+        borderRadius: '4px',
+        fontSize: '16px',
+        cursor: 'pointer',
+        marginBottom: '12px'
     },
     button: {
         padding: '12px 24px',

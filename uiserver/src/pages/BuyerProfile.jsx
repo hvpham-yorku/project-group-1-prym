@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getBuyerProfile, updateBuyerProfile } from '../api/buyer';
 import { useAuth } from '../context/AuthContext';
 
@@ -20,6 +21,7 @@ function BuyerProfile() {
     const [error, setError] = useState('');
 
     const { user } = useAuth();
+    const navigate = useNavigate();
 
     // Runs once when the page loads to fetch the buyer's profile from the backend
     useEffect(() => {
@@ -84,6 +86,9 @@ function BuyerProfile() {
     return (
         <div style={styles.container}>
             <div style={styles.card}>
+                <button onClick={() => navigate('/buyer/dashboard')} style={styles.backButton}>
+                    Back to Dashboard
+                </button>
                 <h1 style={styles.title}>My Profile</h1>
 
                 {error && <div style={styles.error}>{error}</div>}
@@ -266,6 +271,16 @@ const styles = {
         display: 'flex',
         flexDirection: 'column',
         gap: '0px'
+    },
+    backButton: {
+        padding: '8px 16px',
+        backgroundColor: 'transparent',
+        color: '#4a7c59',
+        border: '1px solid #4a7c59',
+        borderRadius: '4px',
+        fontSize: '14px',
+        cursor: 'pointer',
+        marginBottom: '16px'
     },
     error: {
         backgroundColor: '#fee',
