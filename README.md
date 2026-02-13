@@ -31,7 +31,7 @@ Full stack webapp with:
 
 ## Setup
 you need two seperate terminals running, one for frontend and one for backend
-[Link to wiki setup][(https://github.com/facebook/react/wiki/Sites-Using-React)](https://github.com/hvpham-yorku/project-group-1-prym.wiki.git)
+[Link to wiki setup](https://github.com/hvpham-yorku/project-group-1-prym.wiki.git)
 
 Open it in your browser:
 - `http://localhost:5173`
