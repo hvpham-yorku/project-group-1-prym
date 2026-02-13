@@ -2,6 +2,15 @@ Meeting Minutes:
 
 note: minutes were not taken during daily "stand up meetings"
 
+[Jan 15th 2026]
+
+Agenda: decide on project idea (URGENT) and create contract
+
+- Discussed potential ideas: freezer organization, education
+- Shayan suggested that we work with Cow Sharing, something he has personal experience with - all agreed on this idea
+- Drafted and sent email to professor about the project idea for approval
+- Discussed and Katelyn created group contract, will be emailed around for everyone to sign
+
 [February 3rd 2026]
 
 Agenda: discuss project and setting up.
@@ -21,6 +30,15 @@ Agenda: discuss project progress.
 - Make sure to be descriptive in pull requests!!
 
 [Feb 12th 2026]
+
+Agenda: discuss project progress, discuss architechture diagram
+
+- jacob showing rudimentary design of architecture diagram
+- discussing potential changes to implement in later iterations
+
+Changes On Plan:
+
+- Instead of two-page setup where second page is name, phone # AND prefernces, in later iterations create a seperate questionnaire for users on a different page to make it less confusing 
 
 Task Assignments:
 
@@ -43,6 +61,10 @@ Mock Buyer Account Data - Shayan
 Seller Profile Modifications - Harleen
 Authentication and Security Files - Sufyan
 
+Development Tasks Per User Story:
+
+
+
 Time Allocated vs Time Spent:
 
 [Assigned: || Taken: ] Team Jira Setup + Maintenance - Jacob
@@ -63,6 +85,3 @@ Time Allocated vs Time Spent:
 [Assigned: || Taken: ] Mock Buyer Account Data - Shayan
 [Assigned: || Taken: ] Seller Profile Modifications - Harleen
 [Assigned: || Taken: ] Authentication and Security Files - Sufyan
-
-
-
