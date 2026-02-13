@@ -122,4 +122,42 @@ public class BuyerServiceTest {
             buyerService.getBuyerProfile(999L);
         });
     }
+
+    // Test 6: Updating a profile when it exists
+    @Test
+    void updateBuyerProfile_Success() {
+        // Arrange: create an existing buyer with old values
+        Buyer existingBuyer = new Buyer();
+        existingBuyer.setFirstName("Shayan");
+        existingBuyer.setLastName("Darajeh");
+        existingBuyer.setPhoneNumber("123-456-7890");
+        existingBuyer.setPreferredCuts("Ribeye");
+        existingBuyer.setQuantity("Half cow");
+        when(buyerRepository.findByUserId(1L)).thenReturn(Optional.of(existingBuyer));
+        when(buyerRepository.save(any(Buyer.class))).thenAnswer(i -> i.getArgument(0));
+
+        // Act: update with new values
+        Buyer result = buyerService.updateBuyerProfile(1L, "NewFirst", "NewLast",
+                "999-999-9999", "T-Bone", "Whole cow");
+
+        // Assert: check the fields were updated
+        assertEquals("NewFirst", result.getFirstName());
+        assertEquals("NewLast", result.getLastName());
+        assertEquals("999-999-9999", result.getPhoneNumber());
+        assertEquals("T-Bone", result.getPreferredCuts());
+        assertEquals("Whole cow", result.getQuantity());
+        verify(buyerRepository).save(any(Buyer.class));
+    }
+
+    // Test 7: Updating a profile that doesn't exist
+    @Test
+    void updateBuyerProfile_NotFound() {
+        // Arrange: no profile exists for this user
+        when(buyerRepository.findByUserId(999L)).thenReturn(Optional.empty());
+
+        // Act + Assert: should throw an error
+        assertThrows(RuntimeException.class, () -> {
+            buyerService.updateBuyerProfile(999L, "A", "B", "C", "D", "E");
+        });
+    }
 }
