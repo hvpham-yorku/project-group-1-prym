@@ -89,4 +89,37 @@ public class BuyerServiceTest {
                     "123-456-7890", "Ribeye", "Half cow");
         });
     }
+
+    // Test 4: Getting a profile when it exists
+    @Test
+    void getBuyerProfile_Success() {
+        // Arrange: create a buyer and tell the fake repo to return it
+        Buyer buyer = new Buyer();
+        buyer.setFirstName("Shayan");
+        buyer.setLastName("Darajeh");
+        buyer.setPhoneNumber("123-456-7890");
+        buyer.setPreferredCuts("Ribeye");
+        buyer.setQuantity("Half cow");
+        when(buyerRepository.findByUserId(1L)).thenReturn(Optional.of(buyer));
+
+        // Act: get the profile
+        Buyer result = buyerService.getBuyerProfile(1L);
+
+        // Assert: check the right profile came back
+        assertNotNull(result);
+        assertEquals("Shayan", result.getFirstName());
+        assertEquals("Darajeh", result.getLastName());
+    }
+
+    // Test 5: Getting a profile that doesn't exist
+    @Test
+    void getBuyerProfile_NotFound() {
+        // Arrange: no profile exists for this user
+        when(buyerRepository.findByUserId(999L)).thenReturn(Optional.empty());
+
+        // Act + Assert: should throw an error
+        assertThrows(RuntimeException.class, () -> {
+            buyerService.getBuyerProfile(999L);
+        });
+    }
 }
