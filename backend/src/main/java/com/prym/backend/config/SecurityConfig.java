@@ -32,7 +32,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth //defines who can access what urls
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/buyer/**").hasRole("BUYER") // only buyers can access
-                .requestMatchers("/api/seller/**").hasRole("SELLER") //only Sellers can access
+                .requestMatchers("/api/sellers/**").hasRole("SELLER") //only Sellers can access
                 .anyRequest().authenticated() //everything else requires just being logged in
             )
             .addFilterBefore(sessionFilter, UsernamePasswordAuthenticationFilter.class); // sets the priority of our SessionFilter to run first before Spring's default authentication filter. This is where we check the SESSION_ID cookie
@@ -44,7 +44,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173"));//only allow requests from the react frontend
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));// Allow these http methods
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT","PATCH", "DELETE", "OPTIONS"));// Allow these http methods
         configuration.setAllowedHeaders(Arrays.asList("*"));//allow any headers
         configuration.setAllowCredentials(true);//allow cookies to be sent with requests
 
