@@ -51,6 +51,9 @@ function BuyerDashboard() {
                         <span style={styles.infoValue}>{user?.phoneNumber}</span>
                     </div>
                 </div>
+                <button onClick={() => navigate('/buyer/profile')} style={styles.profileButton}>
+                    My Profile
+                </button>
 
                 <button onClick={handleLogout} style={styles.button}>
                     Logout
@@ -140,6 +143,16 @@ const styles = {
     },
     infoValue: {
         color: '#333'
+    },
+    profileButton: {
+        padding: '12px 24px',
+        backgroundColor: '#4a7c59',
+        color: 'white',
+        border: 'none',
+        borderRadius: '4px',
+        fontSize: '16px',
+        cursor: 'pointer',
+        marginBottom: '12px'
     },
     button: {
         padding: '12px 24px',
