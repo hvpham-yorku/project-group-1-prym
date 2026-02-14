@@ -145,25 +145,25 @@ For detailed documentation, visit the [Project Wiki](../../wiki)
 
 | Task | Assigned To | Time Allocated | Time Spent |
 |------|-------------|----------------|------------|
-| Team Jira Setup + Maintenance | Jacob | | |
+| Team Jira Setup + Maintenance | Jacob | 1 Day | 1 Day |
 | PRD Update | Sufyan | 1 hour | 1 hour |
 | README File | Sufyan | 30 minutes | 20 minutes |
 | Project Map Design | Katelyn | 1 Day | 1 Day |
-| Implement Basic UI Vue Server | Jacob | | |
+| Implement Basic UI Vue Server | Jacob | 1 Day | 1 Day |
 | Implement Basic Database Backend | Sufyan | 1 day | 1 day |
 | Seller Account Creation | Sufyan | 1 day | 0.5 day |
 | Buyer Account Creation | Sufyan | 1 day | 0.5 day |
 | Buyer/Seller Login | Sufyan | 1.5 days | 1 day |
 | Authentication and Security Files | Sufyan | 0.5 day | 0.5 day |
-| Basic UI Decorations | Jacob | | |
+| Basic UI Decorations | Jacob | Set to Overdue | Set to Overdue |
 | Buyer Profile Modification | Shayan | 1 day | 3 hours 30 min |
 | Mock Seller Account Data | Harleen | 30 min |1.5 hours|
 | Mock Buyer Account Data | Shayan | 30 mins | 30 mins|
 | Seller Profile Modifications | Harleen | 1 Day | 1 day |
 | Farm Listings | Katelyn | 1.5 Day | 3 hours |
-| Basic Tests | Jacob | | |
+| Basic Tests | Jacob | 1 Day | 1 Day |
 | Mock Farm Listing Data | Katelyn | 30 min | 20 min |
-| Architecture Diagram | Jacob | | |
+| Architecture Diagram | Jacob | 1 Day | 1 Day |
 
 ---
 **some of the tasks here were done in parallel, so there are a lot of cases where times overlap.**
