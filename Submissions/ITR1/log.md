@@ -97,12 +97,12 @@ Time Allocated vs Time Spent:
 [Assigned: || Taken: ] Buyer Account Creation - Sufyan
 [Assigned: || Taken: ] Buyer/Seller Login - Sufyan
 [Assigned: || Taken: ] Basic UI Decorations - Jacob
-[Assigned: || Taken: ] Buyer Profile Modification - Shayan
+[Assigned: 3 hours || Taken: 3 hours 30 mins] Buyer Profile Modification - Shayan
 [Assigned: || Taken: ] Seller Account Creation - Sufyan
 [Assigned: || Taken: 3 hours] Farm Listings - Katelyn
 [Assigned: || Taken: ] Basic Tests - Jacob
 [Assigned: || Taken: 20 min.] Mock Farm Listing Data - Katelyn
 [Assigned: || Taken: ] Mock Seller Account Data - Harleen
-[Assigned: || Taken: ] Mock Buyer Account Data - Shayan
+[Assigned: 30 mins || Taken: 45 mins] Mock Buyer Account Data - Shayan
 [Assigned: || Taken: ] Seller Profile Modifications - Harleen
 [Assigned: || Taken: ] Authentication and Security Files - Sufyan
