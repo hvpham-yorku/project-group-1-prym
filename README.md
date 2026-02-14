@@ -31,6 +31,15 @@ For more detailed information, check out our [Wiki](../../wiki):
 Open it in your browser:
 - `http://localhost:5173`
 
+---
 
+## Testing
 
+### Backend Tests
+
+From `backend/`:
+
+```bash
+./mvnw test -Dtest=LoginTest
+```
 
