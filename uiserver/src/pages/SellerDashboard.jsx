@@ -23,8 +23,11 @@ function SellerDashboard() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
+    // YOUR VERSION: Safe useEffect with user?.id guard
     useEffect(() => {
         const fetchProfile = async () => {
+            if (!user?.id) return; // Wait until user is loaded
+
             try {
                 setLoading(true);
                 const data = await getSellerProfile(user.id);
@@ -46,7 +49,7 @@ function SellerDashboard() {
             }
         };
         fetchProfile();
-    }, [user.id]);
+    }, [user?.id]);
 
     const handleLogout = async () => {
         try {
@@ -58,24 +61,27 @@ function SellerDashboard() {
             navigate('/login');
         }
     };
-	
-	const handleSave = async () => {
-	    try {
-	        // Only send fields that backend allows updating
-	        const payload = {
-    shopName: formData.shopName,
-    shopAddress: formData.shopAddress
-};
 
-	        const updated = await updateSellerProfile(user.id, payload);
-	        setProfile(updated);
-	        
-	        setIsEditing(false);
-	    } catch (err) {
-	        console.error("Save error:", err);
-	        alert("Failed to save profile. Check the console for errors.");
-	    }
-	};
+    // YOUR VERSION: handleSave updates full profile
+    const handleSave = async () => {
+        try {
+            const payload = {
+                firstName: formData.firstName,
+                lastName: formData.lastName,
+                username: formData.username,
+                phoneNumber: formData.phoneNumber,
+                shopName: formData.shopName,
+                shopAddress: formData.shopAddress
+            };
+
+            const updated = await updateSellerProfile(user.id, payload);
+            setProfile(updated);
+            setIsEditing(false);
+        } catch (err) {
+            console.error("Save error:", err);
+            alert("Failed to save profile.");
+        }
+    };
 
     if (loading) {
         return <div style={{ textAlign: 'center', padding: '50px' }}>Loading...</div>;
@@ -119,24 +125,24 @@ function SellerDashboard() {
                             <p style={styles.info}>You are logged in as a <strong>SELLER</strong></p>
 
                             <div style={styles.infoCard}>
-    {Object.entries({
-        "Shop Name": formData.shopName,
-        "Shop Address": formData.shopAddress
-    }).map(([label, value]) => (
-        <div key={label} style={styles.infoRow}>
-            <span style={styles.infoLabel}>{label}:</span>
-            {isEditing ? (
-                <input
-                    type="text"
-                    value={value}
-                    onChange={(e) => setFormData({ ...formData, [camelCase(label)]: e.target.value })}
-                />
-            ) : (
-                <span style={styles.infoValue}>{value}</span>
-            )}
-        </div>
-    ))}
-</div>
+                                {Object.entries({
+                                    "Shop Name": formData.shopName,
+                                    "Shop Address": formData.shopAddress
+                                }).map(([label, value]) => (
+                                    <div key={label} style={styles.infoRow}>
+                                        <span style={styles.infoLabel}>{label}:</span>
+                                        {isEditing ? (
+                                            <input
+                                                type="text"
+                                                value={value}
+                                                onChange={(e) => setFormData({ ...formData, [camelCase(label)]: e.target.value })}
+                                            />
+                                        ) : (
+                                            <span style={styles.infoValue}>{value}</span>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
 
                             <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginTop: '20px' }}>
                                 {isEditing ? (
@@ -249,95 +255,94 @@ function Nav({ setActiveSection, handleLogout }) {
 
 const styles = {
     container: { 
-		minHeight: '100vh', 
-		display: 'flex', 
-		alignItems: 'center', 
-		justifyContent: 'center', 
-		backgroundColor: '#f5f5f0', 
-		padding: '20px' 
-	},
+        minHeight: '100vh', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        backgroundColor: '#f5f5f0', 
+        padding: '20px' 
+    },
     card: { 
-		backgroundColor: 'white', 
-		padding: '40px', 
-		borderRadius: '8px', 
-		boxShadow: '0 4px 6px rgba(0,0,0,0.1)', 
-		textAlign: 'center', 
-		border: '2px solid #5c4033', 
-		minWidth: '350px' 
-	},
+        backgroundColor: 'white', 
+        padding: '40px', 
+        borderRadius: '8px', 
+        boxShadow: '0 4px 6px rgba(0,0,0,0.1)', 
+        textAlign: 'center', 
+        border: '2px solid #5c4033', 
+        minWidth: '350px' 
+    },
     profilePictureContainer: { 
-		display: 'flex', 
-		justifyContent: 'center', 
-		marginBottom: '20px' 
-	},
+        display: 'flex', 
+        justifyContent: 'center', 
+        marginBottom: '20px' 
+    },
     profilePicture: { 
-		width: '120px', 
-		height: '120px', 
-		borderRadius: '50%', 
-		objectFit: 'cover', 
-		border: '3px solid #5c4033' 
-	},
+        width: '120px', 
+        height: '120px', 
+        borderRadius: '50%', 
+        objectFit: 'cover', 
+        border: '3px solid #5c4033' 
+    },
     profilePicturePlaceholder: { 
-		width: '120px', 
-		height: '120px', 
-		borderRadius: '50%', 
-		backgroundColor: '#5c4033', 
-		color: 'white', 
-		display: 'flex', 
-		alignItems: 'center', 
-		justifyContent: 'center', 
-		fontSize: '36px', 
-		fontWeight: 'bold' },
+        width: '120px', 
+        height: '120px', 
+        borderRadius: '50%', 
+        backgroundColor: '#5c4033', 
+        color: 'white', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        fontSize: '36px', 
+        fontWeight: 'bold' 
+    },
     title: { 
-		color: '#5c4033', 
-		marginBottom: '8px' 
-	},
+        color: '#5c4033', 
+        marginBottom: '8px' 
+    },
     welcome: { 
-		fontSize: '22px', 
-		color: '#333', 
-		fontWeight: '600', 
-		marginBottom: '4px' 
-	},
+        fontSize: '22px', 
+        color: '#333', 
+        fontWeight: '600', 
+        marginBottom: '4px' 
+    },
     name: { 
-		fontSize: '16px', 
-		color: '#666', 
-		marginBottom: '8px' 
-	},
+        fontSize: '16px', 
+        color: '#666', 
+        marginBottom: '8px' 
+    },
     info: { 
-		color: '#666', 
-		marginBottom: '20px'
-	},
+        color: '#666', 
+        marginBottom: '20px' 
+    },
     infoCard: { 
-		backgroundColor: '#f9f9f9', 
-		borderRadius: '8px', 
-		padding: '16px', 
-		marginBottom: '24px', 
-		textAlign: 'left' 
-	},
+        backgroundColor: '#f9f9f9', 
+        borderRadius: '8px', 
+        padding: '16px', 
+        marginBottom: '24px', 
+        textAlign: 'left' 
+    },
     infoRow: { 
-		display: 'flex', 
-		justifyContent: 'space-between', 
-		
-		padding: '8px 0', 
-		borderBottom: '1px solid #eee' 
-	},
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        padding: '8px 0', 
+        borderBottom: '1px solid #eee' 
+    },
     infoLabel: { 
-		color: '#666', 
-		fontWeight: '500' 
-	},
+        color: '#666', 
+        fontWeight: '500' 
+    },
     infoValue: { 
-		color: '#333' 
-	},
+        color: '#333' 
+    },
     button: { 
-		padding: '12px 24px', 
-		backgroundColor: '#4a7c59', 
-		color: 'white', 
-		border: 'none', 
-		borderRadius: '4px', 
-		
-		fontSize: '16px', 
-		cursor: 'pointer' 
-	}
+        padding: '12px 24px', 
+        backgroundColor: '#4a7c59', 
+        color: 'white', 
+        border: 'none', 
+        borderRadius: '4px', 
+        fontSize: '16px', 
+        cursor: 'pointer' 
+    }
 };
 
 export default SellerDashboard;
