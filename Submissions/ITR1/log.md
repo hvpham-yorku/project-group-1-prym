@@ -132,7 +132,7 @@ For detailed documentation, visit the [Project Wiki](../../wiki)
 | Buyer/Seller login |  POST /api/auth/login - email and password validation, create SESSION_ID cookie (7 day expiry), return user object with role |
 | Buyer account creation|  POST /api/auth/register/buyer - Creates User with BUYER role, validates unique email/username, hashes password, auto-creates session, returns user data |
 | Seller account creation |  POST /api/auth/register/seller - Creates User with SELLER role, validates unique email/username, hashes password, auto-creates session, returns user data  |
-| Buyer account modification | temp |
+| Buyer account modification | PUT /api/buyer/profile/{userId} - Updates buyer preferences (preferredCuts, quantity), verifies logged-in user matches userId for authorization, returns updated buyer profile |
 | Seller account modification | temp |
 | Farm listings | create basic page to hold listings, link them to another temporary farm listing page, create basic data |
 
