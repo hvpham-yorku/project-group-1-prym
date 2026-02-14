@@ -40,6 +40,6 @@ Open it in your browser:
 From `backend/`:
 
 ```bash
-./mvnw test -Dtest=LoginTest
+./mvnw test -Dtest=LoginTest,RegisterTest
 ```
 
