@@ -133,8 +133,8 @@ For detailed documentation, visit the [Project Wiki](../../wiki)
 | Buyer/Seller login |  POST /api/auth/login - email and password validation, create SESSION_ID cookie (7 day expiry), return user object with role |
 | Buyer account creation|  POST /api/auth/register/buyer - Creates User with BUYER role, validates unique email/username, hashes password, auto-creates session, returns user data |
 | Seller account creation |  POST /api/auth/register/seller - Creates User with SELLER role, validates unique email/username, hashes password, auto-creates session, returns user data  |
-| Buyer account modification | temp |
-| Seller account modification | temp |
+| Buyer account modification | PUT /api/buyer/profile/{userId} - Updates buyer preferences (preferredCuts, quantity), verifies logged-in user matches userId for authorization, returns updated buyer profile |
+| Seller account modification | PATCH /api/seller/{id} – Updates the seller's profile information (shop name, shop address), verifies logged-in user matches userId for authorization, validates input, returns the updated seller profile. |
 | Farm listings | create basic page to hold listings, link them to another temporary farm listing page, create basic data |
 
 
@@ -156,20 +156,13 @@ For detailed documentation, visit the [Project Wiki](../../wiki)
 | Buyer/Seller Login | Sufyan | 1.5 days | 1 day |
 | Authentication and Security Files | Sufyan | 0.5 day | 0.5 day |
 | Basic UI Decorations | Jacob | | |
-| Buyer Profile Modification | Shayan | 3 hours | 1 day |
-| Farm Listings | Katelyn | 0.5 Days | 3 hours |
-| Basic Tests | Jacob | | |
-| Mock Farm Listing Data | Katelyn | 30 min | 20 min |
+| Buyer Profile Modification | Shayan | 1 day | 3 hours 30 min |
 | Mock Seller Account Data | Harleen | 30 min |1.5 hours|
 | Mock Buyer Account Data | Shayan | 30 mins | 30 mins|
-| Seller Profile Modifications | Harleen | 1 Day |1.5 days |
-| Buyer Profile Modification | Shayan |3 hours | 3 hours 30 mins|
-| Farm Listings | Katelyn | 1 Day | 3 hours |
+| Seller Profile Modifications | Harleen | 1 Day | 1 day |
+| Farm Listings | Katelyn | 1.5 Day | 3 hours |
 | Basic Tests | Jacob | | |
 | Mock Farm Listing Data | Katelyn | 30 min | 20 min |
-| Mock Seller Account Data | Harleen | | |
-| Mock Buyer Account Data | Shayan | 30 mins | 30 mins|
-| Seller Profile Modifications | Harleen | 1 day | 1 day |
 | Architecture Diagram | Jacob | | |
 
 ---
