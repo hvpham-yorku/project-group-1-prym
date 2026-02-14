@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { createSellerProfile } from "../api/seller"; 
+import { updateSellerProfile } from "../api/seller"; 
 import { useAuth } from "../context/AuthContext";
 
 function SellerProfileSetup() {
@@ -26,13 +26,9 @@ function SellerProfileSetup() {
 	        setLoading(true);
 
 	        try {
-	            const profileData = {
-	                ...formData,
-	                userId: user?.id // Make sure this matches the "userId" key in your Java Map
-	            };
+	        
 
-	            await createSellerProfile(profileData);
-	            navigate("/seller/dashboard");
+await updateSellerProfile(user?.id, formData);	            navigate("/seller/dashboard");
 	        } catch (err) {
 	            console.error("Setup Error:", err);
 	            setError("Failed to create profile. Check if the server is running.");

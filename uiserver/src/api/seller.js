@@ -1,8 +1,7 @@
 import axios from 'axios';
 
 export const getSellerProfile = async (userId) => {
-    const response = await axios.get(`/api/seller/${userId}`, {
-        withCredentials: true // sends cookies for auth
+const response = await axios.get(`/api/seller/profile/${userId}`, {        withCredentials: true // sends cookies for auth
     });
     return response.data; // only return the profile data
 };
