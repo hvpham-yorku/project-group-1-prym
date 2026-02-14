@@ -74,6 +74,22 @@ For detailed documentation, visit the [Project Wiki](../../wiki)
 - Discussed user experience
 - Added link to wiki to log file and modified log file
 - Examined and commented on Jira progress
+---
+
+## Rationale behind big decisions
+
+| Decision | Rationale |
+|------|-------------|
+| Authentication using cookie based session management | we chose to use cookie based management instead of JWT tokens or Spring Security's default session management is that they were easier to implement and we can have better control over them.  |
+| Single User table with Role enum (BUYER/SELLER) | we chose this instead of seperate BuyerUser and SellerUser tables because it would reduce the duplicates by a lot, which would allow us to follow DRY coding principles. and the use of Role enum instead of strings prevents typos |
+| H2 File-Based database with JPA/Hibernate | since we are still in development, our team chose a file-based storage that requires no PostgreSQL or MySQL. This would make development easier and make sure everyone has an identical database setup  |
+| Use of Lombok annotations instead of manual getters/setters/constructors | This is a design choice we made to make the code readable and have less repetitions. | 
+
+---
+
+## Cocerns
+
+- Our main concern was understanding the stack we are using as fast as possible, and we are well on track to do so. 
 
 ---
 
@@ -110,9 +126,16 @@ For detailed documentation, visit the [Project Wiki](../../wiki)
 ---
 
 ## Development Tasks Per User Story
+| User Story | Details |
+|------|-------------|
+| Buyer/Seller login |  POST /api/auth/login - email and password validation, create SESSION_ID cookie (7 day expiry), return user object with role |
+| Buyer account creation|  POST /api/auth/register/buyer - Creates User with BUYER role, validates unique email/username, hashes password, auto-creates session, returns user data |
+| Seller account creation |  POST /api/auth/register/seller - Creates User with SELLER role, validates unique email/username, hashes password, auto-creates session, returns user data  |
+| Buyer account modification | temp |
+| Seller account modification | temp |
+| Farm listings | temp |
 
-- User/Seller Account Creation
-- User/Seller Login
+
 
 ---
 
@@ -129,7 +152,7 @@ For detailed documentation, visit the [Project Wiki](../../wiki)
 | Seller Account Creation | Sufyan | 1 day | 0.5 day |
 | Buyer Account Creation | Sufyan | 1 day | 0.5 day |
 | Buyer/Seller Login | Sufyan | 1.5 days | 1 day |
-| Authentication and Security Files | Sufyan | | 0.5 day |
+| Authentication and Security Files | Sufyan | 0.5 day | 0.5 day |
 | Basic UI Decorations | Jacob | | |
 | Buyer Profile Modification | Shayan | | |
 | Farm Listings | Katelyn | | 3 hours |
@@ -139,5 +162,7 @@ For detailed documentation, visit the [Project Wiki](../../wiki)
 | Mock Buyer Account Data | Shayan | | |
 | Seller Profile Modifications | Harleen | | |
 | Architecture Diagram | Jacob | | |
+
+---
 **some of the tasks here were done in parallel, so there are a lot of cases where times overlap.**
 **some tasks were similar with minor changes like Buyer login and Seller login, you implement it for one and just copy it for the other while doing minor changes. So the allocated time for the tasks was split up evenly.**
