@@ -66,13 +66,9 @@ function SellerDashboard() {
     const handleSave = async () => {
         try {
             const payload = {
-                firstName: formData.firstName,
-                lastName: formData.lastName,
-                username: formData.username,
-                phoneNumber: formData.phoneNumber,
-                shopName: formData.shopName,
-                shopAddress: formData.shopAddress
-            };
+    shopName: formData.shopName,
+    shopAddress: formData.shopAddress
+};
 
             const updated = await updateSellerProfile(user.id, payload);
             setProfile(updated);
