@@ -17,7 +17,7 @@ public class SellerController {
         this.sellerService = sellerService;
     }
 
-    @PostMapping("/signup")
+    @PostMapping("/profile")
     public ResponseEntity<?> createSeller(@RequestBody Map<String, String> request) {
         try {
             Long userId = Long.parseLong(request.get("userId"));

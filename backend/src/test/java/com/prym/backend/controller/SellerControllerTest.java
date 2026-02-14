@@ -1,6 +1,5 @@
 package com.prym.backend.controller;
 
-import com.prym.backend.controller.SellerController;
 import com.prym.backend.dto.SellerProfileUpdateDTO;
 import com.prym.backend.model.User;
 import com.prym.backend.repository.UserRepository;
@@ -13,10 +12,11 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 
-import static org.mockito.Mockito.*;
-
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
+import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class SellerControllerTest {
@@ -54,12 +54,12 @@ public class SellerControllerTest {
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(seller));
 
-        ResponseEntity<User> response = sellerController.getSeller(1L);
+        ResponseEntity<?> response = sellerController.getSeller(1L);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("seller1", response.getBody().getUsername());
+        assertTrue(response.getBody() instanceof User);
+        assertEquals("seller1", ((User) response.getBody()).getUsername());
     }
-
 
     @Test
     void getSeller_ForbiddenIfBuyer() {
@@ -69,68 +69,71 @@ public class SellerControllerTest {
 
         when(userRepository.findById(2L)).thenReturn(Optional.of(buyer));
 
-        ResponseEntity<User> response = sellerController.getSeller(2L);
+        ResponseEntity<?> response = sellerController.getSeller(2L);
 
         assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
         assertNull(response.getBody());
     }
-    
+
     @Test
     void updateSeller_Username_Success() {
-        SellerProfileUpdateDTO dto = new SellerProfileUpdateDTO();
-        dto.setUserName("newUsername");
+        Map<String, String> updates = new HashMap<>();
+        updates.put("userName", "newUsername");
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(testSeller));
         when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
 
-        ResponseEntity<User> response = sellerController.updateSeller(1L, dto);
+        ResponseEntity<?> response = sellerController.updateSeller(1L, updates);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("newUsername", response.getBody().getUsername());
-        assertEquals("John", response.getBody().getFirstName()); // unchanged
+        assertTrue(response.getBody() instanceof User);
+        assertEquals("newUsername", ((User) response.getBody()).getUsername());
     }
-    
+
     @Test
     void updateSeller_FirstName_Success() {
-        SellerProfileUpdateDTO dto = new SellerProfileUpdateDTO();
-        dto.setFirstName("Alice");
+        Map<String, String> updates = new HashMap<>();
+        updates.put("firstName", "Alice");
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(testSeller));
         when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
 
-        ResponseEntity<User> response = sellerController.updateSeller(1L, dto);
+        ResponseEntity<?> response = sellerController.updateSeller(1L, updates);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("Alice", response.getBody().getFirstName());
-        assertEquals("seller1", response.getBody().getUsername()); // unchanged
+        assertTrue(response.getBody() instanceof User);
+        assertEquals("Alice", ((User) response.getBody()).getFirstName());
+        assertEquals("seller1", ((User) response.getBody()).getUsername()); // unchanged
     }
-    
+
     @Test
     void updateSeller_LastName_Success() {
-        SellerProfileUpdateDTO dto = new SellerProfileUpdateDTO();
-        dto.setLastName("Smith");
+        Map<String, String> updates = new HashMap<>();
+        updates.put("lastName", "Smith");
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(testSeller));
         when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
 
-        ResponseEntity<User> response = sellerController.updateSeller(1L, dto);
+        ResponseEntity<?> response = sellerController.updateSeller(1L, updates);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("Smith", response.getBody().getLastName());
-        assertEquals("John", response.getBody().getFirstName()); // unchanged
+        assertTrue(response.getBody() instanceof User);
+        assertEquals("Smith", ((User) response.getBody()).getLastName());
+        assertEquals("John", ((User) response.getBody()).getFirstName()); // unchanged
     }
 
     @Test
     void updateSeller_PhoneNumber_Success() {
-        SellerProfileUpdateDTO dto = new SellerProfileUpdateDTO();
-        dto.setPhoneNumber("9876543210");
+        Map<String, String> updates = new HashMap<>();
+        updates.put("phoneNumber", "9876543210");
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(testSeller));
         when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
 
-        ResponseEntity<User> response = sellerController.updateSeller(1L, dto);
+        ResponseEntity<?> response = sellerController.updateSeller(1L, updates);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("9876543210", response.getBody().getPhoneNumber());
+        assertTrue(response.getBody() instanceof User);
+        assertEquals("9876543210", ((User) response.getBody()).getPhoneNumber());
     }
 }

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { registerSeller } from '../../api/auth';
+import { registerSeller } from "../../api/auth";
 import { useAuth } from '../../context/AuthContext';
 
 function SellerSignup() {
@@ -29,17 +29,15 @@ function SellerSignup() {
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         if (file) {
-            // Check file size (limit to 2MB)
-            if (file.size > 2 * 1024 * 1024) {
+            if (file.size > 2 * 1024 * 1024) { // 2MB limit
                 setError('Image must be less than 2MB');
                 return;
             }
 
             const reader = new FileReader();
             reader.onloadend = () => {
-                const base64String = reader.result;
-                setFormData(prev => ({ ...prev, profilePicture: base64String }));
-                setImagePreview(base64String);
+                setFormData(prev => ({ ...prev, profilePicture: reader.result }));
+                setImagePreview(reader.result);
             };
             reader.readAsDataURL(file);
         }
@@ -49,7 +47,7 @@ function SellerSignup() {
         e.preventDefault();
         setError('');
 
-        // Validation
+        // Basic validations
         if (formData.password !== formData.confirmPassword) {
             setError('Passwords do not match');
             return;
@@ -65,7 +63,6 @@ function SellerSignup() {
             return;
         }
 
-        // Basic phone validation
         const phoneRegex = /^[\d\s\-\+\(\)]{10,}$/;
         if (!phoneRegex.test(formData.phoneNumber)) {
             setError('Please enter a valid phone number');
@@ -84,10 +81,13 @@ function SellerSignup() {
                 phoneNumber: formData.phoneNumber,
                 profilePicture: formData.profilePicture || null
             });
+
             saveUser(user);
-            navigate('/seller/dashboard');
+
+            // Redirect to Seller Profile Setup after signup
+            navigate('/seller/profile-setup');
         } catch (err) {
-            setError(err.message);
+            setError(err.message || 'Failed to create seller account');
         } finally {
             setLoading(false);
         }
@@ -122,7 +122,7 @@ function SellerSignup() {
                         </label>
                     </div>
 
-                    {/* Name Fields - Side by Side */}
+                    {/* Name Fields */}
                     <div style={styles.row}>
                         <div style={styles.halfWidth}>
                             <label style={styles.label}>First Name</label>

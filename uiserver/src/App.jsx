@@ -9,6 +9,7 @@ import BuyerProfile from './pages/BuyerProfile';
 import SellerDashboard from './pages/SellerDashboard';
 import FarmListingsPage from './pages/FarmListingsPage';
 import FarmListing from './pages/FarmListing';
+import SellerProfileSetup from './pages/SellerProfileSetup';
 
 function ProtectedRoute({ children, allowedRole }) {
     const { user } = useAuth();
@@ -56,6 +57,13 @@ function AppRoutes() {
                     <SellerDashboard />
                 </ProtectedRoute>
             } />
+			
+			<Route path="/seller/profile-setup" element={
+			    <ProtectedRoute allowedRole="SELLER">
+			        <SellerProfileSetup />
+			    </ProtectedRoute>
+			} />
+
 
             <Route path="/" element={<Navigate to="/login" />} />
             <Route path="*" element={<Navigate to="/login" />} />
