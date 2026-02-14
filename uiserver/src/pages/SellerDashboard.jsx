@@ -27,7 +27,7 @@ function SellerDashboard() {
         const fetchProfile = async () => {
             try {
                 setLoading(true);
-                const data = await getSellerProfile();
+                const data = await getSellerProfile(user.id);
                 setProfile(data);
                 setFormData({
                     firstName: data.firstName || '',
@@ -63,18 +63,13 @@ function SellerDashboard() {
 	    try {
 	        // Only send fields that backend allows updating
 	        const payload = {
-	            firstName: formData.firstName,
-	            lastName: formData.lastName,
-	            username: formData.username,
-	            phoneNumber: formData.phoneNumber,
-	            shopName: formData.shopName,
-	            shopAddress: formData.shopAddress
-	        };
+    shopName: formData.shopName,
+    shopAddress: formData.shopAddress
+};
 
-	        const updated = await updateSellerProfile(payload);
-
+	        const updated = await updateSellerProfile(user.id, payload);
 	        setProfile(updated);
-	        saveUser(updated);
+	        
 	        setIsEditing(false);
 	    } catch (err) {
 	        console.error("Save error:", err);
@@ -124,29 +119,24 @@ function SellerDashboard() {
                             <p style={styles.info}>You are logged in as a <strong>SELLER</strong></p>
 
                             <div style={styles.infoCard}>
-                                {Object.entries({
-                                    "First Name": formData.firstName,
-                                    "Last Name": formData.lastName,
-                                    "Username": formData.username,
-                                    "Phone": formData.phoneNumber,
-                                    "Email": formData.email,
-                                    "Shop Name": formData.shopName,
-                                    "Shop Address": formData.shopAddress
-                                }).map(([label, value]) => (
-                                    <div key={label} style={styles.infoRow}>
-                                        <span style={styles.infoLabel}>{label}:</span>
-                                        {isEditing && label !== "Email" ? (
-                                            <input
-                                                type={label === "Phone" ? "tel" : "text"}
-                                                value={value}
-                                                onChange={(e) => setFormData({ ...formData, [camelCase(label)]: e.target.value })}
-                                            />
-                                        ) : (
-                                            <span style={styles.infoValue}>{value}</span>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
+    {Object.entries({
+        "Shop Name": formData.shopName,
+        "Shop Address": formData.shopAddress
+    }).map(([label, value]) => (
+        <div key={label} style={styles.infoRow}>
+            <span style={styles.infoLabel}>{label}:</span>
+            {isEditing ? (
+                <input
+                    type="text"
+                    value={value}
+                    onChange={(e) => setFormData({ ...formData, [camelCase(label)]: e.target.value })}
+                />
+            ) : (
+                <span style={styles.infoValue}>{value}</span>
+            )}
+        </div>
+    ))}
+</div>
 
                             <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginTop: '20px' }}>
                                 {isEditing ? (
