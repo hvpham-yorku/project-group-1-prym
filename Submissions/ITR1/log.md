@@ -159,9 +159,9 @@ For detailed documentation, visit the [Project Wiki](../../wiki)
 | Farm Listings | Katelyn | 0.5 Days | 3 hours |
 | Basic Tests | Jacob | | |
 | Mock Farm Listing Data | Katelyn | 30 min | 20 min |
-| Mock Seller Account Data | Harleen | 30 min | |
+| Mock Seller Account Data | Harleen | 30 min |1.5 hours|
 | Mock Buyer Account Data | Shayan | | |
-| Seller Profile Modifications | Harleen | 1 Day | |
+| Seller Profile Modifications | Harleen | 1 Day |1.5 days |
 | Buyer Profile Modification | Shayan |3 hours | 3 hours 30 mins|
 | Farm Listings | Katelyn | 1 Day | 3 hours |
 | Basic Tests | Jacob | | |
