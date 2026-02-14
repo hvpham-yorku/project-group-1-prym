@@ -155,7 +155,7 @@ For detailed documentation, visit the [Project Wiki](../../wiki)
 | Authentication and Security Files | Sufyan | 0.5 day | 0.5 day |
 | Basic UI Decorations | Jacob | | |
 | Buyer Profile Modification | Shayan | | |
-| Farm Listings | Katelyn | 1 Day | 3 hours |
+| Farm Listings | Katelyn | 0.5 Days | 3 hours |
 | Basic Tests | Jacob | | |
 | Mock Farm Listing Data | Katelyn | 30 min | 20 min |
 | Mock Seller Account Data | Harleen | | |
