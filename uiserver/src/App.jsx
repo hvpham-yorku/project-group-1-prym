@@ -32,7 +32,7 @@ function AppRoutes() {
         <Routes>
             <Route path="/login" element={user ? <Navigate to={user.role === 'BUYER' ? '/buyer/dashboard' : '/seller/dashboard'} /> : <Login />} />
             <Route path="/register/buyer" element={user ? <Navigate to="/buyer/profile-setup" /> : <BuyerSignup />} />
-            <Route path="/register/seller" element={user ? <Navigate to="/seller/dashboard" /> : <SellerSignup />} />
+            <Route path="/register/seller" element={user ? <Navigate to="/seller/profile-setup" /> : <SellerSignup />} />
             
             <Route path="/buyer/dashboard" element={
                 <ProtectedRoute allowedRole="BUYER">

@@ -23,30 +23,33 @@ function SellerDashboard() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
-    useEffect(() => {
-        const fetchProfile = async () => {
-            try {
-                setLoading(true);
-                const data = await getSellerProfile();
-                setProfile(data);
-                setFormData({
-                    firstName: data.firstName || '',
-                    lastName: data.lastName || '',
-                    username: data.username || '',
-                    email: data.email || '',
-                    phoneNumber: data.phoneNumber || '',
-                    shopName: data.shopName || '',
-                    shopAddress: data.shopAddress || ''
-                });
-            } catch (err) {
-                setError("Failed to load profile.");
-                console.error(err);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchProfile();
-    }, [user.id]);
+	useEffect(() => {
+	    const fetchProfile = async () => {
+	        if (!user?.id) return; // Wait until user is loaded
+
+	        try {
+	            setLoading(true);
+	  
+	            const data = await getSellerProfile(user.id); 
+	            setProfile(data);
+	            setFormData({
+	                firstName: data.firstName || '',
+	                lastName: data.lastName || '',
+	                username: data.username || '',
+	                email: data.email || '',
+	                phoneNumber: data.phoneNumber || '',
+	                shopName: data.shopName || '',
+	                shopAddress: data.shopAddress || ''
+	            });
+	        } catch (err) {
+	            setError("Failed to load profile.");
+	            console.error(err);
+	        } finally {
+	            setLoading(false);
+	        }
+	    };
+	    fetchProfile();
+	}, [user?.id]); 
 
     const handleLogout = async () => {
         try {
@@ -61,7 +64,6 @@ function SellerDashboard() {
 	
 	const handleSave = async () => {
 	    try {
-	        // Only send fields that backend allows updating
 	        const payload = {
 	            firstName: formData.firstName,
 	            lastName: formData.lastName,
@@ -71,14 +73,14 @@ function SellerDashboard() {
 	            shopAddress: formData.shopAddress
 	        };
 
-	        const updated = await updateSellerProfile(payload);
+	        const updated = await updateSellerProfile(user.id, payload);
 
 	        setProfile(updated);
 	        saveUser(updated);
 	        setIsEditing(false);
 	    } catch (err) {
 	        console.error("Save error:", err);
-	        alert("Failed to save profile. Check the console for errors.");
+	        alert("Failed to save profile.");
 	    }
 	};
 

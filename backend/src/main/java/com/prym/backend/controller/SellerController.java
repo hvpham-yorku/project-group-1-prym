@@ -1,6 +1,7 @@
 package com.prym.backend.controller;
 
 import com.prym.backend.model.Seller;
+import com.prym.backend.model.User;
 import com.prym.backend.service.SellerService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,15 +32,24 @@ public class SellerController {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
-
-    @GetMapping("/{userId}")
+    
+    @GetMapping("/profile/{userId}")
     public ResponseEntity<?> getSeller(@PathVariable Long userId) {
         try {
             Seller seller = sellerService.getSellerProfile(userId);
-            return ResponseEntity.ok(seller);
+            User user = seller.getUser(); // Get the associated user object
 
+            return ResponseEntity.ok(Map.of(
+                "firstName", user.getFirstName(),
+                "lastName", user.getLastName(),
+                "username", user.getUsername(),
+                "email", user.getEmail(),
+                "phoneNumber", user.getPhoneNumber(),
+                "shopName", seller.getShopName(),
+                "shopAddress", seller.getShopAddress()
+            ));
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+            return ResponseEntity.status(404).body(Map.of("error", "Profile not found"));
         }
     }
 

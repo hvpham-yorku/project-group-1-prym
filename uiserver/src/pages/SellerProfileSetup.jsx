@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createSellerProfile } from "../api/seller"; 
+import { useAuth } from "../context/AuthContext";
 
 function SellerProfileSetup() {
     const navigate = useNavigate();
+	const {user} = useAuth();
 
     const [formData, setFormData] = useState({
         shopName: "",
@@ -17,22 +19,28 @@ function SellerProfileSetup() {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
     };
+	
+	const handleSubmit = async (e) => {
+	        e.preventDefault();
+	        setError("");
+	        setLoading(true);
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setError("");
-        setLoading(true);
+	        try {
+	            const profileData = {
+	                ...formData,
+	                userId: user?.id // Make sure this matches the "userId" key in your Java Map
+	            };
 
-        try {
-            await createSellerProfile(formData);
-            navigate("/seller/dashboard");
-        } catch (err) {
-            setError("Failed to create seller profile");
-        } finally {
-            setLoading(false);
-        }
-    };
-
+	            await createSellerProfile(profileData);
+	            navigate("/seller/dashboard");
+	        } catch (err) {
+	            console.error("Setup Error:", err);
+	            setError("Failed to create profile. Check if the server is running.");
+	        } finally {
+	            setLoading(false);
+	        }
+	    };
+		
     return (
         <div style={{ padding: "40px", textAlign: "center" }}>
             <h2>Complete Your Seller Profile</h2>
