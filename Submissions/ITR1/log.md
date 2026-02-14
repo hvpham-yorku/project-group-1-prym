@@ -74,6 +74,7 @@ For detailed documentation, visit the [Project Wiki](../../wiki)
 - Discussed user experience
 - Added link to wiki to log file and modified log file
 - Examined and commented on Jira progress
+
 ---
 
 ## Rationale behind big decisions
@@ -161,6 +162,13 @@ For detailed documentation, visit the [Project Wiki](../../wiki)
 | Mock Seller Account Data | Harleen | 30 min | |
 | Mock Buyer Account Data | Shayan | | |
 | Seller Profile Modifications | Harleen | 1 Day | |
+| Buyer Profile Modification | Shayan |3 hours | 3 hours 30 mins|
+| Farm Listings | Katelyn | 1 Day | 3 hours |
+| Basic Tests | Jacob | | |
+| Mock Farm Listing Data | Katelyn | 30 min | 20 min |
+| Mock Seller Account Data | Harleen | | |
+| Mock Buyer Account Data | Shayan | 30 mins | 30 mins|
+| Seller Profile Modifications | Harleen | | |
 | Architecture Diagram | Jacob | | |
 
 ---
