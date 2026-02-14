@@ -1,8 +1,11 @@
 package com.prym.backend.controller;
 
 import com.prym.backend.model.Buyer;
+import com.prym.backend.model.User;
 import com.prym.backend.service.BuyerService;
+import com.prym.backend.repository.UserRepository;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -14,10 +17,20 @@ import java.util.Map;
 public class BuyerController {
 
     private final BuyerService buyerService;
+    private final UserRepository userRepository;
 
-    // Spring injects the BuyerService automatically through this constructor
-    public BuyerController(BuyerService buyerService) {
+    // Spring injects the BuyerService and UserRepository automatically through this constructor
+    public BuyerController(BuyerService buyerService, UserRepository userRepository) {
         this.buyerService = buyerService;
+        this.userRepository = userRepository;
+    }
+
+    // Gets the logged-in user's ID from the security context
+    private Long getLoggedInUserId() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return user.getId();
     }
 
     // POST /api/buyer/profile, creates a new buyer profile after signup
@@ -26,6 +39,11 @@ public class BuyerController {
         try {
             // Extract fields from the JSON request body
             Long userId = Long.parseLong(request.get("userId"));
+
+            if (!getLoggedInUserId().equals(userId)) {
+                return ResponseEntity.status(403).body(Map.of("error", "You can only create your own profile"));
+            }
+
             String preferredCuts = request.get("preferredCuts");
             String quantity = request.get("quantity");
 
@@ -44,6 +62,9 @@ public class BuyerController {
     @GetMapping("/profile/{userId}")
     public ResponseEntity<?> getProfile(@PathVariable Long userId) {
         try {
+            if (!getLoggedInUserId().equals(userId)) {
+                return ResponseEntity.status(403).body(Map.of("error", "You can only view your own profile"));
+            }
             Buyer buyer = buyerService.getBuyerProfile(userId);
             return ResponseEntity.ok(buyer);
 
@@ -56,6 +77,9 @@ public class BuyerController {
     @PutMapping("/profile/{userId}")
     public ResponseEntity<?> updateProfile(@PathVariable Long userId, @RequestBody Map<String, String> request) {
         try {
+            if (!getLoggedInUserId().equals(userId)) {
+                return ResponseEntity.status(403).body(Map.of("error", "You can only edit your own profile"));
+            }
             // Extract the updated fields from the JSON request body
             String preferredCuts = request.get("preferredCuts");
             String quantity = request.get("quantity");
