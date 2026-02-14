@@ -23,33 +23,30 @@ function SellerDashboard() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
-	useEffect(() => {
-	    const fetchProfile = async () => {
-	        if (!user?.id) return; // Wait until user is loaded
-
-	        try {
-	            setLoading(true);
-	  
-	            const data = await getSellerProfile(user.id); 
-	            setProfile(data);
-	            setFormData({
-	                firstName: data.firstName || '',
-	                lastName: data.lastName || '',
-	                username: data.username || '',
-	                email: data.email || '',
-	                phoneNumber: data.phoneNumber || '',
-	                shopName: data.shopName || '',
-	                shopAddress: data.shopAddress || ''
-	            });
-	        } catch (err) {
-	            setError("Failed to load profile.");
-	            console.error(err);
-	        } finally {
-	            setLoading(false);
-	        }
-	    };
-	    fetchProfile();
-	}, [user?.id]); 
+    useEffect(() => {
+        const fetchProfile = async () => {
+            try {
+                setLoading(true);
+                const data = await getSellerProfile(user.id);
+                setProfile(data);
+                setFormData({
+                    firstName: data.firstName || '',
+                    lastName: data.lastName || '',
+                    username: data.username || '',
+                    email: data.email || '',
+                    phoneNumber: data.phoneNumber || '',
+                    shopName: data.shopName || '',
+                    shopAddress: data.shopAddress || ''
+                });
+            } catch (err) {
+                setError("Failed to load profile.");
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchProfile();
+    }, [user.id]);
 
     const handleLogout = async () => {
         try {
@@ -64,23 +61,19 @@ function SellerDashboard() {
 	
 	const handleSave = async () => {
 	    try {
+	        // Only send fields that backend allows updating
 	        const payload = {
-	            firstName: formData.firstName,
-	            lastName: formData.lastName,
-	            username: formData.username,
-	            phoneNumber: formData.phoneNumber,
-	            shopName: formData.shopName,
-	            shopAddress: formData.shopAddress
-	        };
+    shopName: formData.shopName,
+    shopAddress: formData.shopAddress
+};
 
 	        const updated = await updateSellerProfile(user.id, payload);
-
 	        setProfile(updated);
-	        saveUser(updated);
+	        
 	        setIsEditing(false);
 	    } catch (err) {
 	        console.error("Save error:", err);
-	        alert("Failed to save profile.");
+	        alert("Failed to save profile. Check the console for errors.");
 	    }
 	};
 
@@ -126,29 +119,24 @@ function SellerDashboard() {
                             <p style={styles.info}>You are logged in as a <strong>SELLER</strong></p>
 
                             <div style={styles.infoCard}>
-                                {Object.entries({
-                                    "First Name": formData.firstName,
-                                    "Last Name": formData.lastName,
-                                    "Username": formData.username,
-                                    "Phone": formData.phoneNumber,
-                                    "Email": formData.email,
-                                    "Shop Name": formData.shopName,
-                                    "Shop Address": formData.shopAddress
-                                }).map(([label, value]) => (
-                                    <div key={label} style={styles.infoRow}>
-                                        <span style={styles.infoLabel}>{label}:</span>
-                                        {isEditing && label !== "Email" ? (
-                                            <input
-                                                type={label === "Phone" ? "tel" : "text"}
-                                                value={value}
-                                                onChange={(e) => setFormData({ ...formData, [camelCase(label)]: e.target.value })}
-                                            />
-                                        ) : (
-                                            <span style={styles.infoValue}>{value}</span>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
+    {Object.entries({
+        "Shop Name": formData.shopName,
+        "Shop Address": formData.shopAddress
+    }).map(([label, value]) => (
+        <div key={label} style={styles.infoRow}>
+            <span style={styles.infoLabel}>{label}:</span>
+            {isEditing ? (
+                <input
+                    type="text"
+                    value={value}
+                    onChange={(e) => setFormData({ ...formData, [camelCase(label)]: e.target.value })}
+                />
+            ) : (
+                <span style={styles.infoValue}>{value}</span>
+            )}
+        </div>
+    ))}
+</div>
 
                             <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginTop: '20px' }}>
                                 {isEditing ? (

@@ -32,7 +32,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth //defines who can access what urls
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/buyer/**").hasRole("BUYER") // only buyers can access
-                .requestMatchers("/api/seller/**").hasAuthority("ROLE_SELLER") //only Sellers can access
+                .requestMatchers("/api/seller/**").hasRole("SELLER") //only Sellers can access
                 .anyRequest().authenticated() //everything else requires just being logged in
             )
             .addFilterBefore(sessionFilter, UsernamePasswordAuthenticationFilter.class); // sets the priority of our SessionFilter to run first before Spring's default authentication filter. This is where we check the SESSION_ID cookie

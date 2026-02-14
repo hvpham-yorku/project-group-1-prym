@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.prym.backend.model.Session;
 import com.prym.backend.model.User;
 import com.prym.backend.service.AuthService;
+import com.prym.backend.service.SellerService;
 import com.prym.backend.service.SessionService;
 
 import jakarta.servlet.http.Cookie;
@@ -28,12 +29,12 @@ public class AuthController {
 
     private final AuthService authService;
     private final SessionService sessionService;
-
-    public AuthController(AuthService authService, SessionService sessionService) {
-        this.authService = authService;
-        this.sessionService = sessionService;
-    }
-
+    private final SellerService sellerService; 
+public AuthController(AuthService authService, SessionService sessionService, SellerService sellerService) {
+    this.authService = authService;
+    this.sessionService = sessionService;
+    this.sellerService = sellerService;  
+}
     @PostMapping("/register/buyer")
     public ResponseEntity<?> registerBuyer(@RequestBody Map<String, String> request, HttpServletResponse response) {// ResponseEntity<?>
                                                                                                                     // =
@@ -82,28 +83,31 @@ public class AuthController {
     }
 
     @PostMapping("/register/seller")
-    public ResponseEntity<?> registerSeller(@RequestBody Map<String, String> request, HttpServletResponse response) {
-        try {
-            String email = request.get("email");
-            String password = request.get("password");
-            String username = request.get("username");
-            String firstName = request.get("firstName");
-            String lastName = request.get("lastName");
-            String phoneNumber = request.get("phoneNumber");
-            String profilePicture = request.get("profilePicture");
+public ResponseEntity<?> registerSeller(@RequestBody Map<String, String> request, HttpServletResponse response) {
+    try {
+        String email = request.get("email");
+        String password = request.get("password");
+        String username = request.get("username");
+        String firstName = request.get("firstName");
+        String lastName = request.get("lastName");
+        String phoneNumber = request.get("phoneNumber");
+        String profilePicture = request.get("profilePicture");
 
-            User user = authService.register(email, password, User.Role.SELLER, username, firstName, lastName,
-                    phoneNumber, profilePicture);
-            Session session = sessionService.createSession(user);
+        User user = authService.register(email, password, User.Role.SELLER, username, firstName, lastName,
+                phoneNumber, profilePicture);
+        
+        // ADD THIS: Create empty seller profile
+        sellerService.createSellerProfile(user.getId(), "", "");
+        
+        Session session = sessionService.createSession(user);
+        addSessionCookie(response, session.getSessionId());
 
-            addSessionCookie(response, session.getSessionId());
+        return ResponseEntity.ok(buildUserResponse(user));
 
-            return ResponseEntity.ok(buildUserResponse(user));
-
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-        }
+    } catch (RuntimeException e) {
+        return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
     }
+}
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> request, HttpServletResponse response) {
