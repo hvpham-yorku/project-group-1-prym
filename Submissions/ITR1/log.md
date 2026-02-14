@@ -136,7 +136,8 @@ For detailed documentation, visit the [Project Wiki](../../wiki)
 | Buyer account modification | PUT /api/buyer/profile/{userId} - Updates buyer preferences (preferredCuts, quantity), verifies logged-in user matches userId for authorization, returns updated buyer profile |
 | Seller account modification | PATCH /api/seller/{id} – Updates the seller's profile information (shop name, shop address), verifies logged-in user matches userId for authorization, validates input, returns the updated seller profile. |
 | Farm listings | create basic page to hold listings, link them to another temporary farm listing page, create basic data |
-
+| Session validation | GET /api/auth/me - Validates SESSION_ID cookie, returns current user data or 401 if invalid/expired |
+| Logout | POST /api/auth/logout - Invalidates session, clears SESSION_ID cookie |
 
 
 ---
