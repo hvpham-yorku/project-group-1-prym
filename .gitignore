@@ -1,4 +1,7 @@
-.metadata
 .project
+*.classpath
+*.settings/
+#Frontend IDE or Eclipse files
+uiserver/.project
+.metadata
 backend/.metadata
-*~

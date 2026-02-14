@@ -29,6 +29,11 @@ public class SessionFilter extends OncePerRequestFilter { //a OncePerRequestFilt
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) // this method runs on every request to our API
             throws ServletException, IOException {
+    	
+    	if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         // Try to get SESSION_ID cookie from the request
         String sessionId = getSessionIdFromCookies(request);
