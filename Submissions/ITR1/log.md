@@ -87,7 +87,7 @@ For detailed documentation, visit the [Project Wiki](../../wiki)
 
 ---
 
-## Cocerns
+## Concerns
 
 - Our main concern was understanding the stack we are using as fast as possible, and we are well on track to do so. 
 
@@ -133,7 +133,7 @@ For detailed documentation, visit the [Project Wiki](../../wiki)
 | Seller account creation |  POST /api/auth/register/seller - Creates User with SELLER role, validates unique email/username, hashes password, auto-creates session, returns user data  |
 | Buyer account modification | temp |
 | Seller account modification | temp |
-| Farm listings | temp |
+| Farm listings | create basic page to hold listings, link them to another temporary farm listing page, create basic data |
 
 
 
@@ -155,9 +155,9 @@ For detailed documentation, visit the [Project Wiki](../../wiki)
 | Authentication and Security Files | Sufyan | 0.5 day | 0.5 day |
 | Basic UI Decorations | Jacob | | |
 | Buyer Profile Modification | Shayan | | |
-| Farm Listings | Katelyn | | 3 hours |
+| Farm Listings | Katelyn | 1 Day | 3 hours |
 | Basic Tests | Jacob | | |
-| Mock Farm Listing Data | Katelyn | | 20 min |
+| Mock Farm Listing Data | Katelyn | 30 min | 20 min |
 | Mock Seller Account Data | Harleen | | |
 | Mock Buyer Account Data | Shayan | | |
 | Seller Profile Modifications | Harleen | | |
