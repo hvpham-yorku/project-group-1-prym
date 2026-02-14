@@ -70,7 +70,7 @@ For detailed documentation, visit the [Project Wiki](../../wiki)
 **Agenda:** Discuss project wiki and testing structure
 
 - Went over architecture basics
-- Reviewed ITER1 Deliverables
+- Reviewed ITR1 Deliverables
 - Discussed user experience
 - Added link to wiki to log file and modified log file
 - Examined and commented on Jira progress
@@ -85,6 +85,7 @@ For detailed documentation, visit the [Project Wiki](../../wiki)
 | Single User table with Role enum (BUYER/SELLER) | we chose this instead of seperate BuyerUser and SellerUser tables because it would reduce the duplicates by a lot, which would allow us to follow DRY coding principles. and the use of Role enum instead of strings prevents typos |
 | H2 File-Based database with JPA/Hibernate | since we are still in development, our team chose a file-based storage that requires no PostgreSQL or MySQL. This would make development easier and make sure everyone has an identical database setup  |
 | Use of Lombok annotations instead of manual getters/setters/constructors | This is a design choice we made to make the code readable and have less repetitions. | 
+| Shared User entity with separate Buyer/Seller profiles | Common user attributes (email, password, first name, last name, phone) are stored in a single User table, while role specific data (shopName/shopAddress for sellers, preferredCuts/quantity for buyers) are stored in separate Buyer and Seller tables linked by userId. This follows normalization principles and avoids duplicating common fields across roles. |
 
 ---
 
@@ -155,12 +156,12 @@ For detailed documentation, visit the [Project Wiki](../../wiki)
 | Buyer/Seller Login | Sufyan | 1.5 days | 1 day |
 | Authentication and Security Files | Sufyan | 0.5 day | 0.5 day |
 | Basic UI Decorations | Jacob | | |
-| Buyer Profile Modification | Shayan | | |
+| Buyer Profile Modification | Shayan | 3 hours | 1 day |
 | Farm Listings | Katelyn | 0.5 Days | 3 hours |
 | Basic Tests | Jacob | | |
 | Mock Farm Listing Data | Katelyn | 30 min | 20 min |
 | Mock Seller Account Data | Harleen | 30 min |1.5 hours|
-| Mock Buyer Account Data | Shayan | | |
+| Mock Buyer Account Data | Shayan | 30 mins | 30 mins|
 | Seller Profile Modifications | Harleen | 1 Day |1.5 days |
 | Buyer Profile Modification | Shayan |3 hours | 3 hours 30 mins|
 | Farm Listings | Katelyn | 1 Day | 3 hours |
@@ -168,7 +169,7 @@ For detailed documentation, visit the [Project Wiki](../../wiki)
 | Mock Farm Listing Data | Katelyn | 30 min | 20 min |
 | Mock Seller Account Data | Harleen | | |
 | Mock Buyer Account Data | Shayan | 30 mins | 30 mins|
-| Seller Profile Modifications | Harleen | | |
+| Seller Profile Modifications | Harleen | 1 day | 1 day |
 | Architecture Diagram | Jacob | | |
 
 ---
