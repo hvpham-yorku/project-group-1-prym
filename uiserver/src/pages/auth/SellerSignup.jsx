@@ -11,6 +11,7 @@ function SellerSignup() {
         username: '',
         firstName: '',
         lastName: '',
+        shopName:'',
         phoneNumber: '',
         profilePicture: ''
     });
@@ -78,6 +79,7 @@ function SellerSignup() {
                 username: formData.username,
                 firstName: formData.firstName,
                 lastName: formData.lastName,
+                shopName: formData.shopName,
                 phoneNumber: formData.phoneNumber,
                 profilePicture: formData.profilePicture || null
             });
@@ -182,6 +184,17 @@ function SellerSignup() {
                             placeholder="e.g., 416-555-1234"
                             style={styles.input}
                             required
+                        />
+                    </div>
+                    
+                    <div style={styles.inputGroup}>
+                        <label style={styles.label}>Shop Name</label>
+                        <input
+                            type="text"
+                            name="shopName"
+                            value={formData.shopName}
+                            onChange={handleChange}
+                            style={styles.input}
                         />
                     </div>
 

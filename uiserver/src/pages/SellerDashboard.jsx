@@ -92,6 +92,8 @@ function SellerDashboard() {
                     {activeSection === "Dashboard" && (
                         <>
                             <h1 style={styles.title}>Seller Dashboard</h1>
+                            <h1 style={styles.info}><strong>{formData.shopName}</strong></h1>
+                            <h1 style={styles.name}>{user?.firstName} {user?.lastName}</h1>
                             <p style={styles.welcome}>Welcome, {user?.username}!</p>
                             <p style={styles.info}>You are logged in as a <strong>SELLER</strong></p>
                         </>
