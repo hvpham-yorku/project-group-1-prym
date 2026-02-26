@@ -2,7 +2,7 @@
 // This file gives the frontend a way to communicate with the buyer controller on the backend
 // Each function maps to one endpoint in BuyerController.java
 
-const API_URL = 'http://localhost:8080/api/buyer';
+const API_URL = '/api/buyer';
 
 // Creates a new buyer profile after signup
 // Calls POST /api/buyer/profile
