@@ -1,10 +1,11 @@
 import {farms} from '../assets/data.js';
-
+import {Link} from 'react-router-dom';
+//<a href='/farmlistingspage/farmlisting'><button style={styles.button}>{farm.name}</button></a>
 function FarmListingsPage(){
 	const listItems = farms.map(farm => 
 		<li key={farm.id}>
 			<div style={styles.listing}>
-				<a href='/farmlistingspage/farmlisting'><button style={styles.button}>{farm.name}</button></a>
+				<Link to={`/farmlistingspage/${farm.id}`}><button style={styles.button}>{farm.name}</button></Link>
 			</div>
 		</li>
 	);

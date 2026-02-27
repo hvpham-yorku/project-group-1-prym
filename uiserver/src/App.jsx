@@ -56,12 +56,14 @@ function AppRoutes() {
                     <SellerDashboard />
                 </ProtectedRoute>
             } />
+			
+			<Route path="/farmlistingspage" element={<FarmListingsPage />} />
+			<Route path="/farmlistingspage/:farmid" element={<FarmListing />} />
 
             <Route path="/" element={<Navigate to="/login" />} />
             <Route path="*" element={<Navigate to="/login" />} />
 			
-			<Route path="/farmlistingspage" element={<FarmListingsPage />} />
-			<Route path="/farmlistingspage/farmlisting" element={<FarmListing />} />
+			
         </Routes>
     );
 }
