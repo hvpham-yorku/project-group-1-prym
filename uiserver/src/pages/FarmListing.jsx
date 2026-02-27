@@ -8,6 +8,8 @@ function FarmListing(){
 	console.log(farmid);
 	const farm = getFarm(farmid);
 	console.log(farm);
+	let f = farm.certifications;
+	const certs = f.map(c => <li style={styles.certification}>{c}</li>);
 	
 	return(
 		<div>
@@ -17,7 +19,7 @@ function FarmListing(){
 			
 			<div style={styles.container}>
 				<p style={styles.descBox}>{farm.description}</p>
-				<p style = {styles.certBox}> These are the certifications! </p>
+				<ul style = {styles.certBox}>{certs}</ul>
 			</div>
 			
 			<div style={styles.container}>
@@ -59,6 +61,7 @@ const styles = {
 	certBox:{
 		margin: 20,
 		display: 'flex',
+		flexDirection: 'row',
 		alignItems: 'center',
 		justifyContent: 'center',
 		backgroundColor: '#f5f5f0',
@@ -67,6 +70,19 @@ const styles = {
 		borderRadius: 5,
 		width: '40%',
 		height: 100,
+	},
+	certification: {
+		margin: 5,
+		display: 'flex',
+		flexDirection: 'row',
+		alignItems: 'center',
+		justifyContent: 'center',
+		backgroundColor: '#f5f5f0',
+		border: 'solid',
+		borderColor: '#333',
+		borderRadius: '100%',
+		width: '20%',
+		height: '80%',
 	},
 	cowBox:	{
 		margin: 20,
