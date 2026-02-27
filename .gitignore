@@ -5,3 +5,5 @@
 uiserver/.project
 .metadata
 backend/.metadata
+# IntelliJ IDEA local files
+.idea/
