@@ -1,18 +1,22 @@
 import {useParams} from 'react-router-dom';
 import farmImage from '../assets/rural-farm-landscape-stockcake.webp';
+import {getFarm} from '../api/farm.js';
 
 function FarmListing(){
 	
-	const {id} = useParams();
+	let { farmid } = useParams();
+	console.log(farmid);
+	const farm = getFarm(farmid);
+	console.log(farm);
 	
 	return(
 		<div>
 			<img src={farmImage} width='100%' height='300' alt="farm image"/>
 			
-			<h1 style={styles.header}>Farm Listing</h1>
+			<h1 style={styles.header}>{farm.name}</h1>
 			
 			<div style={styles.container}>
-				<p style={styles.descBox}> This is a description of the farm! </p>
+				<p style={styles.descBox}>{farm.description}</p>
 				<p style = {styles.certBox}> These are the certifications! </p>
 			</div>
 			

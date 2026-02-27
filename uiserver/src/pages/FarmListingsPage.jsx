@@ -5,7 +5,7 @@ function FarmListingsPage(){
 	const listItems = farms.map(farm => 
 		<li key={farm.id}>
 			<div style={styles.listing}>
-				<Link to={`/farmlistingspage/${farm.id}`}><button style={styles.button}>{farm.name}</button></Link>
+				<Link to={`/farmlistingspage/${farm.name}`}><button style={styles.button}>{farm.name}</button></Link>
 			</div>
 		</li>
 	);
