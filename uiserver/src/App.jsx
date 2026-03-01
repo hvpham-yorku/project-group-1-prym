@@ -58,6 +58,8 @@ function AppRoutes() {
                 </ProtectedRoute>
             } />
 			
+			<Route path="/farmlistingspage" element={<FarmListingsPage />} />
+			<Route path="/farmlistingspage/:farmid" element={<FarmListing />} />
 			<Route path="/seller/profile-setup" element={
 			    <ProtectedRoute allowedRole="SELLER">
 			        <SellerProfileSetup />
@@ -68,8 +70,7 @@ function AppRoutes() {
             <Route path="/" element={<Navigate to="/login" />} />
             <Route path="*" element={<Navigate to="/login" />} />
 			
-			<Route path="/farmlistingspage" element={<FarmListingsPage />} />
-			<Route path="/farmlistingspage/farmlisting" element={<FarmListing />} />
+			
         </Routes>
     );
 }
