@@ -74,9 +74,11 @@ const styles = {
 	button: {
 		backgroundColor: 'white',
 		color: '#4a7c59',
-		fontSize: 100,
+		fontSize: 50,
 		fontFamily: 'Roboto',
 		width: 800,
+		height: 200,
+		//border: 'none',
 	},
 	header: {
 		fontFamily: 'Roboto',
