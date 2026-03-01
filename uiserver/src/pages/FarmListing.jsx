@@ -80,7 +80,7 @@ const styles = {
 		backgroundColor: '#f5f5f0',
 		border: 'solid',
 		borderColor: '#333',
-		borderRadius: '100%',
+		borderRadius: '50%',
 		width: '20%',
 		height: '80%',
 	},
