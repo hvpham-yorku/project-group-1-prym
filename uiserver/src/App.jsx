@@ -9,6 +9,7 @@ import BuyerProfile from './pages/BuyerProfile';
 import SellerDashboard from './pages/SellerDashboard';
 import FarmListingsPage from './pages/FarmListingsPage';
 import FarmListing from './pages/FarmListing';
+import SellerProfileSetup from './pages/SellerProfileSetup';
 
 function ProtectedRoute({ children, allowedRole }) {
     const { user } = useAuth();
@@ -31,7 +32,7 @@ function AppRoutes() {
         <Routes>
             <Route path="/login" element={user ? <Navigate to={user.role === 'BUYER' ? '/buyer/dashboard' : '/seller/dashboard'} /> : <Login />} />
             <Route path="/register/buyer" element={user ? <Navigate to="/buyer/profile-setup" /> : <BuyerSignup />} />
-            <Route path="/register/seller" element={user ? <Navigate to="/seller/dashboard" /> : <SellerSignup />} />
+            <Route path="/register/seller" element={user ? <Navigate to="/seller/profile-setup" /> : <SellerSignup />} />
             
             <Route path="/buyer/dashboard" element={
                 <ProtectedRoute allowedRole="BUYER">
@@ -59,6 +60,12 @@ function AppRoutes() {
 			
 			<Route path="/farmlistingspage" element={<FarmListingsPage />} />
 			<Route path="/farmlistingspage/:farmid" element={<FarmListing />} />
+			<Route path="/seller/profile-setup" element={
+			    <ProtectedRoute allowedRole="SELLER">
+			        <SellerProfileSetup />
+			    </ProtectedRoute>
+			} />
+
 
             <Route path="/" element={<Navigate to="/login" />} />
             <Route path="*" element={<Navigate to="/login" />} />
