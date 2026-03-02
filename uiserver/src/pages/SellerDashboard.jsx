@@ -1,346 +1,325 @@
-import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import { logout } from '../api/auth';
-import { useState, useEffect } from 'react';
-import { getSellerProfile, updateSellerProfile } from '../api/seller';
+import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { logout } from "../api/auth";
+import { useState, useEffect } from "react";
+import { getSellerProfile, updateSellerProfile } from "../api/seller";
 
 function SellerDashboard() {
-    const { user, clearUser, saveUser } = useAuth();
-    const navigate = useNavigate();
+  const { user, clearUser } = useAuth();
+  const navigate = useNavigate();
 
-    const [isEditing, setIsEditing] = useState(false);
-    const [formData, setFormData] = useState({
-        firstName: user?.firstName || '',
-        lastName: user?.lastName || '',
-        username: user?.username || '',
-        email: user?.email || '',
-        phoneNumber: user?.phoneNumber || '',
-        shopName: '',
-        shopAddress: ''
-    });
-    const [activeSection, setActiveSection] = useState("Dashboard");
-    const [profile, setProfile] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({
+    shopAddress: "",
+    category: "",
+    description: "",
+  });
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-    // YOUR VERSION: Safe useEffect with user?.id guard
-    useEffect(() => {
-        const fetchProfile = async () => {
-            if (!user?.id) return; // Wait until user is loaded
-
-            try {
-                setLoading(true);
-                const data = await getSellerProfile(user.id);
-                setProfile(data);
-                setFormData({
-                    firstName: data.firstName || '',
-                    lastName: data.lastName || '',
-                    username: data.username || '',
-                    email: data.email || '',
-                    phoneNumber: data.phoneNumber || '',
-                    shopName: data.shopName || '',
-                    shopAddress: data.shopAddress || ''
-                });
-            } catch (err) {
-                setError("Failed to load profile.");
-                console.error(err);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchProfile();
-    }, [user?.id]);
-
-    const handleLogout = async () => {
-        try {
-            await logout();
-        } catch (error) {
-            console.error('Logout failed:', error);
-        } finally {
-            clearUser();
-            navigate('/login');
-        }
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!user?.id) return;
+      try {
+        setLoading(true);
+        const data = await getSellerProfile(user.id);
+        setProfile(data);
+        setFormData({
+          shopAddress: data.shopAddress || "",
+          category: data.category || "",
+          description: data.description || "",
+        });
+      } catch (err) {
+        setError("Failed to load profile.");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
     };
+    fetchProfile();
+  }, [user?.id]);
 
-    // YOUR VERSION: handleSave updates full profile
-    const handleSave = async () => {
-        try {
-            const payload = {
-    shopName: formData.shopName,
-    shopAddress: formData.shopAddress
-};
-
-            const updated = await updateSellerProfile(user.id, payload);
-            setProfile(updated);
-            setIsEditing(false);
-        } catch (err) {
-            console.error("Save error:", err);
-            alert("Failed to save profile.");
-        }
-    };
-
-    if (loading) {
-        return <div style={{ textAlign: 'center', padding: '50px' }}>Loading...</div>;
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error("Logout failed:", error);
+    } finally {
+      clearUser();
+      navigate("/login");
     }
+  };
 
+  const handleSave = async () => {
+    try {
+      await updateSellerProfile(user.id, formData);
+      setProfile((prev) => ({
+        ...prev,
+        shopAddress: formData.shopAddress,
+        category: formData.category,
+        description: formData.description,
+      }));
+      setIsEditing(false);
+    } catch (err) {
+      console.error("Save error:", err);
+      setError("Failed to save profile.");
+    }
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  if (loading) {
     return (
-        <div>
-            <Nav setActiveSection={setActiveSection} handleLogout={handleLogout} />
-
-            <div style={styles.container}>
-                <div style={styles.card}>
-                    {activeSection === "Dashboard" && (
-                        <>
-                            <h1 style={styles.title}>Seller Dashboard</h1>
-                            <h1 style={styles.info}><strong>{formData.shopName}</strong></h1>
-                            <h1 style={styles.name}>{user?.firstName} {user?.lastName}</h1>
-                            <p style={styles.welcome}>Welcome, {user?.username}!</p>
-                            <p style={styles.info}>You are logged in as a <strong>SELLER</strong></p>
-                        </>
-                    )}
-
-                    {activeSection === "Profile" && (
-                        <>
-                            <div style={styles.profilePictureContainer}>
-                                {user?.profilePicture ? (
-                                    <img
-                                        src={user.profilePicture}
-                                        alt="Profile"
-                                        style={styles.profilePicture}
-                                    />
-                                ) : (
-                                    <div style={styles.profilePicturePlaceholder}>
-                                        {user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}
-                                    </div>
-                                )}
-                            </div>
-
-                            <h1 style={styles.title}>Your Profile</h1>
-                            <p style={styles.welcome}>Welcome, {isEditing ? formData.firstName : user?.username}!</p>
-                            <p style={styles.name}>
-                                {isEditing ? `${formData.firstName} ${formData.lastName}` : `${user?.firstName} ${user?.lastName}`}
-                            </p>
-                            <p style={styles.info}>You are logged in as a <strong>SELLER</strong></p>
-
-                            <div style={styles.infoCard}>
-                                {Object.entries({
-                                    "Shop Name": formData.shopName,
-                                    "Shop Address": formData.shopAddress
-                                }).map(([label, value]) => (
-                                    <div key={label} style={styles.infoRow}>
-                                        <span style={styles.infoLabel}>{label}:</span>
-                                        {isEditing ? (
-                                            <input
-                                                type="text"
-                                                value={value}
-                                                onChange={(e) => setFormData({ ...formData, [camelCase(label)]: e.target.value })}
-                                            />
-                                        ) : (
-                                            <span style={styles.infoValue}>{value}</span>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
-
-                            <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginTop: '20px' }}>
-                                {isEditing ? (
-                                    <>
-                                        <button style={styles.button} onClick={handleSave}>Save</button>
-                                        <button
-                                            style={styles.button}
-                                            onClick={() => {
-                                                setFormData({
-                                                    firstName: profile?.firstName || '',
-                                                    lastName: profile?.lastName || '',
-                                                    username: profile?.username || '',
-                                                    email: profile?.email || '',
-                                                    phoneNumber: profile?.phoneNumber || '',
-                                                    shopName: profile?.shopName || '',
-                                                    shopAddress: profile?.shopAddress || ''
-                                                });
-                                                setIsEditing(false);
-                                            }}
-                                        >
-                                            Discard
-                                        </button>
-                                    </>
-                                ) : (
-                                    <>
-                                        <button style={styles.button} onClick={() => setIsEditing(true)}>Edit Profile</button>
-                                        <button style={styles.button} onClick={handleLogout}>Logout</button>
-                                    </>
-                                )}
-                            </div>
-                        </>
-                    )}
-
-                    {activeSection === "Notifications" && (
-                        <div>
-                            <h1>Notifications</h1>
-                            <p>No notifications yet.</p>
-                        </div>
-                    )}
-                </div>
-            </div>
-        </div>
+      <div style={{ textAlign: "center", padding: "50px" }}>Loading...</div>
     );
-}
+  }
 
-// Utility to convert labels to camelCase for formData keys
-function camelCase(label) {
-    return label
-        .replace(/\s(.)/g, function(match, group1) { return group1.toUpperCase(); })
-        .replace(/\s/g, '')
-        .replace(/^(.)/, function(match, group1) { return group1.toLowerCase(); });
-}
-
-function Nav({ setActiveSection, handleLogout }) {
-    const [hamburgerOpen, setHamburgerOpen] = useState(false);
-    const toggleHamburger = () => setHamburgerOpen(!hamburgerOpen);
-
-    return (
-        <div>
-            <div style={{
-                position: 'absolute',
-                top: 20,
-                left: 20,
-                fontSize: '24px',
-                cursor: 'pointer',
-                zIndex: 1000
-            }}
-                onClick={toggleHamburger}
-            >
-                ☰
+  return (
+    <div style={styles.container}>
+      <div style={styles.card}>
+        {/* Profile Picture */}
+        <div style={styles.profilePictureContainer}>
+          {user?.profilePicture ? (
+            <img
+              src={user.profilePicture}
+              alt="Profile"
+              style={styles.profilePicture}
+            />
+          ) : (
+            <div style={styles.profilePicturePlaceholder}>
+              {user?.firstName?.charAt(0)}
+              {user?.lastName?.charAt(0)}
             </div>
+          )}
+        </div>
 
-            {hamburgerOpen && (
-                <div style={{
-                    width: '200px',
-                    height: '100vh',
-                    backgroundColor: '#ddd',
-                    position: 'fixed',
-                    top: 0,
-                    left: 0,
-                    padding: '20px',
-                    paddingTop: '70px',
-                    zIndex: 999
-                }}>
-                    <ul style={{ listStyle: 'none', padding: 0 }}>
-                        {["Dashboard", "Profile", "Notifications"].map(section => (
-                            <li key={section}>
-                                <button
-                                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
-                                    onClick={() => { setActiveSection(section); setHamburgerOpen(false); }}
-                                >
-                                    {section}
-                                </button>
-                            </li>
-                        ))}
-                        <li>
-                            <button
-                                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
-                                onClick={() => { handleLogout(); setHamburgerOpen(false); }}
-                            >
-                                Logout
-                            </button>
-                        </li>
-                    </ul>
-                </div>
+        <h1 style={styles.title}>Seller Dashboard</h1>
+        <p style={styles.welcome}>Welcome, {user?.username}!</p>
+        <p style={styles.name}>
+          {user?.firstName} {user?.lastName}
+        </p>
+        <p style={styles.info}>
+          You are logged in as a <strong>SELLER</strong>
+        </p>
+
+        {error && <div style={styles.error}>{error}</div>}
+
+        {/* Info Card */}
+        <div style={styles.infoCard}>
+          <div style={styles.infoRow}>
+            <span style={styles.infoLabel}>Email:</span>
+            <span style={styles.infoValue}>{user?.email}</span>
+          </div>
+          <div style={styles.infoRow}>
+            <span style={styles.infoLabel}>Phone:</span>
+            <span style={styles.infoValue}>{user?.phoneNumber}</span>
+          </div>
+          <div style={styles.infoRow}>
+            <span style={styles.infoLabel}>Shop Name:</span>
+            <span style={styles.infoValue}>{profile?.shopName}</span>
+          </div>
+          <div style={styles.infoRow}>
+            <span style={styles.infoLabel}>Address:</span>
+            {isEditing ? (
+              <input
+                name="shopAddress"
+                value={formData.shopAddress}
+                onChange={handleChange}
+                style={styles.editInput}
+              />
+            ) : (
+              <span style={styles.infoValue}>{profile?.shopAddress}</span>
             )}
+          </div>
+          <div style={styles.infoRow}>
+            <span style={styles.infoLabel}>Category:</span>
+            {isEditing ? (
+              <select
+                name="category"
+                value={formData.category}
+                onChange={handleChange}
+                style={styles.editInput}
+              >
+                <option value="">Select</option>
+                <option value="HALAL">Halal</option>
+                <option value="KOSHER">Kosher</option>
+                <option value="ORGANIC">Organic</option>
+                <option value="CONVENTIONAL">Conventional</option>
+              </select>
+            ) : (
+              <span style={styles.infoValue}>{profile?.category}</span>
+            )}
+          </div>
+          <div style={styles.infoRow}>
+            <span style={styles.infoLabel}>Description:</span>
+            {isEditing ? (
+              <textarea
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                style={styles.editInput}
+                rows={3}
+              />
+            ) : (
+              <span style={styles.infoValue}>{profile?.description}</span>
+            )}
+          </div>
         </div>
-    );
+
+        {/* Buttons */}
+        <div style={{ display: "flex", justifyContent: "center", gap: "12px" }}>
+          {isEditing ? (
+            <>
+              <button style={styles.button} onClick={handleSave}>
+                Save
+              </button>
+              <button
+                style={styles.secondaryButton}
+                onClick={() => {
+                  setFormData({
+                    shopAddress: profile?.shopAddress || "",
+                    category: profile?.category || "",
+                    description: profile?.description || "",
+                  });
+                  setIsEditing(false);
+                }}
+              >
+                Discard
+              </button>
+            </>
+          ) : (
+            <>
+              <button style={styles.button} onClick={() => setIsEditing(true)}>
+                Edit Profile
+              </button>
+              <button style={styles.secondaryButton} onClick={handleLogout}>
+                Logout
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 const styles = {
-    container: { 
-        minHeight: '100vh', 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'center', 
-        backgroundColor: '#f5f5f0', 
-        padding: '20px' 
-    },
-    card: { 
-        backgroundColor: 'white', 
-        padding: '40px', 
-        borderRadius: '8px', 
-        boxShadow: '0 4px 6px rgba(0,0,0,0.1)', 
-        textAlign: 'center', 
-        border: '2px solid #5c4033', 
-        minWidth: '350px' 
-    },
-    profilePictureContainer: { 
-        display: 'flex', 
-        justifyContent: 'center', 
-        marginBottom: '20px' 
-    },
-    profilePicture: { 
-        width: '120px', 
-        height: '120px', 
-        borderRadius: '50%', 
-        objectFit: 'cover', 
-        border: '3px solid #5c4033' 
-    },
-    profilePicturePlaceholder: { 
-        width: '120px', 
-        height: '120px', 
-        borderRadius: '50%', 
-        backgroundColor: '#5c4033', 
-        color: 'white', 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'center', 
-        fontSize: '36px', 
-        fontWeight: 'bold' 
-    },
-    title: { 
-        color: '#5c4033', 
-        marginBottom: '8px' 
-    },
-    welcome: { 
-        fontSize: '22px', 
-        color: '#333', 
-        fontWeight: '600', 
-        marginBottom: '4px' 
-    },
-    name: { 
-        fontSize: '16px', 
-        color: '#666', 
-        marginBottom: '8px' 
-    },
-    info: { 
-        color: '#666', 
-        marginBottom: '20px' 
-    },
-    infoCard: { 
-        backgroundColor: '#f9f9f9', 
-        borderRadius: '8px', 
-        padding: '16px', 
-        marginBottom: '24px', 
-        textAlign: 'left' 
-    },
-    infoRow: { 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        padding: '8px 0', 
-        borderBottom: '1px solid #eee' 
-    },
-    infoLabel: { 
-        color: '#666', 
-        fontWeight: '500' 
-    },
-    infoValue: { 
-        color: '#333' 
-    },
-    button: { 
-        padding: '12px 24px', 
-        backgroundColor: '#4a7c59', 
-        color: 'white', 
-        border: 'none', 
-        borderRadius: '4px', 
-        fontSize: '16px', 
-        cursor: 'pointer' 
-    }
+  container: {
+    minHeight: "100vh",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#f5f5f0",
+    padding: "20px",
+  },
+  card: {
+    backgroundColor: "white",
+    padding: "40px",
+    borderRadius: "8px",
+    boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+    textAlign: "center",
+    border: "2px solid #5c4033",
+    minWidth: "350px",
+  },
+  profilePictureContainer: {
+    display: "flex",
+    justifyContent: "center",
+    marginBottom: "20px",
+  },
+  profilePicture: {
+    width: "120px",
+    height: "120px",
+    borderRadius: "50%",
+    objectFit: "cover",
+    border: "3px solid #5c4033",
+  },
+  profilePicturePlaceholder: {
+    width: "120px",
+    height: "120px",
+    borderRadius: "50%",
+    backgroundColor: "#5c4033",
+    color: "white",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: "36px",
+    fontWeight: "bold",
+  },
+  title: {
+    color: "#5c4033",
+    marginBottom: "8px",
+  },
+  welcome: {
+    fontSize: "22px",
+    color: "#333",
+    fontWeight: "600",
+    marginBottom: "4px",
+  },
+  name: {
+    fontSize: "16px",
+    color: "#666",
+    marginBottom: "8px",
+  },
+  info: {
+    color: "#666",
+    marginBottom: "20px",
+  },
+  infoCard: {
+    backgroundColor: "#f9f9f9",
+    borderRadius: "8px",
+    padding: "16px",
+    marginBottom: "24px",
+    textAlign: "left",
+  },
+  infoRow: {
+    display: "flex",
+    justifyContent: "space-between",
+    padding: "8px 0",
+    borderBottom: "1px solid #eee",
+  },
+  infoLabel: {
+    color: "#666",
+    fontWeight: "500",
+  },
+  infoValue: {
+    color: "#333",
+  },
+  button: {
+    padding: "12px 24px",
+    backgroundColor: "#4a7c59",
+    color: "white",
+    border: "none",
+    borderRadius: "4px",
+    fontSize: "16px",
+    cursor: "pointer",
+  },
+  error: {
+    backgroundColor: "#fee",
+    color: "#c00",
+    padding: "12px",
+    borderRadius: "4px",
+    marginBottom: "16px",
+    textAlign: "center",
+  },
+  editInput: {
+    padding: "6px",
+    borderRadius: "4px",
+    border: "1px solid #ccc",
+    fontSize: "14px",
+  },
+  secondaryButton: {
+    padding: "12px 24px",
+    backgroundColor: "#5c4033",
+    color: "white",
+    border: "none",
+    borderRadius: "4px",
+    fontSize: "16px",
+    cursor: "pointer",
+  },
 };
 
 export default SellerDashboard;
