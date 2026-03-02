@@ -87,7 +87,7 @@ public class AuthController {
 				phoneNumber, profilePicture);
 			
 			// ADD THIS: Create empty seller profile
-			sellerService.createSellerProfile(user.getId(), shopName, "");
+			sellerService.createSellerProfile(user.getId(), shopName, "", "");
 			
 			Session session = sessionService.createSession(user);
 			addSessionCookie(response, session.getSessionId());
