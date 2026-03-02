@@ -5,11 +5,13 @@ import { useState, useEffect } from "react";
 import { getSellerProfile, updateSellerProfile } from "../api/seller";
 
 function SellerDashboard() {
-  const { user, clearUser } = useAuth();
+  const { user, clearUser, saveUser } = useAuth();
   const navigate = useNavigate();
 
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
+    shopName: "",
+    phoneNumber: "",
     shopAddress: "",
     category: "",
     description: "",
@@ -26,6 +28,8 @@ function SellerDashboard() {
         const data = await getSellerProfile(user.id);
         setProfile(data);
         setFormData({
+          shopName: data.shopName || "",
+          phoneNumber: data.phoneNumber || "",
           shopAddress: data.shopAddress || "",
           category: data.category || "",
           description: data.description || "",
@@ -51,22 +55,38 @@ function SellerDashboard() {
     }
   };
 
-  const handleSave = async () => {
-    try {
-       await updateSellerProfile(user.id, { ...formData, shopName: profile?.shopName });
-
-      setProfile((prev) => ({
-        ...prev,
-        shopAddress: formData.shopAddress,
-        category: formData.category,
-        description: formData.description,
-      }));
-      setIsEditing(false);
-    } catch (err) {
-      console.error("Save error:", err);
-      setError("Failed to save profile.");
+const handleSave = async () => {
+  setError("");
+  try {
+    if (formData.phoneNumber) {
+      const phoneRegex = /^\+?[\d]{1,3}?[\s\-.]?\(?\d{1,4}\)?[\s\-.]?\d{1,4}[\s\-.]?\d{1,9}$/;
+      if (!phoneRegex.test(formData.phoneNumber)) {
+        setError("Please enter a valid phone number.");
+        return;
+      }
     }
-  };
+
+    await updateSellerProfile(user.id, { ...formData });
+
+    const savedPhone = formData.phoneNumber || profile?.phoneNumber;
+
+    setProfile((prev) => ({
+      ...prev,
+      shopName: formData.shopName,
+      phoneNumber: savedPhone,
+      shopAddress: formData.shopAddress,
+      category: formData.category,
+      description: formData.description,
+    }));
+    setFormData((prev) => ({ ...prev, phoneNumber: savedPhone }));
+    saveUser({ ...user, phoneNumber: savedPhone });
+    setIsEditing(false);
+  } catch (err) {
+    console.error("Save error:", err);
+    setError("Failed to save profile.");
+  }
+};
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -117,11 +137,29 @@ function SellerDashboard() {
           </div>
           <div style={styles.infoRow}>
             <span style={styles.infoLabel}>Phone:</span>
-            <span style={styles.infoValue}>{user?.phoneNumber}</span>
+            {isEditing ? (
+              <input
+                name="phoneNumber"
+                value={formData.phoneNumber}
+                onChange={handleChange}
+                style={styles.editInput}
+              />
+            ) : (
+              <span style={styles.infoValue}>{profile?.phoneNumber}</span>
+            )}
           </div>
           <div style={styles.infoRow}>
             <span style={styles.infoLabel}>Shop Name:</span>
-            <span style={styles.infoValue}>{profile?.shopName}</span>
+            {isEditing ? (
+              <input
+                name="shopName"
+                value={formData.shopName}
+                onChange={handleChange}
+                style={styles.editInput}
+              />
+            ) : (
+              <span style={styles.infoValue}>{profile?.shopName}</span>
+            )}
           </div>
           <div style={styles.infoRow}>
             <span style={styles.infoLabel}>Address:</span>
@@ -182,6 +220,8 @@ function SellerDashboard() {
                 style={styles.secondaryButton}
                 onClick={() => {
                   setFormData({
+                    shopName: profile?.shopName || "",
+                    phoneNumber: profile?.phoneNumber || "",
                     shopAddress: profile?.shopAddress || "",
                     category: profile?.category || "",
                     description: profile?.description || "",

@@ -110,7 +110,7 @@ public class SellerControllerTest {
         updatedSeller.setShopName("Updated Shop");
         updatedSeller.setShopAddress("Updated Address");
 
-       when(sellerService.updateSellerProfile(1L, "Updated Shop", "Updated Address", null, null))
+       when(sellerService.updateSellerProfile(1L, "Updated Shop", null, "Updated Address", null, null))
        .thenReturn(updatedSeller);
 
         ResponseEntity<?> response = sellerController.updateSeller(1L, updates, validSessionId);

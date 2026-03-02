@@ -81,11 +81,12 @@ public ResponseEntity<?> getSeller(@PathVariable Long userId,
     
     try {
         String shopName = request.get("shopName");
+        String phoneNumber = request.get("phoneNumber");
         String shopAddress = request.get("shopAddress");
         String description = request.get("description");
         String category = request.get("category");
 
-        Seller updatedSeller = sellerService.updateSellerProfile(userId, shopName, shopAddress, description, category);
+        Seller updatedSeller = sellerService.updateSellerProfile(userId, shopName, phoneNumber, shopAddress, description, category);
         return ResponseEntity.ok(updatedSeller);
 
     } catch (RuntimeException e) {
