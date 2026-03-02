@@ -21,7 +21,7 @@ public class SellerService {
     }
 
     // Creates a new seller profile linked to an existing user
-    public Seller createSellerProfile(Long userId, String shopName, String shopAddress) {
+    public Seller createSellerProfile(Long userId, String shopName, String shopAddress, String description) {
   
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -36,6 +36,7 @@ public class SellerService {
         seller.setUser(user);
         seller.setShopName(shopName);
         seller.setShopAddress(shopAddress);
+        seller.setDescription(description);
 
         return sellerRepository.save(seller);
     }
@@ -47,12 +48,17 @@ public class SellerService {
     }
 
     // Updates an existing seller's shop info
-    public Seller updateSellerProfile(Long userId, String shopName, String shopAddress) {
+    public Seller updateSellerProfile(Long userId, String shopName, String shopAddress, String description, String category) {
         Seller seller = sellerRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Seller profile not found"));
 
         seller.setShopName(shopName);
         seller.setShopAddress(shopAddress);
+        seller.setDescription(description);
+
+        if(category != null){
+            seller.setCategory(Seller.SellerCategory.valueOf(category));
+        }
 
         return sellerRepository.save(seller);
     }
