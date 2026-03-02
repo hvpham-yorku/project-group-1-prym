@@ -55,25 +55,38 @@ function SellerDashboard() {
     }
   };
 
-  const handleSave = async () => {
-    try {
-      await updateSellerProfile(user.id, { ...formData });
-
-      setProfile((prev) => ({
-        ...prev,
-        shopName: formData.shopName,
-        phoneNumber: formData.phoneNumber,
-        shopAddress: formData.shopAddress,
-        category: formData.category,
-        description: formData.description,
-      }));
-      setIsEditing(false);
-      saveUser({ ...user, phoneNumber: formData.phoneNumber });
-    } catch (err) {
-      console.error("Save error:", err);
-      setError("Failed to save profile.");
+const handleSave = async () => {
+  setError("");
+  try {
+    if (formData.phoneNumber) {
+      const phoneRegex = /^\+?[\d]{1,3}?[\s\-.]?\(?\d{1,4}\)?[\s\-.]?\d{1,4}[\s\-.]?\d{1,9}$/;
+      if (!phoneRegex.test(formData.phoneNumber)) {
+        setError("Please enter a valid phone number.");
+        return;
+      }
     }
-  };
+
+    await updateSellerProfile(user.id, { ...formData });
+
+    const savedPhone = formData.phoneNumber || profile?.phoneNumber;
+
+    setProfile((prev) => ({
+      ...prev,
+      shopName: formData.shopName,
+      phoneNumber: savedPhone,
+      shopAddress: formData.shopAddress,
+      category: formData.category,
+      description: formData.description,
+    }));
+    setFormData((prev) => ({ ...prev, phoneNumber: savedPhone }));
+    saveUser({ ...user, phoneNumber: savedPhone });
+    setIsEditing(false);
+  } catch (err) {
+    console.error("Save error:", err);
+    setError("Failed to save profile.");
+  }
+};
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
