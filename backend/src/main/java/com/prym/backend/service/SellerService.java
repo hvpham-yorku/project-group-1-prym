@@ -5,6 +5,7 @@ import com.prym.backend.model.User;
 import com.prym.backend.repository.SellerRepository;
 import com.prym.backend.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 // Handles all seller profile business logic (creating, retrieving, and updating profiles)
 // This layer enforces rules before anything touches the database
