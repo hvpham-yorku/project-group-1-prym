@@ -10,6 +10,8 @@ function SellerDashboard() {
 
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
+    shopName: "",
+    phoneNumber: "",
     shopAddress: "",
     category: "",
     description: "",
@@ -26,6 +28,8 @@ function SellerDashboard() {
         const data = await getSellerProfile(user.id);
         setProfile(data);
         setFormData({
+          shopName: data.shopName || "",
+          phoneNumber: data.phoneNumber || "",
           shopAddress: data.shopAddress || "",
           category: data.category || "",
           description: data.description || "",
@@ -53,10 +57,11 @@ function SellerDashboard() {
 
   const handleSave = async () => {
     try {
-       await updateSellerProfile(user.id, { ...formData, shopName: profile?.shopName });
+      await updateSellerProfile(user.id, { ...formData });
 
       setProfile((prev) => ({
         ...prev,
+        shopName: formData.shopName,
         shopAddress: formData.shopAddress,
         category: formData.category,
         description: formData.description,
@@ -117,11 +122,29 @@ function SellerDashboard() {
           </div>
           <div style={styles.infoRow}>
             <span style={styles.infoLabel}>Phone:</span>
-            <span style={styles.infoValue}>{user?.phoneNumber}</span>
+            {isEditing ? (
+              <input
+                name="phoneNumber"
+                value={formData.phoneNumber}
+                onChange={handleChange}
+                style={styles.editInput}
+              />
+            ) : (
+              <span style={styles.infoValue}>{user?.phoneNumber}</span>
+            )}
           </div>
           <div style={styles.infoRow}>
             <span style={styles.infoLabel}>Shop Name:</span>
-            <span style={styles.infoValue}>{profile?.shopName}</span>
+            {isEditing ? (
+              <input
+                name="shopName"
+                value={formData.shopName}
+                onChange={handleChange}
+                style={styles.editInput}
+              />
+            ) : (
+              <span style={styles.infoValue}>{profile?.shopName}</span>
+            )}
           </div>
           <div style={styles.infoRow}>
             <span style={styles.infoLabel}>Address:</span>
@@ -182,6 +205,8 @@ function SellerDashboard() {
                 style={styles.secondaryButton}
                 onClick={() => {
                   setFormData({
+                    shopName: profile?.shopName || "",
+                    phoneNumber: profile?.phoneNumber || "",
                     shopAddress: profile?.shopAddress || "",
                     category: profile?.category || "",
                     description: profile?.description || "",
