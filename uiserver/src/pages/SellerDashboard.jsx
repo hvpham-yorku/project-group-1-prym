@@ -62,6 +62,7 @@ function SellerDashboard() {
       setProfile((prev) => ({
         ...prev,
         shopName: formData.shopName,
+        phoneNumber: formData.phoneNumber,
         shopAddress: formData.shopAddress,
         category: formData.category,
         description: formData.description,
@@ -130,7 +131,7 @@ function SellerDashboard() {
                 style={styles.editInput}
               />
             ) : (
-              <span style={styles.infoValue}>{user?.phoneNumber}</span>
+              <span style={styles.infoValue}>{profile?.phoneNumber}</span>
             )}
           </div>
           <div style={styles.infoRow}>
