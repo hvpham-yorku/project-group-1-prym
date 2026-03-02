@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { getSellerProfile, updateSellerProfile } from "../api/seller";
 
 function SellerDashboard() {
-  const { user, clearUser } = useAuth();
+  const { user, clearUser, saveUser } = useAuth();
   const navigate = useNavigate();
 
   const [isEditing, setIsEditing] = useState(false);
@@ -68,6 +68,7 @@ function SellerDashboard() {
         description: formData.description,
       }));
       setIsEditing(false);
+      saveUser({ ...user, phoneNumber: formData.phoneNumber });
     } catch (err) {
       console.error("Save error:", err);
       setError("Failed to save profile.");
