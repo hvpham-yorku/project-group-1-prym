@@ -24,6 +24,7 @@ public class Seller {
 
     private String shopName;                 // Name of the seller’s shop
     private String shopAddress;              // Address of the shop/store
+    private String description;              // Description of the farm
     
     public enum SellerCategory{
     	HALAL,

@@ -36,7 +36,7 @@ public class SellerDataInitializer implements CommandLineRunner {
 					"1234567890",
 					null);
 			
-			this.sellerService.createSellerProfile(sellerUser1.getId(), "Seller One Shop", "123 Main St");
+			this.sellerService.createSellerProfile(sellerUser1.getId(), "Seller One Shop", "123 Main St", "");
 			System.out.println("Seller 1 created.");
 		}
 		
@@ -51,7 +51,7 @@ public class SellerDataInitializer implements CommandLineRunner {
 					"1212121212",
 					null);
 			
-		    this.sellerService.createSellerProfile(sellerUser2.getId(), "Seller Two Shop", "456 Market St");
+		    this.sellerService.createSellerProfile(sellerUser2.getId(), "Seller Two Shop", "456 Market St", "");
 			System.out.println("Seller 2 created.");
 		}
 	}
