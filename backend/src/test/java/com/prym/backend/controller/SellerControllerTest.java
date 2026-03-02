@@ -65,8 +65,8 @@ public class SellerControllerTest {
         request.put("shopName", "New Shop");
         request.put("shopAddress", "123 Main Street");
 
-        when(sellerService.createSellerProfile(1L, "New Shop", "123 Main Street"))
-                .thenReturn(testSeller);
+       when(sellerService.createSellerProfile(1L, "New Shop", "123 Main Street", null))
+        .thenReturn(testSeller);
 
         ResponseEntity<?> response = sellerController.createSeller(request);
 
@@ -110,8 +110,8 @@ public class SellerControllerTest {
         updatedSeller.setShopName("Updated Shop");
         updatedSeller.setShopAddress("Updated Address");
 
-        when(sellerService.updateSellerProfile(1L, "Updated Shop", "Updated Address"))
-                .thenReturn(updatedSeller);
+       when(sellerService.updateSellerProfile(1L, "Updated Shop", "Updated Address", null, null))
+       .thenReturn(updatedSeller);
 
         ResponseEntity<?> response = sellerController.updateSeller(1L, updates, validSessionId);
 
