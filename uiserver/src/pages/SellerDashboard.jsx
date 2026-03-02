@@ -53,7 +53,8 @@ function SellerDashboard() {
 
   const handleSave = async () => {
     try {
-      await updateSellerProfile(user.id, formData);
+       await updateSellerProfile(user.id, { ...formData, shopName: profile?.shopName });
+
       setProfile((prev) => ({
         ...prev,
         shopAddress: formData.shopAddress,
