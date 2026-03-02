@@ -73,8 +73,8 @@ public class BuyerController {
         }
     }
 
-    // PUT /api/buyer/profile/{userId}, updates an existing buyer's profile
-    @PutMapping("/profile/{userId}")
+    // PATCH /api/buyer/profile/{userId}, updates an existing buyer's profile
+@PatchMapping("/profile/{userId}")
     public ResponseEntity<?> updateProfile(@PathVariable Long userId, @RequestBody Map<String, String> request) {
         try {
             if (!getLoggedInUserId().equals(userId)) {

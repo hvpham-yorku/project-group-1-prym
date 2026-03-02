@@ -64,7 +64,8 @@ function SellerSignup() {
             return;
         }
 
-        const phoneRegex = /^[\d\s\-\+\(\)]{10,}$/;
+       const phoneRegex = /^\+?[\d]{1,3}?[\s\-.]?\(?\d{1,4}\)?[\s\-.]?\d{1,4}[\s\-.]?\d{1,9}$/;
+
         if (!phoneRegex.test(formData.phoneNumber)) {
             setError('Please enter a valid phone number');
             return;

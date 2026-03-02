@@ -1,23 +1,59 @@
-import axios from 'axios';
+// API helper for seller profile endpoints
+// Each function maps to one endpoint in SellerController.java
 
-export const getSellerProfile = async (userId) => {
-    console.log("Fetching profile for userId:", userId);
-const response = await axios.get(`/api/seller/profile/${userId}`, {        withCredentials: true // sends cookies for auth
-    });
-    return response.data; // only return the profile data
-};
+const API_URL = '/api/seller';
 
-// Create seller profile (for first-time sellers)
-export const createSellerProfile = async (data) => {
-    const response = await axios.post('/api/seller/profile', data, {
-        withCredentials: true
+// Creates a new seller profile after signup
+// Calls POST /api/seller/profile
+export async function createSellerProfile(profileData) {
+    const response = await fetch(`${API_URL}/profile`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(profileData)
     });
-    return response.data;
-};
 
-export const updateSellerProfile = async (userId, data) => {
-    const response = await axios.patch(`/api/seller/${userId}`, data, {
-        withCredentials: true
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data.error || 'Failed to create profile');
+    }
+
+    return data;
+}
+
+// Fetches an existing seller profile by user ID
+// Calls GET /api/seller/profile/{userId}
+export async function getSellerProfile(userId) {
+    const response = await fetch(`${API_URL}/profile/${userId}`, {
+        method: 'GET',
+        credentials: 'include'
     });
-    return response.data;
-};
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data.error || 'Failed to get profile');
+    }
+
+    return data;
+}
+
+// Updates an existing seller profile
+// Calls PATCH /api/seller/profile/{userId}
+export async function updateSellerProfile(userId, profileData) {
+    const response = await fetch(`${API_URL}/profile/${userId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(profileData)
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data.error || 'Failed to update profile');
+    }
+
+    return data;
+}

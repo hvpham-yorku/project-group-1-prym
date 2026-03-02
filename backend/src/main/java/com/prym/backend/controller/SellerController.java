@@ -67,7 +67,8 @@ public ResponseEntity<?> getSeller(@PathVariable Long userId,
         return ResponseEntity.status(404).body(Map.of("error", "Profile not found"));
     }
 }
-@PatchMapping("/{userId}")
+@PatchMapping("/profile/{userId}")
+
         public ResponseEntity<?> updateSeller(@PathVariable Long userId, 
         @RequestBody Map<String, String> request,
         @CookieValue(name = "SESSION_ID", required = false) String sessionId) {
