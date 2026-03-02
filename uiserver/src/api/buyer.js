@@ -42,11 +42,11 @@ export async function getBuyerProfile(userId) {
 }
 
 // Updates an existing buyer profile
-// Calls PUT /api/buyer/profile/{userId}
+// Calls PATCH /api/buyer/profile/{userId}
 // profileData contains: preferredCuts, quantity
 export async function updateBuyerProfile(userId, profileData) {
     const response = await fetch(`${API_URL}/profile/${userId}`, {
-        method: 'PUT',
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify(profileData)
