@@ -83,9 +83,9 @@ public class BuyerController {
             // Extract the updated fields from the JSON request body
             String preferredCuts = request.get("preferredCuts");
             String quantity = request.get("quantity");
-
+            String phoneNumber = request.get("phoneNumber");
             // Pass to the service, which finds the existing profile and updates it
-            Buyer buyer = buyerService.updateBuyerProfile(userId, preferredCuts, quantity);
+            Buyer buyer = buyerService.updateBuyerProfile(userId, preferredCuts, quantity,phoneNumber);
 
             return ResponseEntity.ok(buyer);
 
