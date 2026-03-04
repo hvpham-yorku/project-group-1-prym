@@ -3,6 +3,26 @@ import { useNavigate } from "react-router-dom";
 import { logout } from "../api/auth";
 import { useState, useEffect } from "react";
 import { getBuyerProfile, updateBuyerProfile } from "../api/buyer";
+import CowDiagram from "../components/CowDiagram";
+
+// "Chuck, Rib x2, Sirloin"  →  { Chuck: 1, Rib: 2, Sirloin: 1 }
+function parseCuts(str) {
+  if (!str) return {};
+  const result = {};
+  str.split(", ").forEach((item) => {
+    const match = item.match(/^(.+?) x(\d+)$/);
+    if (match) result[match[1]] = parseInt(match[2], 10);
+    else if (item.trim()) result[item.trim()] = 1;
+  });
+  return result;
+}
+
+// { Chuck: 1, Rib: 2 }  →  "Chuck, Rib x2"
+function serializeCuts(cutsObj) {
+  return Object.entries(cutsObj)
+    .map(([cut, qty]) => (qty > 1 ? `${cut} x${qty}` : cut))
+    .join(", ");
+}
 
 function BuyerDashboard() {
   const { user, clearUser, saveUser } = useAuth();
@@ -11,7 +31,7 @@ function BuyerDashboard() {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     phoneNumber: "",
-    preferredCuts: "",
+    selectedCuts: {},   // { [cutId]: quantity }
     quantity: "",
   });
   const [profile, setProfile] = useState(null);
@@ -27,7 +47,7 @@ function BuyerDashboard() {
         setProfile(data);
         setFormData({
           phoneNumber: user?.phoneNumber || "",
-          preferredCuts: data.preferredCuts || "",
+          selectedCuts: parseCuts(data.preferredCuts),
           quantity: data.quantity || "",
         });
       } catch (err) {
@@ -56,20 +76,24 @@ function BuyerDashboard() {
     try {
       if (formData.phoneNumber) {
         const phoneRegex = /^(\+?1[\s.\-]?)?(\(?\d{3}\)?[\s.\-]?)\d{3}[\s.\-]?\d{4}$/;
-if (!phoneRegex.test(formData.phoneNumber)) {
+        if (!phoneRegex.test(formData.phoneNumber)) {
           setError("Please enter a valid phone number.");
           return;
         }
       }
+
+      const preferredCuts = serializeCuts(formData.selectedCuts);
+
       await updateBuyerProfile(user.id, {
-        preferredCuts: formData.preferredCuts,
+        preferredCuts,
         quantity: formData.quantity,
         phoneNumber: formData.phoneNumber,
       });
+
       const savedPhone = formData.phoneNumber || user?.phoneNumber;
       setProfile((prev) => ({
         ...prev,
-        preferredCuts: formData.preferredCuts,
+        preferredCuts,
         quantity: formData.quantity,
       }));
       setFormData((prev) => ({ ...prev, phoneNumber: savedPhone }));
@@ -86,10 +110,31 @@ if (!phoneRegex.test(formData.phoneNumber)) {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Toggle a cut on/off in edit mode
+  const handleCutToggle = (id) => {
+    setFormData((prev) => {
+      const cuts = { ...prev.selectedCuts };
+      if (id in cuts) delete cuts[id];
+      else cuts[id] = 1;
+      return { ...prev, selectedCuts: cuts };
+    });
+  };
+
+  // +1 / -1 on a cut's quantity; deselects if qty would fall below 1
+  const handleCutQty = (id, delta) => {
+    setFormData((prev) => {
+      const qty = (prev.selectedCuts[id] ?? 1) + delta;
+      const cuts = { ...prev.selectedCuts };
+      if (qty < 1) delete cuts[id];
+      else if (qty <= 2) cuts[id] = qty;
+      return { ...prev, selectedCuts: cuts };
+    });
+  };
+
   const handleDiscard = () => {
     setFormData({
       phoneNumber: user?.phoneNumber || "",
-      preferredCuts: profile?.preferredCuts || "",
+      selectedCuts: parseCuts(profile?.preferredCuts),
       quantity: profile?.quantity || "",
     });
     setError("");
@@ -98,6 +143,9 @@ if (!phoneRegex.test(formData.phoneNumber)) {
 
   const initials =
     (user?.firstName?.charAt(0) || "") + (user?.lastName?.charAt(0) || "");
+
+  // The cuts to show in the diagram — profile's saved cuts when viewing, form state when editing
+  const displayCuts = isEditing ? formData.selectedCuts : parseCuts(profile?.preferredCuts);
 
   if (loading) {
     return (
@@ -148,26 +196,8 @@ if (!phoneRegex.test(formData.phoneNumber)) {
             )}
           </div>
 
-          {/* Preferred Cuts */}
+          {/* Quantity */}
           <div style={styles.fieldCard}>
-            <p style={styles.fieldLabel}>Preferred Cuts</p>
-            {isEditing ? (
-              <input
-                name="preferredCuts"
-                value={formData.preferredCuts}
-                onChange={handleChange}
-                placeholder="e.g. ribeye, brisket"
-                style={styles.fieldInput}
-              />
-            ) : (
-              <p style={profile?.preferredCuts ? styles.fieldValue : styles.fieldValueEmpty}>
-                {profile?.preferredCuts || "Not set"}
-              </p>
-            )}
-          </div>
-
-          {/* Quantity — full width */}
-          <div style={{ ...styles.fieldCard, gridColumn: "1 / -1" }}>
             <p style={styles.fieldLabel}>Quantity</p>
             {isEditing ? (
               <select
@@ -185,6 +215,29 @@ if (!phoneRegex.test(formData.phoneNumber)) {
               <p style={profile?.quantity ? styles.fieldValue : styles.fieldValueEmpty}>
                 {profile?.quantity || "Not set"}
               </p>
+            )}
+          </div>
+
+          {/* Preferred Cuts — cow diagram, full width */}
+          <div style={{ ...styles.fieldCard, gridColumn: "1 / -1", padding: "20px 16px 12px" }}>
+            <p style={styles.fieldLabel}>
+              Preferred Cuts
+              {isEditing && (
+                <span style={styles.editHint}>
+                  — click a section to select, use − / + to set quantity
+                </span>
+              )}
+            </p>
+
+            {Object.keys(displayCuts).length === 0 && !isEditing ? (
+              <p style={styles.fieldValueEmpty}>Not set</p>
+            ) : (
+              <CowDiagram
+                selectedCuts={displayCuts}
+                onToggle={handleCutToggle}
+                onQuantityChange={handleCutQty}
+                readOnly={!isEditing}
+              />
             )}
           </div>
 
@@ -298,6 +351,14 @@ const styles = {
     textTransform: "uppercase",
     color: BUYER_COLOR,
     margin: "0 0 8px 0",
+  },
+  editHint: {
+    fontSize: "10px",
+    fontWeight: "500",
+    letterSpacing: "0.02em",
+    textTransform: "none",
+    color: "#999",
+    marginLeft: "4px",
   },
   fieldValue: {
     fontSize: "16px",

@@ -13,9 +13,10 @@ import { useState } from 'react';
  *   Head/horns: x≈346–475, y≈77–182
  *
  * Props:
- *   selectedCuts: { [cutId: string]: number }  — map of selected cut → quantity (1 or 2)
- *   onToggle(id)                                — add (qty=1) or remove a cut
- *   onQuantityChange(id, delta)                 — delta = +1 or -1; parent handles deselect if qty < 1
+ *   selectedCuts:    { [cutId: string]: number }  — map of selected cut → quantity (1 or 2)
+ *   onToggle(id)                                  — add (qty=1) or remove a cut
+ *   onQuantityChange(id, delta)                   — delta = +1 or -1; parent handles deselect if qty < 1
+ *   readOnly         boolean (default false)       — display-only; disables all interaction
  */
 
 const RED_HI = '#b03030';
@@ -156,14 +157,14 @@ function Counter({ cx, cy, qty, onMinus, onPlus }) {
   );
 }
 
-function CowDiagram({ selectedCuts, onToggle, onQuantityChange }) {
+function CowDiagram({ selectedCuts, onToggle, onQuantityChange, readOnly = false }) {
   const [hovered, setHovered] = useState(null);
 
   return (
     <svg
       viewBox="-5 70 485 340"
       style={{ width: '100%', maxWidth: 720, userSelect: 'none' }}
-      aria-label="Interactive beef cuts — click a section to select"
+      aria-label={readOnly ? 'Beef cuts diagram' : 'Interactive beef cuts — click a section to select'}
     >
       <defs>
         <clipPath id="cowClip">
@@ -188,17 +189,17 @@ function CowDiagram({ selectedCuts, onToggle, onQuantityChange }) {
       <g clipPath="url(#cowClip)">
         {CUTS.map(({ id, rect: [x, y, w, h] }) => {
           const selected = id in selectedCuts;
-          const isHov    = hovered === id && !selected;
+          const isHov    = !readOnly && hovered === id && !selected;
           return (
             <rect
               key={id} x={x} y={y} width={w} height={h}
               fill={selected ? GREEN : RED_HI}
               fillOpacity={selected ? 0.88 : isHov ? 0.38 : 0}
-              pointerEvents="all"
-              onClick={() => onToggle(id)}
-              onMouseEnter={() => setHovered(id)}
-              onMouseLeave={() => setHovered(null)}
-              style={{ cursor: 'pointer', transition: 'fill-opacity 0.1s' }}
+              pointerEvents={readOnly ? 'none' : 'all'}
+              onClick={readOnly ? undefined : () => onToggle(id)}
+              onMouseEnter={readOnly ? undefined : () => setHovered(id)}
+              onMouseLeave={readOnly ? undefined : () => setHovered(null)}
+              style={{ cursor: readOnly ? 'default' : 'pointer', transition: 'fill-opacity 0.1s' }}
             />
           );
         })}
@@ -230,7 +231,7 @@ function CowDiagram({ selectedCuts, onToggle, onQuantityChange }) {
         stroke="rgba(0,0,0,0.3)" strokeWidth="0.8"
         pointerEvents="none" />
 
-      {/* ── CUT LABELS (shift up when selected to make room for counter) ── */}
+      {/* ── CUT LABELS (shift up when selected + interactive to make room for counter) ── */}
       <g pointerEvents="none" filter="url(#lblShadow)"
         fontFamily="'Helvetica Neue',Arial,sans-serif" fontWeight="800"
         fill={WHITE} letterSpacing="0.6">
@@ -238,7 +239,8 @@ function CowDiagram({ selectedCuts, onToggle, onQuantityChange }) {
           const selected = id in selectedCuts;
           const lines    = getLines(id);
           const lineH    = size + 2.5;
-          const labelY   = selected ? cy - 10 : cy;
+          // Shift label up only in interactive mode (counter appears below)
+          const labelY   = (selected && !readOnly) ? cy - 10 : cy;
           return (
             <text key={id} textAnchor="middle">
               {lines.map((line, i) => (
@@ -252,10 +254,31 @@ function CowDiagram({ selectedCuts, onToggle, onQuantityChange }) {
         })}
       </g>
 
-      {/* ── QUANTITY COUNTERS (not clipped — always fully visible) ── */}
+      {/* ── QUANTITY INDICATORS ── */}
       {CUTS.map(({ id, label: [cx, cy] }) => {
         if (!(id in selectedCuts)) return null;
         const qty = selectedCuts[id];
+
+        // Read-only: show a small ×2 badge (only when qty > 1)
+        if (readOnly) {
+          if (qty <= 1) return null;
+          return (
+            <text
+              key={`badge-${id}`}
+              x={cx} y={cy + 13}
+              textAnchor="middle" dominantBaseline="middle"
+              fontSize="9" fontWeight="800"
+              fill="rgba(255,255,255,0.92)"
+              fontFamily="'Helvetica Neue',Arial,sans-serif"
+              pointerEvents="none"
+              filter="url(#lblShadow)"
+            >
+              ×{qty}
+            </text>
+          );
+        }
+
+        // Interactive: full − qty + counter pill
         return (
           <Counter
             key={`counter-${id}`}
