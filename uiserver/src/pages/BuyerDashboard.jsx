@@ -161,6 +161,9 @@ function BuyerDashboard() {
       {/* Header Banner */}
       <div style={styles.banner}>
         <div style={styles.bannerInner}>
+          <button style={styles.backBtn} onClick={() => navigate('/farmlistings')}>
+            ← Back
+          </button>
           <div style={styles.avatar}>{initials}</div>
           <div>
             <h1 style={styles.bannerName}>{user?.firstName} {user?.lastName}</h1>
@@ -282,6 +285,18 @@ const styles = {
     display: "flex",
     alignItems: "center",
     gap: "24px",
+  },
+  backBtn: {
+    background: 'none',
+    border: '2px solid rgba(255,255,255,0.6)',
+    borderRadius: '6px',
+    color: 'white',
+    fontSize: '14px',
+    fontWeight: '600',
+    padding: '6px 14px',
+    cursor: 'pointer',
+    marginRight: '8px',
+    flexShrink: 0,
   },
   avatar: {
     width: "80px",

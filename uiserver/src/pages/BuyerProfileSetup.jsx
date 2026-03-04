@@ -56,7 +56,7 @@ function BuyerProfileSetup() {
                 .join(', ');
 
             await createBuyerProfile({ userId: user.id, preferredCuts, quantity });
-            navigate('/buyer/dashboard');
+            navigate('/farmlistings');
         } catch (err) {
             setError(err.message);
         } finally {

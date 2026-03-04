@@ -28,7 +28,7 @@ function Login() {
             
 	if (user.role === 'BUYER') {
 		saveUser(user);
-                navigate('/buyer/dashboard');
+                navigate('/farmlistings');
             } else if (user.role === 'SELLER') {
 		saveUser(user);
                 navigate('/seller/dashboard');
