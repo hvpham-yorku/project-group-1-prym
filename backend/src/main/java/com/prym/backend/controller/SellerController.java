@@ -59,8 +59,6 @@ public ResponseEntity<?> getSeller(@PathVariable Long userId,
             "phoneNumber", user.getPhoneNumber(),
             "shopName", seller.getShopName() == null ? "" : seller.getShopName(),
             "shopAddress", seller.getShopAddress() == null ? "" : seller.getShopAddress(),
-
-            "category",seller.getCategory() == null ? "" : seller.getCategory().name(),
             "description", seller.getDescription() == null ? "" : seller.getDescription()
         ));
     } catch (RuntimeException e) {

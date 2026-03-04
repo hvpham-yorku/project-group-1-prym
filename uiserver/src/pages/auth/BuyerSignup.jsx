@@ -66,7 +66,7 @@ function BuyerSignup() {
         }
 
         // Basic phone validation (adjust regex as needed)
-       const phoneRegex = /^\+?[\d]{1,3}?[\s\-.]?\(?\d{1,4}\)?[\s\-.]?\d{1,4}[\s\-.]?\d{1,9}$/;
+      const phoneRegex = /^(\+?1[\s.\-]?)?(\(?\d{3}\)?[\s.\-]?)\d{3}[\s.\-]?\d{4}$/;
 
         if (!phoneRegex.test(formData.phoneNumber)) {
             setError('Please enter a valid phone number');

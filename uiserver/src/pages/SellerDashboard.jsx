@@ -55,310 +55,338 @@ function SellerDashboard() {
     }
   };
 
-const handleSave = async () => {
-  setError("");
-  try {
-    if (formData.phoneNumber) {
-      const phoneRegex = /^\+?[\d]{1,3}?[\s\-.]?\(?\d{1,4}\)?[\s\-.]?\d{1,4}[\s\-.]?\d{1,9}$/;
-      if (!phoneRegex.test(formData.phoneNumber)) {
-        setError("Please enter a valid phone number.");
-        return;
+  const handleSave = async () => {
+    setError("");
+    try {
+      if (formData.phoneNumber) {
+        const phoneRegex = /^(\+?1[\s.\-]?)?(\(?\d{3}\)?[\s.\-]?)\d{3}[\s.\-]?\d{4}$/;
+ if (!phoneRegex.test(formData.phoneNumber)) {
+          setError("Please enter a valid phone number.");
+          return;
+        }
       }
+      await updateSellerProfile(user.id, { ...formData });
+      const savedPhone = formData.phoneNumber || profile?.phoneNumber;
+      setProfile((prev) => ({
+        ...prev,
+        shopName: formData.shopName,
+        phoneNumber: savedPhone,
+        shopAddress: formData.shopAddress,
+        category: formData.category,
+        description: formData.description,
+      }));
+      setFormData((prev) => ({ ...prev, phoneNumber: savedPhone }));
+      saveUser({ ...user, phoneNumber: savedPhone });
+      setIsEditing(false);
+    } catch (err) {
+      console.error("Save error:", err);
+      setError("Failed to save profile.");
     }
-
-    await updateSellerProfile(user.id, { ...formData });
-
-    const savedPhone = formData.phoneNumber || profile?.phoneNumber;
-
-    setProfile((prev) => ({
-      ...prev,
-      shopName: formData.shopName,
-      phoneNumber: savedPhone,
-      shopAddress: formData.shopAddress,
-      category: formData.category,
-      description: formData.description,
-    }));
-    setFormData((prev) => ({ ...prev, phoneNumber: savedPhone }));
-    saveUser({ ...user, phoneNumber: savedPhone });
-    setIsEditing(false);
-  } catch (err) {
-    console.error("Save error:", err);
-    setError("Failed to save profile.");
-  }
-};
-
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleDiscard = () => {
+    setFormData({
+      shopName: profile?.shopName || "",
+      phoneNumber: profile?.phoneNumber || "",
+      shopAddress: profile?.shopAddress || "",
+      category: profile?.category || "",
+      description: profile?.description || "",
+    });
+    setError("");
+    setIsEditing(false);
+  };
+
+  const initials =
+    (user?.firstName?.charAt(0) || "") + (user?.lastName?.charAt(0) || "");
+
   if (loading) {
     return (
-      <div style={{ textAlign: "center", padding: "50px" }}>Loading...</div>
+      <div style={styles.page}>
+        <p style={{ padding: "48px", color: "#666" }}>Loading...</p>
+      </div>
     );
   }
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        {/* Profile Picture */}
-        <div style={styles.profilePictureContainer}>
-          {user?.profilePicture ? (
-            <img
-              src={user.profilePicture}
-              alt="Profile"
-              style={styles.profilePicture}
-            />
-          ) : (
-            <div style={styles.profilePicturePlaceholder}>
-              {user?.firstName?.charAt(0)}
-              {user?.lastName?.charAt(0)}
-            </div>
-          )}
-        </div>
+    <div style={styles.page}>
 
-        <h1 style={styles.title}>Seller Dashboard</h1>
-        <p style={styles.welcome}>Welcome, {user?.username}!</p>
-        <p style={styles.name}>
-          {user?.firstName} {user?.lastName}
-        </p>
-        <p style={styles.info}>
-          You are logged in as a <strong>SELLER</strong>
-        </p>
+      {/* Header Banner */}
+      <div style={styles.banner}>
+        <div style={styles.bannerInner}>
+          <div style={styles.avatar}>{initials}</div>
+          <div>
+            <h1 style={styles.bannerName}>{user?.firstName} {user?.lastName}</h1>
+            <p style={styles.bannerEmail}>{user?.email}</p>
+            <span style={styles.roleBadge}>SELLER</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div style={styles.content}>
 
         {error && <div style={styles.error}>{error}</div>}
 
-        {/* Info Card */}
-        <div style={styles.infoCard}>
-          <div style={styles.infoRow}>
-            <span style={styles.infoLabel}>Email:</span>
-            <span style={styles.infoValue}>{user?.email}</span>
-          </div>
-          <div style={styles.infoRow}>
-            <span style={styles.infoLabel}>Phone:</span>
+        {/* Fields Grid */}
+        <div style={styles.grid}>
+
+          {/* Phone */}
+          <div style={styles.fieldCard}>
+            <p style={styles.fieldLabel}>Phone Number</p>
             {isEditing ? (
               <input
                 name="phoneNumber"
                 value={formData.phoneNumber}
                 onChange={handleChange}
-                style={styles.editInput}
+                placeholder="e.g. +1 416 555 0000"
+                style={styles.fieldInput}
               />
             ) : (
-              <span style={styles.infoValue}>{profile?.phoneNumber}</span>
+              <p style={profile?.phoneNumber ? styles.fieldValue : styles.fieldValueEmpty}>
+                {profile?.phoneNumber || "Not set"}
+              </p>
             )}
           </div>
-          <div style={styles.infoRow}>
-            <span style={styles.infoLabel}>Shop Name:</span>
+
+          {/* Shop Name */}
+          <div style={styles.fieldCard}>
+            <p style={styles.fieldLabel}>Shop Name</p>
             {isEditing ? (
               <input
                 name="shopName"
                 value={formData.shopName}
                 onChange={handleChange}
-                style={styles.editInput}
+                placeholder="Your shop name"
+                style={styles.fieldInput}
               />
             ) : (
-              <span style={styles.infoValue}>{profile?.shopName}</span>
+              <p style={profile?.shopName ? styles.fieldValue : styles.fieldValueEmpty}>
+                {profile?.shopName || "Not set"}
+              </p>
             )}
           </div>
-          <div style={styles.infoRow}>
-            <span style={styles.infoLabel}>Address:</span>
+
+          {/* Address */}
+          <div style={styles.fieldCard}>
+            <p style={styles.fieldLabel}>Address</p>
             {isEditing ? (
               <input
                 name="shopAddress"
                 value={formData.shopAddress}
                 onChange={handleChange}
-                style={styles.editInput}
+                placeholder="Your shop address"
+                style={styles.fieldInput}
               />
             ) : (
-              <span style={styles.infoValue}>{profile?.shopAddress}</span>
+              <p style={profile?.shopAddress ? styles.fieldValue : styles.fieldValueEmpty}>
+                {profile?.shopAddress || "Not set"}
+              </p>
             )}
           </div>
-          <div style={styles.infoRow}>
-            <span style={styles.infoLabel}>Category:</span>
+
+          {/* Category */}
+          <div style={styles.fieldCard}>
+            <p style={styles.fieldLabel}>Category</p>
             {isEditing ? (
               <select
                 name="category"
                 value={formData.category}
                 onChange={handleChange}
-                style={styles.editInput}
+                style={styles.fieldInput}
               >
-                <option value="">Select</option>
+                <option value="">Select category</option>
                 <option value="HALAL">Halal</option>
                 <option value="KOSHER">Kosher</option>
                 <option value="ORGANIC">Organic</option>
                 <option value="CONVENTIONAL">Conventional</option>
               </select>
             ) : (
-              <span style={styles.infoValue}>{profile?.category}</span>
+              <p style={profile?.category ? styles.fieldValue : styles.fieldValueEmpty}>
+                {profile?.category || "Not set"}
+              </p>
             )}
           </div>
-          <div style={styles.infoRow}>
-            <span style={styles.infoLabel}>Description:</span>
+
+          {/* Description — full width */}
+          <div style={{ ...styles.fieldCard, gridColumn: "1 / -1" }}>
+            <p style={styles.fieldLabel}>Description</p>
             {isEditing ? (
               <textarea
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
-                style={styles.editInput}
-                rows={3}
+                placeholder="Tell buyers about your shop"
+                rows={4}
+                style={{ ...styles.fieldInput, resize: "vertical" }}
               />
             ) : (
-              <span style={styles.infoValue}>{profile?.description}</span>
+              <p style={profile?.description ? styles.fieldValue : styles.fieldValueEmpty}>
+                {profile?.description || "Not set"}
+              </p>
             )}
           </div>
+
         </div>
 
         {/* Buttons */}
-        <div style={{ display: "flex", justifyContent: "center", gap: "12px" }}>
+        <div style={styles.buttonRow}>
           {isEditing ? (
             <>
-              <button style={styles.button} onClick={handleSave}>
-                Save
-              </button>
-              <button
-                style={styles.secondaryButton}
-                onClick={() => {
-                  setFormData({
-                    shopName: profile?.shopName || "",
-                    phoneNumber: profile?.phoneNumber || "",
-                    shopAddress: profile?.shopAddress || "",
-                    category: profile?.category || "",
-                    description: profile?.description || "",
-                  });
-                  setIsEditing(false);
-                }}
-              >
-                Discard
-              </button>
+              <button style={styles.secondaryButton} onClick={handleDiscard}>Discard</button>
+              <button style={styles.primaryButton} onClick={handleSave}>Save Changes</button>
             </>
           ) : (
             <>
-              <button style={styles.button} onClick={() => setIsEditing(true)}>
-                Edit Profile
-              </button>
-              <button style={styles.secondaryButton} onClick={handleLogout}>
-                Logout
-              </button>
+              <button style={styles.secondaryButton} onClick={handleLogout}>Logout</button>
+              <button style={styles.primaryButton} onClick={() => setIsEditing(true)}>Edit Profile</button>
             </>
           )}
         </div>
+
       </div>
     </div>
   );
 }
 
+const SELLER_COLOR = "#5c4033";
+const GREEN = "#4a7c59";
+
 const styles = {
-  container: {
+  page: {
     minHeight: "100vh",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
     backgroundColor: "#f5f5f0",
-    padding: "20px",
   },
-  card: {
-    backgroundColor: "white",
-    padding: "40px",
-    borderRadius: "8px",
-    boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
-    textAlign: "center",
-    border: "2px solid #5c4033",
-    minWidth: "350px",
+  banner: {
+    backgroundColor: SELLER_COLOR,
+    padding: "40px 0",
   },
-  profilePictureContainer: {
+  bannerInner: {
+    maxWidth: "900px",
+    margin: "0 auto",
+    padding: "0 48px",
     display: "flex",
-    justifyContent: "center",
-    marginBottom: "20px",
+    alignItems: "center",
+    gap: "24px",
   },
-  profilePicture: {
-    width: "120px",
-    height: "120px",
+  avatar: {
+    width: "80px",
+    height: "80px",
     borderRadius: "50%",
-    objectFit: "cover",
-    border: "3px solid #5c4033",
-  },
-  profilePicturePlaceholder: {
-    width: "120px",
-    height: "120px",
-    borderRadius: "50%",
-    backgroundColor: "#5c4033",
+    backgroundColor: "rgba(255,255,255,0.2)",
+    border: "3px solid rgba(255,255,255,0.5)",
     color: "white",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    fontSize: "36px",
+    fontSize: "28px",
     fontWeight: "bold",
+    flexShrink: 0,
   },
-  title: {
-    color: "#5c4033",
-    marginBottom: "8px",
-  },
-  welcome: {
-    fontSize: "22px",
-    color: "#333",
-    fontWeight: "600",
-    marginBottom: "4px",
-  },
-  name: {
-    fontSize: "16px",
-    color: "#666",
-    marginBottom: "8px",
-  },
-  info: {
-    color: "#666",
-    marginBottom: "20px",
-  },
-  infoCard: {
-    backgroundColor: "#f9f9f9",
-    borderRadius: "8px",
-    padding: "16px",
-    marginBottom: "24px",
-    textAlign: "left",
-  },
-  infoRow: {
-    display: "flex",
-    justifyContent: "space-between",
-    padding: "8px 0",
-    borderBottom: "1px solid #eee",
-  },
-  infoLabel: {
-    color: "#666",
-    fontWeight: "500",
-  },
-  infoValue: {
-    color: "#333",
-  },
-  button: {
-    padding: "12px 24px",
-    backgroundColor: "#4a7c59",
+  bannerName: {
+    fontSize: "26px",
+    fontWeight: "700",
     color: "white",
-    border: "none",
-    borderRadius: "4px",
-    fontSize: "16px",
-    cursor: "pointer",
+    margin: "0 0 4px 0",
+  },
+  bannerEmail: {
+    fontSize: "14px",
+    color: "rgba(255,255,255,0.75)",
+    margin: "0 0 10px 0",
+  },
+  roleBadge: {
+    display: "inline-block",
+    backgroundColor: "rgba(255,255,255,0.2)",
+    color: "white",
+    padding: "3px 12px",
+    borderRadius: "99px",
+    fontSize: "11px",
+    fontWeight: "700",
+    letterSpacing: "0.08em",
+  },
+  content: {
+    maxWidth: "900px",
+    margin: "0 auto",
+    padding: "40px 48px",
   },
   error: {
     backgroundColor: "#fee",
     color: "#c00",
-    padding: "12px",
-    borderRadius: "4px",
-    marginBottom: "16px",
-    textAlign: "center",
-  },
-  editInput: {
-    padding: "6px",
-    borderRadius: "4px",
-    border: "1px solid #ccc",
+    padding: "12px 16px",
+    borderRadius: "6px",
+    marginBottom: "24px",
     fontSize: "14px",
   },
-  secondaryButton: {
-    padding: "12px 24px",
-    backgroundColor: "#5c4033",
+  grid: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: "16px",
+    marginBottom: "32px",
+  },
+  fieldCard: {
+    backgroundColor: "white",
+    borderRadius: "8px",
+    padding: "20px 24px",
+    boxShadow: "0 1px 4px rgba(0,0,0,0.07)",
+    border: "1px solid #e8e4e0",
+  },
+  fieldLabel: {
+    fontSize: "11px",
+    fontWeight: "700",
+    letterSpacing: "0.07em",
+    textTransform: "uppercase",
+    color: SELLER_COLOR,
+    margin: "0 0 8px 0",
+  },
+  fieldValue: {
+    fontSize: "16px",
+    color: "#222",
+    margin: 0,
+  },
+  fieldValueEmpty: {
+    fontSize: "15px",
+    color: "#bbb",
+    fontStyle: "italic",
+    margin: 0,
+  },
+  fieldInput: {
+    width: "100%",
+    padding: "6px 0",
+    border: "none",
+    borderBottom: `2px solid ${SELLER_COLOR}`,
+    backgroundColor: "transparent",
+    fontSize: "16px",
+    color: "#222",
+    outline: "none",
+    boxSizing: "border-box",
+  },
+  buttonRow: {
+    display: "flex",
+    justifyContent: "flex-end",
+    gap: "12px",
+  },
+  primaryButton: {
+    padding: "12px 28px",
+    backgroundColor: GREEN,
     color: "white",
     border: "none",
-    borderRadius: "4px",
-    fontSize: "16px",
+    borderRadius: "6px",
+    fontSize: "15px",
+    fontWeight: "600",
+    cursor: "pointer",
+  },
+  secondaryButton: {
+    padding: "12px 28px",
+    backgroundColor: "white",
+    color: SELLER_COLOR,
+    border: `2px solid ${SELLER_COLOR}`,
+    borderRadius: "6px",
+    fontSize: "15px",
+    fontWeight: "600",
     cursor: "pointer",
   },
 };

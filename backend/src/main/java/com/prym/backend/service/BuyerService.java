@@ -4,6 +4,7 @@ import com.prym.backend.model.Buyer;
 import com.prym.backend.model.User;
 import com.prym.backend.repository.BuyerRepository;
 import com.prym.backend.repository.UserRepository;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
 // Handles all buyer profile business logic (creating, retrieving, and updating profiles)
@@ -52,7 +53,8 @@ public class BuyerService {
 
     // Updates an existing buyer's meat preferences
     // Called when a buyer edits their profile and clicks save
-    public Buyer updateBuyerProfile(Long userId, String preferredCuts, String quantity) {
+    @Transactional
+    public Buyer updateBuyerProfile(Long userId, String preferredCuts, String quantity, String phoneNumber) {
         // Find the existing profile, can't update something that doesn't exist
         Buyer buyer = buyerRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Buyer profile not found"));
@@ -60,8 +62,13 @@ public class BuyerService {
         // Overwrite the old values with the new ones
         buyer.setPreferredCuts(preferredCuts);
         buyer.setQuantity(quantity);
-
+    if (phoneNumber != null && !phoneNumber.isBlank()) {
+            User user = buyer.getUser();
+            user.setPhoneNumber(phoneNumber);
+            userRepository.save(user);
+        }
         // Save the updated profile back to the database
         return buyerRepository.save(buyer);
     }
+    
 }

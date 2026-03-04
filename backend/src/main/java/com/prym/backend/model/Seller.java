@@ -4,8 +4,12 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
-// Represents seller-specific data. Personal info like name, email, and password are stored in User.
+import java.util.List;
+
+// Represents seller-specific data. Each seller IS a farm.
+// Personal info like name, email, and password are stored in User.
 @Entity
 @Table(name = "sellers")
 @Data
@@ -22,16 +26,12 @@ public class Seller {
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
-    private String shopName;                 // Name of the seller’s shop
-    private String shopAddress;              // Address of the shop/store
-    private String description;              // Description of the farm
-    
-    public enum SellerCategory{
-    	HALAL,
-    	KOSHER,
-    	ORGANIC,
-    	CONVENTIONAl
-    }
-    @Enumerated(EnumType.STRING)
-    private SellerCategory category;
+    private String shopName;       // Name of the farm/shop
+    private String shopAddress;    // Address of the farm
+    private String description;    // Description of the farm and its practices
+
+    // A seller can hold multiple certifications (e.g. Organic + Halal at the same time)
+    @OneToMany(mappedBy = "seller", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    private List<Certification> certifications;
 }
