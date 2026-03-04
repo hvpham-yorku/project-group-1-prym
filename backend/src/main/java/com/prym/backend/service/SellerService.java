@@ -58,10 +58,6 @@ public class SellerService {
         seller.setShopAddress(shopAddress);
         seller.setDescription(description);
 
-        if(category != null){
-            seller.setCategory(Seller.SellerCategory.valueOf(category));
-        }
-
         if (phoneNumber != null && !phoneNumber.isBlank()) {
             User user = seller.getUser();
             user.setPhoneNumber(phoneNumber);
