@@ -235,12 +235,29 @@ function BuyerDashboard() {
             {Object.keys(displayCuts).length === 0 && !isEditing ? (
               <p style={styles.fieldValueEmpty}>Not set</p>
             ) : (
-              <CowDiagram
-                selectedCuts={displayCuts}
-                onToggle={handleCutToggle}
-                onQuantityChange={handleCutQty}
-                readOnly={!isEditing}
-              />
+              <>
+                <CowDiagram
+                  selectedCuts={displayCuts}
+                  onToggle={handleCutToggle}
+                  onQuantityChange={handleCutQty}
+                  readOnly={!isEditing}
+                />
+
+                {/* Cut text summary */}
+                {Object.keys(displayCuts).length > 0 && (
+                  <div style={styles.cutsTextRow}>
+                    <span style={styles.cutsLabel}>Selected cuts: </span>
+                    {Object.entries(displayCuts).map(([cut, qty], i, arr) => (
+                      <span key={cut}>
+                        <span style={styles.cutName}>
+                          {cut}{qty > 1 ? ` ×${qty}` : ''}
+                        </span>
+                        {i < arr.length - 1 && <span style={styles.cutSep}>,  </span>}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </>
             )}
           </div>
 
@@ -396,6 +413,27 @@ const styles = {
     color: "#222",
     outline: "none",
     boxSizing: "border-box",
+  },
+  cutsTextRow: {
+    margin: "14px 8px 4px",
+    fontSize: "14px",
+    lineHeight: 1.6,
+  },
+  cutsLabel: {
+    fontSize: "11px",
+    fontWeight: "700",
+    letterSpacing: "0.07em",
+    textTransform: "uppercase",
+    color: BUYER_COLOR,
+    marginRight: "6px",
+  },
+  cutName: {
+    fontWeight: "600",
+    color: "#222",
+    fontSize: "14px",
+  },
+  cutSep: {
+    color: "#aaa",
   },
   buttonRow: {
     display: "flex",
