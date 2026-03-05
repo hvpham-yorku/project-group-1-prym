@@ -125,7 +125,7 @@ public class BuyerServiceTest {
         when(buyerRepository.save(any(Buyer.class))).thenAnswer(i -> i.getArgument(0));
 
         // Act: update with new values
-        Buyer result = buyerService.updateBuyerProfile(1L, "T-Bone", "Whole cow");
+        Buyer result = buyerService.updateBuyerProfile(1L, "T-Bone", "Whole cow", "123-456-7890");
 
         // Assert: check the fields were updated
         assertEquals("T-Bone", result.getPreferredCuts());
@@ -141,7 +141,7 @@ public class BuyerServiceTest {
 
         // Act + Assert: should throw an error
         assertThrows(RuntimeException.class, () -> {
-            buyerService.updateBuyerProfile(999L, "Ribeye", "Half cow");
+            buyerService.updateBuyerProfile(999L, "Ribeye", "Half cow", "111-111-1111");
         });
     }
 }
