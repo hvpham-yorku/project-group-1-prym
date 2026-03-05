@@ -32,6 +32,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth //defines who can access what urls
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/buyer/**").hasRole("BUYER") // only buyers can access
+                .requestMatchers("/api/seller/all").permitAll()//(SPECIAL CASE) allow anyone to access the farm listings
                 .requestMatchers("/api/seller/**").hasRole("SELLER") //only Sellers can access
                 .anyRequest().authenticated() //everything else requires just being logged in
             )

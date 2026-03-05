@@ -15,7 +15,7 @@ function FarmListing(){
 		<div>
 			<img src={farmImage} width='100%' height='300' alt="farm image"/>
 			
-			<h1 style={styles.header}>{farm.name}</h1>
+			<h1 style={styles.header}>{farm.shopName}</h1>
 			
 			<div style={styles.container}>
 				<p style={styles.descBox}>{farm.description}</p>
