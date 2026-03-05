@@ -1,12 +1,12 @@
 import {useParams} from 'react-router-dom';
 import farmImage from '../assets/rural-farm-landscape-stockcake.webp';
-import {getFarm} from '../api/farm.js';
+import {getFarm} from '../api/farm';
 
 function FarmListing(){
 	
-	let { farmid } = useParams();
-	console.log(farmid);
-	const farm = getFarm(farmid);
+	let { farmname } = useParams();
+	console.log(farmname);
+	const farm = getFarm(farmname);
 	console.log(farm);
 	let f = farm.certifications;
 	const certs = f.map(c => <li style={styles.certification}>{c}</li>);

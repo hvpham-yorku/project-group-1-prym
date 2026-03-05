@@ -14,5 +14,6 @@ export function getAllFarms(){
 			.then(data => setFarms(data))
 			.catch(err => console.error("Failed to load farms", err))
 		}, []);
+		
 	return farms;
 }
