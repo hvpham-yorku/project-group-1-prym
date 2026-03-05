@@ -1,4 +1,3 @@
-//import { farms } from '../assets/data.js';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {getAllFarms} from '../api/farm';
