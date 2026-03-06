@@ -1,9 +1,9 @@
 server.port=8080
 
-# PostgreSQL
+# PostgreSQL — copy this file to application.properties and fill in your password
 spring.datasource.url=jdbc:postgresql://localhost:5432/prymdb
 spring.datasource.username=postgres
-spring.datasource.password=
+spring.datasource.password=YOUR_PASSWORD_HERE
 spring.datasource.driver-class-name=org.postgresql.Driver
 
 # JPA Settings
