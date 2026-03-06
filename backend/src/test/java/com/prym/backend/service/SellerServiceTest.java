@@ -49,7 +49,7 @@ public class SellerServiceTest {
 
     // Test 1: createSellerProfile_Success
     @Test
-    public void createSellFerProfile_Success() {
+    public void createSellerProfile_Success() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
         when(sellerRepository.existsByUserId(1L)).thenReturn(false);
         when(sellerRepository.save(any(Seller.class))).thenAnswer(i -> i.getArgument(0));
