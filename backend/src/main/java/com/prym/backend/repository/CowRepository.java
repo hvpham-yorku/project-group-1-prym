@@ -11,4 +11,5 @@ public interface CowRepository extends JpaRepository<Cow, Long> {
     List<Cow> findByCowTypeId(Long cowTypeId);
     List<Cow> findByCowTypeSellerId(Long sellerId);
     List<Cow> findByCowTypeSellerIdAndStatus(Long sellerId, Cow.CowStatus status);
+    List<Cow> findByStatus(Cow.CowStatus status);
 }
