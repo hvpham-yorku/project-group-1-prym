@@ -106,7 +106,7 @@ function BuyerDashboard() {
     try {
       if (formData.phoneNumber) {
         const phoneRegex =
-          /^(\+?1[\s.\-]?)?(\(?\d{3}\)?[\s.\-]?)\d{3}[\s.\-]?\d{4}$/;
+          /^(\+?1[\s.-]?)?(\(?\d{3}\)?[\s.-]?)\d{3}[\s.-]?\d{4}$/;
         if (!phoneRegex.test(formData.phoneNumber)) {
           setError("Please enter a valid phone number.");
           return;
@@ -854,6 +854,7 @@ const styles = {
   joinButtonDisabled: {
     opacity: 0.6,
     cursor: "not-allowed",
+  },
   editAccountBtn: {
     background: "rgba(255,255,255,0.15)",
     border: "2px solid rgba(255,255,255,0.5)",
