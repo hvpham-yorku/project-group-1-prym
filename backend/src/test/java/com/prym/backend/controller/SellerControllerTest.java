@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -130,5 +131,35 @@ public class SellerControllerTest {
         ResponseEntity<?> response = sellerController.updateSeller(2L, updates, validSessionId);
 
         assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+    }
+
+    // ---- Test 6: getAllFarms returns the full list of sellers ----
+    @Test
+    void getAllFarms_Success() {
+        Seller seller2 = new Seller();
+        seller2.setId(2L);
+        seller2.setShopName("Second Farm");
+        seller2.setUser(testUser);
+
+        // Return two sellers from the service
+        when(sellerService.getAllFarms()).thenReturn(List.of(testSeller, seller2));
+
+        ResponseEntity<?> response = sellerController.getAllFarms();
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        List<?> body = (List<?>) response.getBody();
+        assertEquals(2, body.size());
+    }
+
+    // ---- Test 7: getAllFarms returns empty list when no sellers exist ----
+    @Test
+    void getAllFarms_Empty() {
+        when(sellerService.getAllFarms()).thenReturn(List.of());
+
+        ResponseEntity<?> response = sellerController.getAllFarms();
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        List<?> body = (List<?>) response.getBody();
+        assertEquals(0, body.size());
     }
 }

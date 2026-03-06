@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.MockMvc; // simulates HTTP requests
 
 import static org.mockito.ArgumentMatchers.any; // matches any object
 import static org.mockito.ArgumentMatchers.eq; // matches exact value
+import static org.mockito.Mockito.verify; // verifies a method was called
 import static org.mockito.Mockito.when; // defines mock behavior
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post; // builds POST requests
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*; // checks responses
@@ -115,5 +116,52 @@ class RegisterTest {
                                 + "\"lastName\": \"B\", \"phoneNumber\": \"555-0000\"}"))
                 .andExpect(status().isBadRequest()) // expect 400
                 .andExpect(jsonPath("$.error").value("Email already registered")); // verify error message in JSON
+    }
+
+    // ---- Test 4: Registration fails when username is already taken ----
+    @Test
+    void registerWithExistingUsername_returns400() throws Exception {
+        // Service throws when the username is a duplicate
+        when(authService.register(any(), any(), eq(User.Role.BUYER), eq("takenuser"), any(), any(), any(), any()))
+                .thenThrow(new RuntimeException("Username already taken"));
+
+        mockMvc.perform(post("/api/auth/register/buyer")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"email\": \"new@example.com\", \"password\": \"password123\", "
+                                + "\"username\": \"takenuser\", \"firstName\": \"A\", "
+                                + "\"lastName\": \"B\", \"phoneNumber\": \"555-0000\"}"))
+                .andExpect(status().isBadRequest()) // expect 400
+                .andExpect(jsonPath("$.error").value("Username already taken"));
+    }
+
+    // ---- Test 5: Registering a seller also creates a seller profile ----
+    @Test
+    void registerSeller_createsSellerProfile() throws Exception {
+        User mockUser = new User();
+        mockUser.setId(1L);
+        mockUser.setEmail("seller2@example.com");
+        mockUser.setRole(User.Role.SELLER);
+        mockUser.setUsername("seller2");
+        mockUser.setFirstName("Link");
+        mockUser.setLastName("Hero");
+        mockUser.setPhoneNumber("555-9999");
+
+        Session mockSession = new Session();
+        mockSession.setSessionId("fake-session-id");
+
+        when(authService.register(any(), any(), eq(User.Role.SELLER), any(), any(), any(), any(), any()))
+                .thenReturn(mockUser);
+        when(sessionService.createSession(any(User.class))).thenReturn(mockSession);
+
+        mockMvc.perform(post("/api/auth/register/seller")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"email\": \"seller2@example.com\", \"password\": \"password123\", "
+                                + "\"username\": \"seller2\", \"firstName\": \"Link\", "
+                                + "\"lastName\": \"Hero\", \"phoneNumber\": \"555-9999\", "
+                                + "\"shopName\": \"Hero's Meats\"}"))
+                .andExpect(status().isOk());
+
+        // Verify that a seller profile was created with the shop name from the request
+        verify(sellerService).createSellerProfile(1L, "Hero's Meats", "", "");
     }
 }

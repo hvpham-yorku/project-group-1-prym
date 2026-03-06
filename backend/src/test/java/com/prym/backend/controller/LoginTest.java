@@ -18,6 +18,7 @@ import java.util.Optional; // Java wrapper that can hold a value or be empty (us
 import static org.mockito.ArgumentMatchers.any; // Mockito matcher meaning "any object of this type"
 import static org.mockito.ArgumentMatchers.anyString; // Mockito matcher meaning "any string value at all"
 import static org.mockito.Mockito.when; // Used to tell the mock "when this method is called, do this"
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get; // Builds a fake GET request
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post; // Builds a fake POST request to send via MockMvc
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*; // Imports status(), content(), jsonPath() for checking HTTP responses
 
@@ -114,5 +115,70 @@ class LoginTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}")) // Empty JSON — both email and password will be null in the controller
                 .andExpect(status().isUnauthorized()); // Expect 401, the app handles missing fields gracefully
+    }
+
+    // ---- Test 4: Logout with a valid session cookie clears the session ----
+    @Test
+    void logout_withValidSession_returns200() throws Exception {
+        // The controller calls sessionService.deleteSession() then clears the cookie
+        mockMvc.perform(post("/api/auth/logout")
+                        .cookie(new jakarta.servlet.http.Cookie("SESSION_ID", "fake-session-id")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Logged out successfully"));
+    }
+
+    // ---- Test 5: Logout without a session cookie still returns 200 ----
+    @Test
+    void logout_withNoSession_stillReturns200() throws Exception {
+        // Logout should succeed gracefully even if no SESSION_ID cookie is present
+        mockMvc.perform(post("/api/auth/logout"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Logged out successfully"));
+    }
+
+    // ---- Test 6: getCurrentUser with a valid session returns user data ----
+    @Test
+    void getCurrentUser_withValidSession_returnsUserData() throws Exception {
+        User mockUser = new User();
+        mockUser.setId(1L);
+        mockUser.setEmail("test@example.com");
+        mockUser.setRole(User.Role.BUYER);
+        mockUser.setUsername("testuser");
+        mockUser.setFirstName("Test");
+        mockUser.setLastName("User");
+        mockUser.setPhoneNumber("555-1234");
+
+        // When the session is validated, return our fake user
+        when(sessionService.validateSession("fake-session-id"))
+                .thenReturn(Optional.of(mockUser));
+
+        mockMvc.perform(get("/api/auth/me")
+                        .cookie(new jakarta.servlet.http.Cookie("SESSION_ID", "fake-session-id")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.email").value("test@example.com"))
+                .andExpect(jsonPath("$.role").value("BUYER"))
+                .andExpect(jsonPath("$.username").value("testuser"));
+    }
+
+    // ---- Test 7: getCurrentUser with no session cookie returns 401 ----
+    @Test
+    void getCurrentUser_withNoSession_returns401() throws Exception {
+        // No SESSION_ID cookie — controller should return 401 immediately
+        mockMvc.perform(get("/api/auth/me"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error").value("Not logged in"));
+    }
+
+    // ---- Test 8: getCurrentUser with an expired/invalid session returns 401 ----
+    @Test
+    void getCurrentUser_withInvalidSession_returns401() throws Exception {
+        // Session ID exists but validateSession returns empty (expired or not found)
+        when(sessionService.validateSession("bad-session-id"))
+                .thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/api/auth/me")
+                        .cookie(new jakarta.servlet.http.Cookie("SESSION_ID", "bad-session-id")))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error").value("Session expired"));
     }
 }

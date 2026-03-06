@@ -7,6 +7,7 @@ import com.prym.backend.service.SellerService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -89,6 +90,16 @@ public ResponseEntity<?> getSeller(@PathVariable Long userId,
 
     } catch (RuntimeException e) {
         return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+    }
+}
+
+@GetMapping("/all")
+public ResponseEntity<?> getAllFarms() {
+    try {
+        List<Seller> farms = sellerService.getAllFarms();
+        return ResponseEntity.ok(farms);
+    } catch (RuntimeException e) {
+        return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
     }
 }
 }
