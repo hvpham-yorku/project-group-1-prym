@@ -34,3 +34,6 @@ build/
 # H2 Database files
 data/
 *.db
+
+# Local config with real credentials — use application.properties.example as template
+src/main/resources/application.properties
