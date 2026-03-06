@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/seller")
@@ -60,7 +61,8 @@ public ResponseEntity<?> getSeller(@PathVariable Long userId,
             "phoneNumber", user.getPhoneNumber(),
             "shopName", seller.getShopName() == null ? "" : seller.getShopName(),
             "shopAddress", seller.getShopAddress() == null ? "" : seller.getShopAddress(),
-            "description", seller.getDescription() == null ? "" : seller.getDescription()
+            "description", seller.getDescription() == null ? "" : seller.getDescription(),
+            "category", seller.getCategory() == null ? "" : seller.getCategory()
         ));
     } catch (RuntimeException e) {
         return ResponseEntity.status(404).body(Map.of("error", "Profile not found"));

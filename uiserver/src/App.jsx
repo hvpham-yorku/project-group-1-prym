@@ -9,6 +9,9 @@ import SellerDashboard from './pages/SellerDashboard';
 import FarmListingsPage from './pages/FarmListingsPage';
 import FarmListing from './pages/FarmListing';
 import SellerProfileSetup from './pages/SellerProfileSetup';
+import GroupDetailPage from './pages/GroupDetailPage';
+import CreateGroupPage from './pages/CreateGroupPage';
+import BrowseGroupsPage from './pages/BrowseGroupsPage';
 
 function ProtectedRoute({ children, allowedRole }) {
     const { user } = useAuth();
@@ -42,7 +45,7 @@ function AppRoutes() {
                     <FarmListingsPage />
                 </ProtectedRoute>
             } />
-            <Route path="/farmlistings/:farmid" element={
+            <Route path="/farmlistings/:farmname" element={
                 <ProtectedRoute>
                     <FarmListing />
                 </ProtectedRoute>
@@ -57,6 +60,22 @@ function AppRoutes() {
             <Route path="/buyer/profile-setup" element={
                 <ProtectedRoute allowedRole="BUYER">
                     <BuyerProfileSetup />
+                </ProtectedRoute>
+            } />
+
+            <Route path="/buyer/groups/:groupId" element={
+                <ProtectedRoute allowedRole="BUYER">
+                    <GroupDetailPage />
+                </ProtectedRoute>
+            } />
+            <Route path="/buyer/create-group" element={
+                <ProtectedRoute allowedRole="BUYER">
+                    <CreateGroupPage />
+                </ProtectedRoute>
+            } />
+            <Route path="/buyer/browse-groups" element={
+                <ProtectedRoute allowedRole="BUYER">
+                    <BrowseGroupsPage />
                 </ProtectedRoute>
             } />
 
@@ -75,7 +94,7 @@ function AppRoutes() {
             {/* Legacy redirects — keep old URLs working */}
             <Route path="/buyer/dashboard"        element={<Navigate to="/buyer/profile"  replace />} />
             <Route path="/farmlistingspage"        element={<Navigate to="/farmlistings"   replace />} />
-            <Route path="/farmlistingspage/:farmid" element={<Navigate to="/farmlistings/:farmid" replace />} />
+            <Route path="/farmlistingspage/:farmname" element={<Navigate to="/farmlistings/:farmname" replace />} />
 
             {/* Fallback */}
             <Route path="/" element={<Navigate to="/login" />} />

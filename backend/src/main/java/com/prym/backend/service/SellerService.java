@@ -4,6 +4,9 @@ import com.prym.backend.model.Seller;
 import com.prym.backend.model.User;
 import com.prym.backend.repository.SellerRepository;
 import com.prym.backend.repository.UserRepository;
+
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -64,6 +67,7 @@ public class SellerService {
         seller.setShopName(shopName);
         seller.setShopAddress(shopAddress);
         seller.setDescription(description);
+        seller.setCategory(category);
 
         if (phoneNumber != null && !phoneNumber.isBlank()) {
             User user = seller.getUser();
@@ -72,5 +76,9 @@ public class SellerService {
         }
 
         return sellerRepository.save(seller);
+    }
+    
+    public List<Seller> getAllFarms() {
+    	return sellerRepository.findAll();
     }
 }
