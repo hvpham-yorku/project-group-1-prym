@@ -43,7 +43,7 @@ function BuyerDashboard() {
   const [myGroups, setMyGroups] = useState([]);
   const [groupsLoading, setGroupsLoading] = useState(true);
   const [groupsError, setGroupsError] = useState("");
-  const [joiningCowId, setJoiningCowId] = useState(null);
+  const [joiningGroupId, setJoiningGroupId] = useState(null);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -159,21 +159,15 @@ function BuyerDashboard() {
     });
   };
 
-  const handleJoinGroup = async (cowId) => {
-    setJoiningCowId(cowId);
+  const handleJoinGroup = async (groupId) => {
+    setJoiningGroupId(groupId);
     setGroupsError("");
     try {
-      await joinGroup(user.id, cowId);
-      const [available, mine] = await Promise.all([
-        getAvailableGroups(user.id),
-        getMyGroups(user.id),
-      ]);
-      setAvailableGroups(available);
-      setMyGroups(mine);
+      await joinGroup(user.id, groupId);
+      navigate(`/buyer/groups/${groupId}`);
     } catch (err) {
       setGroupsError(err.message || "Failed to join group.");
-    } finally {
-      setJoiningCowId(null);
+      setJoiningGroupId(null);
     }
   };
 
@@ -342,116 +336,116 @@ function BuyerDashboard() {
 
           {groupsError && <div style={styles.error}>{groupsError}</div>}
 
-          {/* Prompt to set preferred cuts first */}
-          {!profile?.preferredCuts && !groupsLoading && (
-            <div style={styles.noCutsPrompt}>
-              Set your preferred cuts above to browse and join groups.
+          {/* ── My Groups ── */}
+          <h3 style={styles.subSectionTitle}>My Groups</h3>
+          {groupsLoading ? (
+            <p style={styles.emptyText}>Loading your groups...</p>
+          ) : myGroups.length === 0 ? (
+            <p style={styles.emptyText}>You have not joined any groups yet.</p>
+          ) : (
+            <div style={styles.groupCardGrid}>
+              {myGroups.map((g) => (
+                <div key={g.groupId} style={{ ...styles.groupCard, cursor: 'pointer' }}
+                  onClick={() => navigate(`/buyer/groups/${g.groupId}`)}>
+
+                  <div style={styles.groupCardHeader}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                      <span style={{ fontSize: '10px', color: '#999', fontWeight: '600' }}>
+                        #{g.groupId}
+                      </span>
+                      <span style={styles.cowNameText}>{g.groupName}</span>
+                    </div>
+                    <div style={styles.certBadges}>
+                      {g.certifications.includes("KOSHER") && (
+                        <span style={{ ...styles.badge, ...styles.badgeKosher }}>Kosher</span>
+                      )}
+                      {g.certifications.includes("HALAL") && (
+                        <span style={{ ...styles.badge, ...styles.badgeHalal }}>Halal</span>
+                      )}
+                      {g.certifications.includes("ORGANIC") && (
+                        <span style={{ ...styles.badge, ...styles.badgeOrganic }}>Organic</span>
+                      )}
+                      {g.certifications.includes("GRASS_FED") && (
+                        <span style={{ ...styles.badge, ...styles.badgeGrassFed }}>Grass-Fed</span>
+                      )}
+                      {g.certifications.includes("NON_GMO") && (
+                        <span style={{ ...styles.badge, ...styles.badgeNonGmo }}>Non-GMO</span>
+                      )}
+                    </div>
+                  </div>
+                  <div style={styles.membersSection}>
+                    <span style={styles.membersLabel}>Members ({g.memberCount})</span>
+                    {g.members.map((m, i) => (
+                      <div key={i} style={styles.memberRow}>
+                        <span style={styles.memberName}>{m.firstName}</span>
+                        <span style={styles.memberCuts}>{m.claimedCuts || 'No cuts yet'}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
           )}
 
-          {profile?.preferredCuts && (
+          {/* ── Available Groups — hidden once user has joined a group ── */}
+          {myGroups.length === 0 && (
             <>
-              {/* ── My Groups ── */}
-              <h3 style={styles.subSectionTitle}>My Groups</h3>
+              <h3 style={{ ...styles.subSectionTitle, marginTop: "32px" }}>Available Groups</h3>
               {groupsLoading ? (
-                <p style={styles.emptyText}>Loading your groups...</p>
-              ) : myGroups.length === 0 ? (
-                <p style={styles.emptyText}>You have not joined any groups yet.</p>
+                <p style={styles.emptyText}>Loading available groups...</p>
+              ) : availableGroups.length === 0 ? (
+                <p style={styles.emptyText}>No groups available yet. Start one!</p>
               ) : (
                 <div style={styles.groupCardGrid}>
-                  {myGroups.map((g) => (
-                    <div key={g.cowId} style={{ ...styles.groupCard, cursor: 'pointer' }}
-                      onClick={() => navigate(`/buyer/groups/${g.cowId}`)}>
-
+                  {availableGroups.map((g) => (
+                    <div
+                      key={g.groupId}
+                      style={{ ...styles.groupCard, cursor: 'pointer' }}
+                      onClick={() => navigate(`/buyer/groups/${g.groupId}`)}
+                    >
                       <div style={styles.groupCardHeader}>
-                        <span style={styles.cowNameText}>{g.cowName}</span>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                          <span style={{ fontSize: '10px', color: '#999', fontWeight: '600' }}>
+                            #{g.groupId}
+                          </span>
+                          <span style={styles.cowNameText}>{g.groupName}</span>
+                        </div>
                         <div style={styles.certBadges}>
                           {g.certifications.includes("KOSHER") && (
                             <span style={{ ...styles.badge, ...styles.badgeKosher }}>Kosher</span>
                           )}
+                          {g.certifications.includes("HALAL") && (
+                            <span style={{ ...styles.badge, ...styles.badgeHalal }}>Halal</span>
+                          )}
                           {g.certifications.includes("ORGANIC") && (
                             <span style={{ ...styles.badge, ...styles.badgeOrganic }}>Organic</span>
+                          )}
+                          {g.certifications.includes("GRASS_FED") && (
+                            <span style={{ ...styles.badge, ...styles.badgeGrassFed }}>Grass-Fed</span>
+                          )}
+                          {g.certifications.includes("NON_GMO") && (
+                            <span style={{ ...styles.badge, ...styles.badgeNonGmo }}>Non-GMO</span>
                           )}
                         </div>
                       </div>
                       <p style={styles.cardDetail}>
-                        {g.estimatedWeightLbs ? `~${g.estimatedWeightLbs} lbs` : ""}
-                        {g.harvestDate ? `  ·  Harvest: ${g.harvestDate}` : ""}
+                        {g.memberCount === 0
+                          ? "No members yet — be the first!"
+                          : `${g.memberCount} member(s) so far`}
                       </p>
-                      <div style={styles.membersSection}>
-                        <span style={styles.membersLabel}>Members ({g.memberCount})</span>
-                        {g.members.map((m, i) => (
-                          <div key={i} style={styles.memberRow}>
-                            <span style={styles.memberName}>{m.firstName}</span>
-                            <span style={styles.memberCuts}>{m.claimedCuts}</span>
-                            {m.phoneNumber && (
-                              <span style={styles.memberPhone}>{m.phoneNumber}</span>
-                            )}
-                          </div>
-                        ))}
-                      </div>
+                      <button
+                        style={{
+                          ...styles.joinButton,
+                          ...(joiningGroupId === g.groupId ? styles.joinButtonDisabled : {}),
+                        }}
+                        onClick={(e) => { e.stopPropagation(); handleJoinGroup(g.groupId); }}
+                        disabled={joiningGroupId === g.groupId}
+                      >
+                        {joiningGroupId === g.groupId ? "Joining..." : "Join Group"}
+                      </button>
                     </div>
                   ))}
                 </div>
-              )}
-
-              {/* ── Available Groups — hidden once user has joined a group ── */}
-              {myGroups.length === 0 && (
-                <>
-                  <h3 style={{ ...styles.subSectionTitle, marginTop: "32px" }}>Available Groups</h3>
-                  {groupsLoading ? (
-                    <p style={styles.emptyText}>Loading available groups...</p>
-                  ) : availableGroups.filter((g) => !g.alreadyJoined && g.compatible).length === 0 ? (
-                    <p style={styles.emptyText}>No available groups match your preferred cuts right now.</p>
-                  ) : (
-                    <div style={styles.groupCardGrid}>
-                      {availableGroups
-                        .filter((g) => !g.alreadyJoined && g.compatible)
-                        .map((g) => (
-                          <div
-                            key={g.cowId}
-                            style={{ ...styles.groupCard, cursor: 'pointer' }}
-                            onClick={() => navigate(`/buyer/groups/${g.cowId}`)}
-                          >
-                            <div style={styles.groupCardHeader}>
-                              <span style={styles.cowNameText}>{g.cowName}</span>
-                              <div style={styles.certBadges}>
-                                {g.certifications.includes("KOSHER") && (
-                                  <span style={{ ...styles.badge, ...styles.badgeKosher }}>Kosher</span>
-                                )}
-                                {g.certifications.includes("ORGANIC") && (
-                                  <span style={{ ...styles.badge, ...styles.badgeOrganic }}>Organic</span>
-                                )}
-                              </div>
-                            </div>
-                            <p style={styles.cardDetail}>
-                              {g.estimatedWeightLbs ? `~${g.estimatedWeightLbs} lbs` : ""}
-                              {g.harvestDate ? `  ·  Harvest: ${g.harvestDate}` : ""}
-                            </p>
-                            <p style={styles.cardDetail}>
-                              {g.memberCount === 0
-                                ? "No members yet — be the first!"
-                                : `${g.memberCount} member(s) so far`}
-                            </p>
-                            <button
-                              style={{
-                                ...styles.joinButton,
-                                ...(joiningCowId === g.cowId ? styles.joinButtonDisabled : {}),
-                              }}
-                              onClick={(e) => { e.stopPropagation(); handleJoinGroup(g.cowId); }}
-                              disabled={joiningCowId === g.cowId}
-                            >
-                              {joiningCowId === g.cowId
-                                ? "Joining..."
-                                : g.memberCount === 0
-                                ? "Start Group"
-                                : "Join Group"}
-                            </button>
-                          </div>
-                        ))}
-                    </div>
-                  )}
-                </>
               )}
             </>
           )}
@@ -739,14 +733,11 @@ const styles = {
     letterSpacing: "0.05em",
     textTransform: "uppercase",
   },
-  badgeKosher: {
-    backgroundColor: "#e3f2fd",
-    color: "#1565c0",
-  },
-  badgeOrganic: {
-    backgroundColor: "#e8f5e9",
-    color: "#2e7d32",
-  },
+  badgeKosher:   { backgroundColor: "#e3f2fd", color: "#1565c0" },
+  badgeHalal:    { backgroundColor: "#fff3e0", color: "#e65100" },
+  badgeOrganic:  { backgroundColor: "#e8f5e9", color: "#2e7d32" },
+  badgeGrassFed: { backgroundColor: "#f1f8e9", color: "#558b2f" },
+  badgeNonGmo:   { backgroundColor: "#fce4ec", color: "#880e4f" },
   cardDetail: {
     fontSize: "13px",
     color: "#666",
