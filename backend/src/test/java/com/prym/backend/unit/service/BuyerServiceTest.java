@@ -1,4 +1,5 @@
-package com.prym.backend.service;
+package com.prym.backend.unit.service;
+import com.prym.backend.service.BuyerService;
 
 import com.prym.backend.model.Buyer;
 import com.prym.backend.model.User;

@@ -1,4 +1,5 @@
-package com.prym.backend.controller;
+package com.prym.backend.unit.controller;
+import com.prym.backend.controller.CowController;
 
 import com.prym.backend.model.Cow;
 import com.prym.backend.model.CowCut;

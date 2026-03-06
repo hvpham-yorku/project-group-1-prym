@@ -1,4 +1,5 @@
-package com.prym.backend.controller;
+package com.prym.backend.unit.controller;
+import com.prym.backend.controller.AuthController;
 
 import com.prym.backend.model.Session; // Imports Session model so we can create fake session objects
 import com.prym.backend.model.User; // Imports User model for creation of fake User objects
