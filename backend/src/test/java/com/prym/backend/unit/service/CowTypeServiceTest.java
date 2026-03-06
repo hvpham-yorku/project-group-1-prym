@@ -1,4 +1,5 @@
-package com.prym.backend.service;
+package com.prym.backend.unit.service;
+import com.prym.backend.service.CowTypeService;
 
 import com.prym.backend.model.CowType;
 import com.prym.backend.model.Seller;

@@ -1,4 +1,5 @@
-package com.prym.backend.service;
+package com.prym.backend.unit.service;
+import com.prym.backend.service.GroupService;
 
 import com.prym.backend.model.*;
 import com.prym.backend.repository.*;

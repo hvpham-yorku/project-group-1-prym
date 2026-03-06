@@ -1,4 +1,5 @@
-package com.prym.backend.service;
+package com.prym.backend.unit.service;
+import com.prym.backend.service.CertificationService;
 
 import com.prym.backend.model.Certification;
 import com.prym.backend.model.Seller;

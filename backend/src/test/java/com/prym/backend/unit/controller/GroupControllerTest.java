@@ -1,4 +1,5 @@
-package com.prym.backend.controller;
+package com.prym.backend.unit.controller;
+import com.prym.backend.controller.GroupController;
 
 import com.prym.backend.model.User;
 import com.prym.backend.repository.UserRepository;

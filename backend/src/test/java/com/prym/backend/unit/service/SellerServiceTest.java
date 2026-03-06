@@ -1,4 +1,5 @@
-package com.prym.backend.service;
+package com.prym.backend.unit.service;
+import com.prym.backend.service.SellerService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

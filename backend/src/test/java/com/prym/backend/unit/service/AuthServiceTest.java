@@ -1,4 +1,5 @@
-package com.prym.backend.service;
+package com.prym.backend.unit.service;
+import com.prym.backend.service.AuthService;
 
 import com.prym.backend.model.User;
 import com.prym.backend.repository.UserRepository;

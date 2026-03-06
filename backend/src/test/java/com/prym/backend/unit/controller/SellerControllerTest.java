@@ -1,4 +1,5 @@
-package com.prym.backend.controller;
+package com.prym.backend.unit.controller;
+import com.prym.backend.controller.SellerController;
 
 import com.prym.backend.model.Seller;
 import com.prym.backend.model.User;
