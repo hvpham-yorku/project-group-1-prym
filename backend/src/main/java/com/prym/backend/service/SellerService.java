@@ -10,6 +10,8 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 // Handles all seller profile business logic (creating, retrieving, and updating profiles)
 // This layer enforces rules before anything touches the database
 @Service
@@ -49,6 +51,11 @@ public class SellerService {
     public Seller getSellerProfile(Long userId) {
         return sellerRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Seller profile not found"));
+    }
+
+    // Returns all seller profiles (used for the farm listings page)
+    public List<Seller> getAllFarms() {
+        return sellerRepository.findAll();
     }
 
     // Updates an existing seller's shop info
