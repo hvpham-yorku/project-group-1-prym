@@ -8,7 +8,14 @@ For detailed documentation, visit the [Project Wiki](../../wiki)
 ## Meeting Minutes
 
 > **Note:** Minutes were not taken during daily "stand up" meetings
-
+### February 23rd, 2026
+**Agenda:** Discuss farm listings, preferences, groups, chat, and ratings features.
+- Confirmed that each seller has one farm with multiple farm listings, and listings link to the farm page with descriptions.
+- Discussed preferences page design, including a cow diagram for meat selection (planned for ITR3) and buttons: Done, Close, and Find Me a Group.
+- Decided that buyers can find matched groups based on preferences, search groups by name, or create a group if no matches are found.
+- Group chat will be available for members with options to leave the chat, and invite links were discussed.
+- Planned rating functionality, allowing buyers to submit ratings and sellers to view ratings for their farm.
+  
 ### March 2nd, 2026
 
 **Agenda** Discuss more formatting
@@ -31,7 +38,7 @@ ___
 
 ## Changes On Plan
 
-- 
+- Moved some user stories to ITR3 due to losing a team member during reading week.
 
 ---
 
@@ -79,10 +86,10 @@ ___
 | View group details | Jacob | | |
 | Join/leave a group | Jacon | | |
 | Jira Setup | Jacob | | |
-| Basic UI decorations | Harleen | | |
+| Basic UI decorations | Harleen |0.5 Day|0.5 Day|
 | Farm Listings Integration into dashboard | Katelyn | 30min | 20min |
 | Group creation tests | Jacob | | |
-| General user profile modification | Harleen | | |
+| General user profile modification | Harleen |0.5 Day|0.5 Day|
 | View Farm details and ratings | Katelyn | 1 Day | 1 Day | 
 | Farm listing tests | Katelyn | 1 Day | 0.5 Day |
 | Group chat with group members | Sufyan | | |
