@@ -2,6 +2,8 @@ package com.prym.backend.service;
 
 import com.prym.backend.model.User;
 import com.prym.backend.repository.UserRepository;
+
+import org.springframework.security.core.parameters.P;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -54,4 +56,43 @@ public class AuthService {
 
         return Optional.empty();
     }
+
+    public User updateUserInfo(Long userId, String firstName, String lastName, String email, String username,
+            String profilePicture) {
+        // find the user
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (firstName != null && !firstName.isBlank()) {
+            user.setFirstName(firstName.trim());
+        }
+        if (lastName != null && !lastName.isBlank()) {
+            user.setLastName(lastName.trim());
+        }
+        if (email != null && !email.isBlank()) {
+            String trimmed = email.trim();
+            if (!trimmed.equalsIgnoreCase(user.getEmail())) {
+                if (userRepository.existsByEmail(trimmed)) {
+                    throw new RuntimeException("Email already in use");
+                }
+                user.setEmail(trimmed);
+            }
+        }
+
+        if (username != null && !username.isBlank()) {
+            String trimmed = username.trim();
+            if (!trimmed.equalsIgnoreCase(user.getUsername())) {
+                if (userRepository.existsByUsername(trimmed)) {
+                    throw new RuntimeException("Username already taken");
+                }
+                user.setUsername(trimmed);
+            }
+        }
+
+        if (profilePicture != null) {
+            user.setProfilePicture(profilePicture);
+        }
+
+        return userRepository.save(user);
+    }
+
 }
