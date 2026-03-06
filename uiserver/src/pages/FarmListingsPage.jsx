@@ -1,6 +1,8 @@
-import { farms } from '../assets/data.js';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { getAllFarms } from '../api/farm';
+
 
 function FarmListingsPage() {
 	const { user } = useAuth();
@@ -10,11 +12,17 @@ function FarmListingsPage() {
 		(user?.firstName?.charAt(0) || '') + (user?.lastName?.charAt(0) || '');
 
 	const profilePath = user?.role === 'BUYER' ? '/buyer/profile' : '/seller/dashboard';
-
+	
+	const [farms, setFarms] = useState([]);
+	
+	useEffect(() => {
+		getAllFarms().then(setFarms).catch(console.error);
+	}, []);
+	
 	const listItems = farms.map(farm =>
 		<li key={farm.id}>
-			<Link to={`/farmlistings/${farm.name}`}>
-				<button style={styles.button}>{farm.name}</button>
+			<Link to={`/farmlistings/${farm.id}`}>
+				<button style={styles.button}>{farm.shopName}</button>
 			</Link>
 		</li>
 	);
@@ -48,10 +56,12 @@ function FarmListingsPage() {
 			<h1 style={styles.header}>Farm Listings</h1>
 
 			<div style={styles.containerMain}>
+				{/* where all the farm listings are shown */}
 				<div style={styles.listingContainer}>
 					<ul>{listItems}</ul>
 				</div>
 				<div style={styles.containerSide}>
+					{/* recently viewed farms and a button to navigate to saved farms */}
 					<p style={styles.recentlyViewedContainer}>Coming Soon...</p>
 					<button style={styles.savedButton}>Coming Soon...</button>
 				</div>

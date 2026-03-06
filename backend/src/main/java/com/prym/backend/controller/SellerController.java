@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/seller")
@@ -92,4 +93,15 @@ public ResponseEntity<?> getSeller(@PathVariable Long userId,
         return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
     }
 }
+
+@GetMapping("all")
+public ResponseEntity<?> getAllFarms(){
+	try {
+		List<Seller> farms = sellerService.getAllFarms();
+		return ResponseEntity.ok(farms);
+	} catch (RuntimeException e) {
+		return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+	}
+}
+
 }
