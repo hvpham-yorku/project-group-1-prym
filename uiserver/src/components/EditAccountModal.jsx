@@ -11,7 +11,6 @@ function EditAccountModal({ onClose, accentColor }) {
     firstName: user?.firstName || "",
     lastName: user?.lastName || "",
     email: user?.email || "",
-    username: user?.username || "",
     profilePicture: user?.profilePicture || "",
   });
 
@@ -52,10 +51,6 @@ function EditAccountModal({ onClose, accentColor }) {
       setError("First and last name are required.");
       return;
     }
-    if (!form.username.trim()) {
-      setError("Username is required.");
-      return;
-    }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(form.email.trim())) {
       setError("Please enter a valid email address.");
@@ -68,7 +63,6 @@ function EditAccountModal({ onClose, accentColor }) {
         firstName: form.firstName.trim(),
         lastName: form.lastName.trim(),
         email: form.email.trim(),
-        username: form.username.trim(),
         profilePicture: form.profilePicture,
       });
 
@@ -192,19 +186,6 @@ function EditAccountModal({ onClose, accentColor }) {
               disabled={saving}
             />
           </div>
-        </div>
-
-        {/* Username */}
-        <div style={styles.fieldGroup}>
-          <label style={labelStyle}>Username</label>
-          <input
-            name="username"
-            value={form.username}
-            onChange={handleChange}
-            placeholder="username"
-            style={inputStyle}
-            disabled={saving}
-          />
         </div>
 
         {/* Email */}

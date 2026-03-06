@@ -29,7 +29,13 @@ function FarmListingsPage() {
 					onClick={() => navigate(profilePath)}
 					title="My Profile"
 				>
-					<div style={styles.avatar}>{initials}</div>
+					<div style={styles.avatar}>
+						{user?.profilePicture ? (
+							<img src={user.profilePicture} alt="Profile" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+						) : (
+							initials
+						)}
+					</div>
 					<span style={styles.profileLabel}>Profile</span>
 				</button>
 

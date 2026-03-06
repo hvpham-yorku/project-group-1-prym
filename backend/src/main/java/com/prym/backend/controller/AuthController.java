@@ -195,7 +195,7 @@ public class AuthController {
 				request.get("lastName"),
 				request.get("email"),
 				request.get("username"),
-				request.get("profilePictrue")
+				request.get("profilePicture")
 			);
 			return ResponseEntity.ok(buildUserResponse(updatedUser));
 		} catch (RuntimeException e){
