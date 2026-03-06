@@ -127,20 +127,22 @@ function SellerDashboard() {
       {/* Header Banner */}
       <div style={styles.banner}>
         <div style={styles.bannerInner}>
-          <div style={styles.avatar}>{initials}</div>
+          <div style={styles.avatarWrapper}>
+            <div style={styles.avatar}>{initials}</div>
+            <button
+              style={styles.editAccountBtn}
+              onClick={() => setShowAccountModal(true)}
+              title="Edit account"
+            >
+              ✎
+            </button>
+          </div>
           <div>
             <h1 style={styles.bannerName}>
               {user?.firstName} {user?.lastName}
             </h1>
             <p style={styles.bannerEmail}>{user?.email}</p>
             <span style={styles.roleBadge}>SELLER</span>
-
-            <button
-              style={styles.editAccountBtn}
-              onClick={() => setShowAccountModal(true)}
-            >
-              Edit Account
-            </button>
           </div>
         </div>
       </div>
@@ -442,15 +444,24 @@ const styles = {
   },
   editAccountBtn: {
     background: "rgba(255,255,255,0.15)",
-    border: "2px solid rgba(255,255,255,0.6)",
-    borderRadius: "6px",
+    border: "2px solid rgba(255,255,255,0.5)",
+    borderRadius: "50%",
     color: "white",
-    fontSize: "13px",
-    fontWeight: "600",
-    padding: "6px 14px",
+    fontSize: "14px",
+    width: "28px",
+    height: "28px",
     cursor: "pointer",
-    marginTop: "10px",
-    display: "inline-block",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 0,
+  },
+  avatarWrapper: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: "8px",
+    flexShrink: 0,
   },
 };
 

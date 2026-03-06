@@ -178,19 +178,23 @@ function BuyerDashboard() {
           >
             ← Back
           </button>
-          <div style={styles.avatar}>{initials}</div>
+          <div style={styles.avatarWrapper}>
+            <div style={styles.avatar}>{initials}</div>
+            <button
+              style={styles.editAccountBtn}
+              onClick={() => setShowAccountModal(true)}
+              title="Edit account"
+            >
+              ✎
+            </button>
+          </div>
+
           <div>
             <h1 style={styles.bannerName}>
               {user?.firstName} {user?.lastName}
             </h1>
             <p style={styles.bannerEmail}>{user?.email}</p>
             <span style={styles.roleBadge}>BUYER</span>
-            <button
-              style={styles.editAccountBtn}
-              onClick={() => setShowAccountModal(true)}
-            >
-              Edit Account
-            </button>
           </div>
         </div>
       </div>
@@ -507,17 +511,26 @@ const styles = {
     cursor: "pointer",
   },
   editAccountBtn: {
-  background: "rgba(255,255,255,0.15)",
-  border: "2px solid rgba(255,255,255,0.6)",
-  borderRadius: "6px",
-  color: "white",
-  fontSize: "13px",
-  fontWeight: "600",
-  padding: "6px 14px",
-  cursor: "pointer",
-  marginTop: "10px",
-  display: "inline-block",
-},
+    background: "rgba(255,255,255,0.15)",
+    border: "2px solid rgba(255,255,255,0.5)",
+    borderRadius: "50%",
+    color: "white",
+    fontSize: "14px",
+    width: "28px",
+    height: "28px",
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 0,
+  },
+  avatarWrapper: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: "8px",
+    flexShrink: 0,
+  },
 };
 
 export default BuyerDashboard;
