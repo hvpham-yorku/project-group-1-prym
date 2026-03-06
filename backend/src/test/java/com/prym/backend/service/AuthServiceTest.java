@@ -19,10 +19,10 @@ public class AuthServiceTest {
     @Mock
     private UserRepository userRepository;
 
-    @Mock
+   
     private AuthService authService;
 
-    @Mock
+    
     private User testUser;
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
