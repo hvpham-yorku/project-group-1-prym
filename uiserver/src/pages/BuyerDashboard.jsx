@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { logout } from "../api/auth";
 import { useState, useEffect } from "react";
 import { getBuyerProfile, updateBuyerProfile } from "../api/buyer";
+import { getAvailableGroups, getMyGroups, joinGroup } from "../api/groups";
 import CowDiagram from "../components/CowDiagram";
 
 // "Chuck, Rib x2, Sirloin"  →  { Chuck: 1, Rib: 2, Sirloin: 1 }
@@ -38,6 +39,12 @@ function BuyerDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const [availableGroups, setAvailableGroups] = useState([]);
+  const [myGroups, setMyGroups] = useState([]);
+  const [groupsLoading, setGroupsLoading] = useState(true);
+  const [groupsError, setGroupsError] = useState("");
+  const [joiningCowId, setJoiningCowId] = useState(null);
+
   useEffect(() => {
     const fetchProfile = async () => {
       if (!user?.id) return;
@@ -58,6 +65,27 @@ function BuyerDashboard() {
       }
     };
     fetchProfile();
+  }, [user?.id]);
+
+  useEffect(() => {
+    const fetchGroups = async () => {
+      if (!user?.id) return;
+      try {
+        setGroupsLoading(true);
+        const [available, mine] = await Promise.all([
+          getAvailableGroups(user.id),
+          getMyGroups(user.id),
+        ]);
+        setAvailableGroups(available);
+        setMyGroups(mine);
+      } catch (err) {
+        setGroupsError("Failed to load groups.");
+        console.error(err);
+      } finally {
+        setGroupsLoading(false);
+      }
+    };
+    fetchGroups();
   }, [user?.id]);
 
   const handleLogout = async () => {
@@ -129,6 +157,24 @@ function BuyerDashboard() {
       else if (qty <= 2) cuts[id] = qty;
       return { ...prev, selectedCuts: cuts };
     });
+  };
+
+  const handleJoinGroup = async (cowId) => {
+    setJoiningCowId(cowId);
+    setGroupsError("");
+    try {
+      await joinGroup(user.id, cowId);
+      const [available, mine] = await Promise.all([
+        getAvailableGroups(user.id),
+        getMyGroups(user.id),
+      ]);
+      setAvailableGroups(available);
+      setMyGroups(mine);
+    } catch (err) {
+      setGroupsError(err.message || "Failed to join group.");
+    } finally {
+      setJoiningCowId(null);
+    }
   };
 
   const handleDiscard = () => {
@@ -274,6 +320,139 @@ function BuyerDashboard() {
             <>
               <button style={styles.secondaryButton} onClick={handleLogout}>Logout</button>
               <button style={styles.primaryButton} onClick={() => setIsEditing(true)}>Edit Profile</button>
+            </>
+          )}
+        </div>
+
+        {/* ── Groups Section ── */}
+        <div style={styles.groupsSection}>
+          <div style={styles.groupsHeader}>
+            <h2 style={styles.sectionTitle}>Groups</h2>
+            {myGroups.length === 0 && !groupsLoading && (
+              <div style={{ display: "flex", gap: "10px" }}>
+                <button style={styles.browseGroupBtn} onClick={() => navigate('/buyer/browse-groups')}>
+                  Find a Group
+                </button>
+                <button style={styles.createGroupBtn} onClick={() => navigate('/buyer/create-group')}>
+                  Start a Group
+                </button>
+              </div>
+            )}
+          </div>
+
+          {groupsError && <div style={styles.error}>{groupsError}</div>}
+
+          {/* Prompt to set preferred cuts first */}
+          {!profile?.preferredCuts && !groupsLoading && (
+            <div style={styles.noCutsPrompt}>
+              Set your preferred cuts above to browse and join groups.
+            </div>
+          )}
+
+          {profile?.preferredCuts && (
+            <>
+              {/* ── My Groups ── */}
+              <h3 style={styles.subSectionTitle}>My Groups</h3>
+              {groupsLoading ? (
+                <p style={styles.emptyText}>Loading your groups...</p>
+              ) : myGroups.length === 0 ? (
+                <p style={styles.emptyText}>You have not joined any groups yet.</p>
+              ) : (
+                <div style={styles.groupCardGrid}>
+                  {myGroups.map((g) => (
+                    <div key={g.cowId} style={{ ...styles.groupCard, cursor: 'pointer' }}
+                      onClick={() => navigate(`/buyer/groups/${g.cowId}`)}>
+
+                      <div style={styles.groupCardHeader}>
+                        <span style={styles.cowNameText}>{g.cowName}</span>
+                        <div style={styles.certBadges}>
+                          {g.certifications.includes("KOSHER") && (
+                            <span style={{ ...styles.badge, ...styles.badgeKosher }}>Kosher</span>
+                          )}
+                          {g.certifications.includes("ORGANIC") && (
+                            <span style={{ ...styles.badge, ...styles.badgeOrganic }}>Organic</span>
+                          )}
+                        </div>
+                      </div>
+                      <p style={styles.cardDetail}>
+                        {g.estimatedWeightLbs ? `~${g.estimatedWeightLbs} lbs` : ""}
+                        {g.harvestDate ? `  ·  Harvest: ${g.harvestDate}` : ""}
+                      </p>
+                      <div style={styles.membersSection}>
+                        <span style={styles.membersLabel}>Members ({g.memberCount})</span>
+                        {g.members.map((m, i) => (
+                          <div key={i} style={styles.memberRow}>
+                            <span style={styles.memberName}>{m.firstName}</span>
+                            <span style={styles.memberCuts}>{m.claimedCuts}</span>
+                            {m.phoneNumber && (
+                              <span style={styles.memberPhone}>{m.phoneNumber}</span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* ── Available Groups — hidden once user has joined a group ── */}
+              {myGroups.length === 0 && (
+                <>
+                  <h3 style={{ ...styles.subSectionTitle, marginTop: "32px" }}>Available Groups</h3>
+                  {groupsLoading ? (
+                    <p style={styles.emptyText}>Loading available groups...</p>
+                  ) : availableGroups.filter((g) => !g.alreadyJoined && g.compatible).length === 0 ? (
+                    <p style={styles.emptyText}>No available groups match your preferred cuts right now.</p>
+                  ) : (
+                    <div style={styles.groupCardGrid}>
+                      {availableGroups
+                        .filter((g) => !g.alreadyJoined && g.compatible)
+                        .map((g) => (
+                          <div
+                            key={g.cowId}
+                            style={{ ...styles.groupCard, cursor: 'pointer' }}
+                            onClick={() => navigate(`/buyer/groups/${g.cowId}`)}
+                          >
+                            <div style={styles.groupCardHeader}>
+                              <span style={styles.cowNameText}>{g.cowName}</span>
+                              <div style={styles.certBadges}>
+                                {g.certifications.includes("KOSHER") && (
+                                  <span style={{ ...styles.badge, ...styles.badgeKosher }}>Kosher</span>
+                                )}
+                                {g.certifications.includes("ORGANIC") && (
+                                  <span style={{ ...styles.badge, ...styles.badgeOrganic }}>Organic</span>
+                                )}
+                              </div>
+                            </div>
+                            <p style={styles.cardDetail}>
+                              {g.estimatedWeightLbs ? `~${g.estimatedWeightLbs} lbs` : ""}
+                              {g.harvestDate ? `  ·  Harvest: ${g.harvestDate}` : ""}
+                            </p>
+                            <p style={styles.cardDetail}>
+                              {g.memberCount === 0
+                                ? "No members yet — be the first!"
+                                : `${g.memberCount} member(s) so far`}
+                            </p>
+                            <button
+                              style={{
+                                ...styles.joinButton,
+                                ...(joiningCowId === g.cowId ? styles.joinButtonDisabled : {}),
+                              }}
+                              onClick={(e) => { e.stopPropagation(); handleJoinGroup(g.cowId); }}
+                              disabled={joiningCowId === g.cowId}
+                            >
+                              {joiningCowId === g.cowId
+                                ? "Joining..."
+                                : g.memberCount === 0
+                                ? "Start Group"
+                                : "Join Group"}
+                            </button>
+                          </div>
+                        ))}
+                    </div>
+                  )}
+                </>
+              )}
             </>
           )}
         </div>
@@ -459,6 +638,174 @@ const styles = {
     fontSize: "15px",
     fontWeight: "600",
     cursor: "pointer",
+  },
+  groupsSection: {
+    marginTop: "48px",
+    paddingTop: "32px",
+    borderTop: "2px solid #e8e4e0",
+  },
+  groupsHeader: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: "20px",
+  },
+  browseGroupBtn: {
+    padding: "9px 20px",
+    backgroundColor: "white",
+    color: BUYER_COLOR,
+    border: `2px solid ${BUYER_COLOR}`,
+    borderRadius: "99px",
+    fontSize: "14px",
+    fontWeight: "600",
+    cursor: "pointer",
+  },
+  createGroupBtn: {
+    padding: "9px 20px",
+    backgroundColor: BUYER_COLOR,
+    color: "white",
+    border: "none",
+    borderRadius: "99px",
+    fontSize: "14px",
+    fontWeight: "600",
+    cursor: "pointer",
+  },
+  sectionTitle: {
+    fontSize: "22px",
+    fontWeight: "700",
+    color: BROWN,
+    margin: 0,
+  },
+  subSectionTitle: {
+    fontSize: "12px",
+    fontWeight: "700",
+    color: BUYER_COLOR,
+    margin: "0 0 12px 0",
+    textTransform: "uppercase",
+    letterSpacing: "0.07em",
+  },
+  noCutsPrompt: {
+    backgroundColor: "#fff8e1",
+    border: "1px solid #ffe082",
+    borderRadius: "8px",
+    padding: "16px 20px",
+    fontSize: "14px",
+    color: "#795548",
+  },
+  emptyText: {
+    fontSize: "14px",
+    color: "#bbb",
+    fontStyle: "italic",
+    margin: 0,
+  },
+  groupCardGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+    gap: "16px",
+  },
+  groupCard: {
+    backgroundColor: "white",
+    borderRadius: "8px",
+    padding: "20px",
+    boxShadow: "0 1px 4px rgba(0,0,0,0.07)",
+    border: "1px solid #e8e4e0",
+    display: "flex",
+    flexDirection: "column",
+    gap: "8px",
+  },
+  groupCardHeader: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: "8px",
+    flexWrap: "wrap",
+  },
+  cowNameText: {
+    fontSize: "16px",
+    fontWeight: "700",
+    color: "#222",
+  },
+  certBadges: {
+    display: "flex",
+    gap: "6px",
+    flexWrap: "wrap",
+  },
+  badge: {
+    display: "inline-block",
+    padding: "2px 8px",
+    borderRadius: "99px",
+    fontSize: "10px",
+    fontWeight: "700",
+    letterSpacing: "0.05em",
+    textTransform: "uppercase",
+  },
+  badgeKosher: {
+    backgroundColor: "#e3f2fd",
+    color: "#1565c0",
+  },
+  badgeOrganic: {
+    backgroundColor: "#e8f5e9",
+    color: "#2e7d32",
+  },
+  cardDetail: {
+    fontSize: "13px",
+    color: "#666",
+    margin: 0,
+  },
+  membersSection: {
+    marginTop: "4px",
+  },
+  membersLabel: {
+    fontSize: "11px",
+    fontWeight: "700",
+    textTransform: "uppercase",
+    letterSpacing: "0.07em",
+    color: BUYER_COLOR,
+    display: "block",
+    marginBottom: "6px",
+  },
+  memberRow: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "1px",
+    backgroundColor: "#f9f9f7",
+    borderRadius: "4px",
+    padding: "6px 10px",
+    marginBottom: "6px",
+    fontSize: "13px",
+  },
+  memberName: {
+    fontWeight: "600",
+    color: "#333",
+  },
+  memberCuts: {
+    color: "#555",
+  },
+  memberPhone: {
+    color: "#888",
+    fontSize: "12px",
+  },
+  incompatibleNote: {
+    fontSize: "12px",
+    color: "#e65100",
+    fontStyle: "italic",
+    margin: 0,
+  },
+  joinButton: {
+    marginTop: "8px",
+    padding: "10px 20px",
+    backgroundColor: BUYER_COLOR,
+    color: "white",
+    border: "none",
+    borderRadius: "6px",
+    fontSize: "14px",
+    fontWeight: "600",
+    cursor: "pointer",
+    alignSelf: "flex-start",
+  },
+  joinButtonDisabled: {
+    opacity: 0.6,
+    cursor: "not-allowed",
   },
 };
 
