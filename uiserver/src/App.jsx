@@ -42,7 +42,7 @@ function AppRoutes() {
                     <FarmListingsPage />
                 </ProtectedRoute>
             } />
-            <Route path="/farmlistings/:farmid" element={
+            <Route path="/farmlistings/:farmname" element={
                 <ProtectedRoute>
                     <FarmListing />
                 </ProtectedRoute>
@@ -75,7 +75,7 @@ function AppRoutes() {
             {/* Legacy redirects — keep old URLs working */}
             <Route path="/buyer/dashboard"        element={<Navigate to="/buyer/profile"  replace />} />
             <Route path="/farmlistingspage"        element={<Navigate to="/farmlistings"   replace />} />
-            <Route path="/farmlistingspage/:farmid" element={<Navigate to="/farmlistings/:farmid" replace />} />
+            <Route path="/farmlistingspage/:farmname" element={<Navigate to="/farmlistings/:farmname" replace />} />
 
             {/* Fallback */}
             <Route path="/" element={<Navigate to="/login" />} />

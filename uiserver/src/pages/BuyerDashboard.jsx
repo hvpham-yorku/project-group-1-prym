@@ -1,5 +1,5 @@
 import { useAuth } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { logout } from "../api/auth";
 import { useState, useEffect } from "react";
 import { getBuyerProfile, updateBuyerProfile } from "../api/buyer";
@@ -272,6 +272,7 @@ function BuyerDashboard() {
             </>
           ) : (
             <>
+			<Link to={`/farmlistings`}><button style={styles.primaryButton}>View Farm Listings</button></Link>
               <button style={styles.secondaryButton} onClick={handleLogout}>Logout</button>
               <button style={styles.primaryButton} onClick={() => setIsEditing(true)}>Edit Profile</button>
             </>

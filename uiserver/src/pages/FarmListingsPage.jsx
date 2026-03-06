@@ -12,7 +12,7 @@ function FarmListingsPage() {
 
 	const profilePath = user?.role === 'BUYER' ? '/buyer/profile' : '/seller/dashboard';
 
-	const farms = getAllFarms();	
+	const farms = getAllFarms();
 	
 	const listItems = farms.map(farm =>
 		<li key={farm.id}>

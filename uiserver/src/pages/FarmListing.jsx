@@ -4,7 +4,7 @@ import {getFarm} from '../api/farm';
 
 function FarmListing(){
 	
-	let { farmname } = useParams();
+	let {farmname} = useParams();
 	console.log(farmname);
 	const farm = getFarm(farmname);
 	console.log(farm);
@@ -34,7 +34,7 @@ function FarmListing(){
 
 const styles = {
 	header: {
-		backgroundColor: 'lightGreen',
+		backgroundColor: '#4a7c59',
 		fontFamily: 'Roboto',
 		display: 'flex',
 		alignItems: 'center',
