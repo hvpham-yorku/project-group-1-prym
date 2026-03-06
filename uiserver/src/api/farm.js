@@ -1,6 +1,6 @@
 import {useState, useEffect} from 'react';
-
-/*export function getAllFarms(){
+/*
+export function getAllFarms(){
 	const [farms, setFarms] = useState([]);
 		
 	useEffect(() => {
@@ -9,11 +9,9 @@ import {useState, useEffect} from 'react';
 		.then(data => setFarms(data))
 		.catch(err => console.error("Failed to load farms", err))
 	}, []);
-		
-	
-	
+
 	return farms;
-}*/
+}
 
 
 export function getAllFarms(){
@@ -33,10 +31,21 @@ export function getAllFarms(){
 	return farms;
 }
 
+
 export function getFarm(name){
-	const farms = getAllFarms();
+	let farms = getAllFarms();
 	console.log(farms);
 	return farms.find((f) => f.shopName === name);
 }
+*/
+export async function getAllFarms(){
+	const response = await fetch('/api/seller/all');
+	return response.json();
+}
 
+
+export async function getFarm(name){
+	const farms = await getAllFarms();
+	return farms.find(f => f.shopName === name);
+}
 

@@ -1,15 +1,23 @@
 import {useParams} from 'react-router-dom';
 import farmImage from '../assets/rural-farm-landscape-stockcake.webp';
 import {getFarm} from '../api/farm';
+import {useState, useEffect} from 'react';
 
 function FarmListing(){
 	
 	let {farmname} = useParams();
 	console.log(farmname);
-	const farm = getFarm(farmname);
-	console.log(farm);
-	let f = farm.certifications;
-	const certs = f.map(c => <li style={styles.certification}>{c}</li>);
+	//const farms = getAllFarms();
+	
+	const [farm, setFarm] = useState(null);
+	
+	useEffect(() => {
+		getFarm(farmname).then(setFarm).catch(console.error);
+	}, [farmname]);
+	
+	if (!farm) return <div>Loading...</div>;
+	
+	const certs = (farm.certifications || []).map(c => <li key={c.id} style={styles.certification}>{c.name}</li>);
 	
 	return(
 		<div>

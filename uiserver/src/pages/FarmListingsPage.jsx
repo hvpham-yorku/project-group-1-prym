@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {getAllFarms} from '../api/farm';
-
+import {useState, useEffect} from 'react';
 
 function FarmListingsPage() {
 	const { user } = useAuth();
@@ -12,7 +12,13 @@ function FarmListingsPage() {
 
 	const profilePath = user?.role === 'BUYER' ? '/buyer/profile' : '/seller/dashboard';
 
-	const farms = getAllFarms();
+	//const farms = getAllFarms();
+	
+	const [farms, setFarms] = useState([]);
+	
+	useEffect(() => {
+		getAllFarms().then(setFarms).catch(console.error);
+	}, []);
 	
 	const listItems = farms.map(farm =>
 		<li key={farm.id}>
