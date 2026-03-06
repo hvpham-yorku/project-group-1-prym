@@ -28,6 +28,7 @@ ___
 
 | Decision | Rationale |
 |------|-------------|
+| Remove seller dashboard | We realised that the seller would have no need for a dashboard past looking at their own farm listing, so we just made that their dashboard and will make it editable |
 
 ---
 
@@ -70,7 +71,7 @@ ___
 ## Development Tasks Per User Story
 | User Story | Details |
 |------|-------------|
-
+| Farm Listings | integrate with database, UI changes, have listings link to unique pages, create actual farm listing page with all info |
 
 ---
 
