@@ -17,7 +17,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.boot.webmvc.autoconfigure.WebMvcProperties.Apiversion.Use;
+
 
 import com.prym.backend.model.Seller;
 import com.prym.backend.model.User;
