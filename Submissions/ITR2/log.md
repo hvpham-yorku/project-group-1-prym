@@ -65,6 +65,8 @@ ___
 | Manage group chat settings | Sufyan |
 | Communication with farms | Sufyan |
 | Group chat tests | Sufyan |
+| Integration tests | Sufyan |
+| Migrate to PostgreSQL | Sufyan |
 
 ---
 
@@ -85,7 +87,7 @@ ___
 | Show groups with matching preferences | Jacob | | |
 | Search for a group | Jacob | | |
 | View group details | Jacob | | |
-| Join/leave a group | Jacon | | |
+| Join/leave a group | Jacob | | |
 | Jira Setup | Jacob | | |
 | Basic UI decorations | Harleen |0.5 Day|0.5 Day|
 | Farm Listings Integration into dashboard | Katelyn | 30min | 20min |
@@ -93,10 +95,12 @@ ___
 | General user profile modification | Harleen |0.5 Day|0.5 Day|
 | View Farm details and ratings | Katelyn | 1 Day | 1 Day | 
 | Farm listing tests | Katelyn | 1 Day | 0.5 Day |
-| Group chat with group members | Sufyan | | |
-| Manage group chat settings | Sufyan | | |
-| Communication with farms | Sufyan | | |
-| Group chat tests | Sufyan | | |
+| Group chat with group members | Sufyan | moved to ITR3 due to plan changes | |
+| Manage group chat settings | Sufyan | moved to ITR3 due to plan changes | |
+| Communication with farms | Sufyan | moved to ITR3 due to plan changes | |
+| Group chat tests | Sufyan | moved to ITR3 due to plan changes | |
+| Integration tests | Sufyan | 0.5 days | 0.5 days |
+| Migrate to PostgreSQL | Sufyan | 1 day | 1 day |
 
 
 ---
