@@ -1,7 +1,8 @@
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import {getAllFarms} from '../api/farm';
-import {useState, useEffect} from 'react';
+import { getAllFarms } from '../api/farm';
+
 
 function FarmListingsPage() {
 	const { user } = useAuth();
@@ -11,8 +12,6 @@ function FarmListingsPage() {
 		(user?.firstName?.charAt(0) || '') + (user?.lastName?.charAt(0) || '');
 
 	const profilePath = user?.role === 'BUYER' ? '/buyer/profile' : '/seller/dashboard';
-
-	//const farms = getAllFarms();
 	
 	const [farms, setFarms] = useState([]);
 	
@@ -22,7 +21,7 @@ function FarmListingsPage() {
 	
 	const listItems = farms.map(farm =>
 		<li key={farm.id}>
-			<Link to={`/farmlistings/${farm.shopName}`}>
+			<Link to={`/farmlistings/${farm.id}`}>
 				<button style={styles.button}>{farm.shopName}</button>
 			</Link>
 		</li>

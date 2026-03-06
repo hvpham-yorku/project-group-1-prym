@@ -1,51 +1,11 @@
 import {useState, useEffect} from 'react';
-/*
-export function getAllFarms(){
-	const [farms, setFarms] = useState([]);
-		
-	useEffect(() => {
-		fetch('api/seller/all')
-		.then(res => res.json())
-		.then(data => setFarms(data))
-		.catch(err => console.error("Failed to load farms", err))
-	}, []);
 
-	return farms;
-}
-
-
-export function getAllFarms(){
-	const [farms, setFarms] = useState([]);
-	
-	useEffect(() => {
-		const fetchData = async () => {
-			const response = await fetch('/api/seller/all');
-			const data = await response.json();
-			setFarms(data);
-		};
-		fetchData().catch(console.error);
-	}, [])
-	
-	console.log(Array.isArray(farms));
-	
-	return farms;
-}
-
-
-export function getFarm(name){
-	let farms = getAllFarms();
-	console.log(farms);
-	return farms.find((f) => f.shopName === name);
-}
-*/
-export async function getAllFarms(){
+export async function getAllFarms() {
 	const response = await fetch('/api/seller/all');
 	return response.json();
 }
 
-
-export async function getFarm(name){
+export async function getFarm(id) {
 	const farms = await getAllFarms();
-	return farms.find(f => f.shopName === name);
+	return farms.find((f) => f.id === Number(id));
 }
-
