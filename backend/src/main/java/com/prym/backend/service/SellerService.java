@@ -60,6 +60,7 @@ public class SellerService {
         seller.setShopName(shopName);
         seller.setShopAddress(shopAddress);
         seller.setDescription(description);
+        seller.setCategory(category);
 
         if (phoneNumber != null && !phoneNumber.isBlank()) {
             User user = seller.getUser();

@@ -44,7 +44,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173"));//only allow requests from the react frontend
+        configuration.setAllowedOriginPatterns(Arrays.asList("http://localhost:*"));//allow any localhost port
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT","PATCH", "DELETE", "OPTIONS"));// Allow these http methods
         configuration.setAllowedHeaders(Arrays.asList("*"));//allow any headers
         configuration.setAllowCredentials(true);//allow cookies to be sent with requests

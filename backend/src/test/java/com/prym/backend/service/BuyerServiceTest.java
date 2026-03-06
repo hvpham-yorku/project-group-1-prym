@@ -39,6 +39,7 @@ public class BuyerServiceTest {
         testUser.setId(1L);
         testUser.setEmail("test@example.com");
         testUser.setRole(User.Role.BUYER);
+        testUser.setPhoneNumber("416-555-0000");
     }
 
     // Test 1: Creating a profile when everything is valid
@@ -125,7 +126,7 @@ public class BuyerServiceTest {
         when(buyerRepository.save(any(Buyer.class))).thenAnswer(i -> i.getArgument(0));
 
         // Act: update with new values
-        Buyer result = buyerService.updateBuyerProfile(1L, "T-Bone", "Whole cow", "123-456-7890");
+        Buyer result = buyerService.updateBuyerProfile(1L, "T-Bone", "Whole cow", null);
 
         // Assert: check the fields were updated
         assertEquals("T-Bone", result.getPreferredCuts());
@@ -141,7 +142,44 @@ public class BuyerServiceTest {
 
         // Act + Assert: should throw an error
         assertThrows(RuntimeException.class, () -> {
-            buyerService.updateBuyerProfile(999L, "Ribeye", "Half cow", "111-111-1111");
+            buyerService.updateBuyerProfile(999L, "Ribeye", "Half cow", "416-555-9999");
         });
+    }
+
+    //Test 8: Update buyer profile with phone number
+    @Test
+    void updateBuyerProfile_WithPhoneNumber(){
+        Buyer existingBuyer = new Buyer();
+        existingBuyer.setUser(testUser);
+        existingBuyer.setPreferredCuts("Ribeye");
+        existingBuyer.setQuantity("Half cow");
+        when(buyerRepository.findByUserId(1L)).thenReturn(Optional.of(existingBuyer));
+        when(buyerRepository.save(any(Buyer.class))).thenAnswer(i -> i.getArgument(0));
+        when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
+
+        // Act: update with new values
+        Buyer result = buyerService.updateBuyerProfile(1L, "T-Bone", "Whole cow", "415-555-9999");
+
+        // Assert: check the fields were updated
+        assertEquals("T-Bone", result.getPreferredCuts());
+        assertEquals("Whole cow", result.getQuantity());
+        assertEquals("415-555-9999", existingBuyer.getUser().getPhoneNumber());
+        verify(userRepository).save(any(User.class));
+        verify(buyerRepository).save(any(Buyer.class));
+    }
+
+    //Test 9: Update Buyer profile with blank phone number
+    @Test
+    void updateBuyerProfile_WithBlankPhoneNumber(){
+        Buyer existingBuyer = new Buyer();
+        existingBuyer.setUser(testUser);
+        existingBuyer.setPreferredCuts("Ribeye");
+        existingBuyer.setQuantity("Half cow");
+        when(buyerRepository.findByUserId(1L)).thenReturn(Optional.of(existingBuyer));
+        when(buyerRepository.save(any(Buyer.class))).thenAnswer(i -> i.getArgument(0));
+    
+        Buyer result = buyerService.updateBuyerProfile(1L, "T-Bone", "Whole cow", "          ");
+        assertEquals("416-555-0000", existingBuyer.getUser().getPhoneNumber());
+        verify(userRepository, never()).save(any(User.class));
     }
 }
