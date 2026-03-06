@@ -63,7 +63,7 @@ function AppRoutes() {
                 </ProtectedRoute>
             } />
 
-            <Route path="/buyer/groups/:cowId" element={
+            <Route path="/buyer/groups/:groupId" element={
                 <ProtectedRoute allowedRole="BUYER">
                     <GroupDetailPage />
                 </ProtectedRoute>
