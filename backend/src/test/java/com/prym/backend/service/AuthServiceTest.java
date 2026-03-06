@@ -29,7 +29,7 @@ public class AuthServiceTest {
     @BeforeEach
     void setUp() {
         authService = new AuthService(userRepository);
-        
+
         testUser = new User();
         testUser.setId(1L);
         testUser.setEmail("test@example.com");
@@ -116,5 +116,72 @@ public class AuthServiceTest {
         Optional<User> result = authService.login("nobody@example.com", "password123");
 
         assertFalse(result.isPresent());
+    }
+
+    // Test 7: updateUserInfo_Success
+    @Test
+    public void updateUserInfo_Success() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+        when(userRepository.existsByEmail("new@example.com")).thenReturn(false);
+        when(userRepository.existsByUsername("newusername")).thenReturn(false);
+        when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
+
+        User result = authService.updateUserInfo(1L, "Jane", "Doe", "new@example.com", "newusername", null);
+
+        assertEquals("Jane", result.getFirstName());
+        assertEquals("Doe", result.getLastName());
+        assertEquals("new@example.com", result.getEmail());
+        assertEquals("newusername", result.getUsername());
+        verify(userRepository).save(any(User.class));
+    }
+
+    // Test 8: updateUserInfo_UserNotFound
+    @Test
+    public void updateUserInfo_UserNotFound() {
+        when(userRepository.findById(99L)).thenReturn(Optional.empty());
+
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> authService.updateUserInfo(99L, "Jane", "Doe", "new@example.com", "newusername", null));
+
+        assertEquals("User not found", ex.getMessage());
+        verify(userRepository, never()).save(any());
+    }
+
+    // Test 9: updateUserInfo_EmailAlreadyInUse
+    @Test
+    public void updateUserInfo_EmailAlreadyInUse() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+        when(userRepository.existsByEmail("taken@example.com")).thenReturn(true);
+
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> authService.updateUserInfo(1L, "Test", "User", "taken@example.com", "testuser", null));
+
+        assertEquals("Email already in use", ex.getMessage());
+        verify(userRepository, never()).save(any());
+    }
+
+    // Test 10: updateUserInfo_UsernameAlreadyTaken
+    @Test
+    public void updateUserInfo_UsernameAlreadyTaken() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+        when(userRepository.existsByUsername("takenuser")).thenReturn(true);
+
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> authService.updateUserInfo(1L, "Test", "User", "test@example.com", "takenuser", null));
+
+        assertEquals("Username already taken", ex.getMessage());
+        verify(userRepository, never()).save(any());
+    }
+
+    // Test 11: updateUserInfo_IgnoresBlankFields
+    @Test
+    public void updateUserInfo_IgnoresBlankFields() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+        when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
+        User result = authService.updateUserInfo(1L, "  ", "  ", "test@example.com", "testuser", null);
+
+        assertEquals("Test", result.getFirstName());
+        assertEquals("User", result.getLastName());
+        verify(userRepository).save(any(User.class));
     }
 }
