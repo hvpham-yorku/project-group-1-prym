@@ -9,6 +9,9 @@ import SellerDashboard from './pages/SellerDashboard';
 import FarmListingsPage from './pages/FarmListingsPage';
 import FarmListing from './pages/FarmListing';
 import SellerProfileSetup from './pages/SellerProfileSetup';
+import GroupDetailPage from './pages/GroupDetailPage';
+import CreateGroupPage from './pages/CreateGroupPage';
+import BrowseGroupsPage from './pages/BrowseGroupsPage';
 
 function ProtectedRoute({ children, allowedRole }) {
     const { user } = useAuth();
@@ -57,6 +60,22 @@ function AppRoutes() {
             <Route path="/buyer/profile-setup" element={
                 <ProtectedRoute allowedRole="BUYER">
                     <BuyerProfileSetup />
+                </ProtectedRoute>
+            } />
+
+            <Route path="/buyer/groups/:cowId" element={
+                <ProtectedRoute allowedRole="BUYER">
+                    <GroupDetailPage />
+                </ProtectedRoute>
+            } />
+            <Route path="/buyer/create-group" element={
+                <ProtectedRoute allowedRole="BUYER">
+                    <CreateGroupPage />
+                </ProtectedRoute>
+            } />
+            <Route path="/buyer/browse-groups" element={
+                <ProtectedRoute allowedRole="BUYER">
+                    <BrowseGroupsPage />
                 </ProtectedRoute>
             } />
 
