@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { logout } from "../api/auth";
 import { useState, useEffect } from "react";
 import { getSellerProfile, updateSellerProfile } from "../api/seller";
+import EditAccountModal from "../components/EditAccountModal";
 
 function SellerDashboard() {
   const { user, clearUser, saveUser } = useAuth();
@@ -19,6 +20,7 @@ function SellerDashboard() {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [showAccountModal, setShowAccountModal] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -59,8 +61,9 @@ function SellerDashboard() {
     setError("");
     try {
       if (formData.phoneNumber) {
-        const phoneRegex = /^(\+?1[\s.\-]?)?(\(?\d{3}\)?[\s.\-]?)\d{3}[\s.\-]?\d{4}$/;
- if (!phoneRegex.test(formData.phoneNumber)) {
+        const phoneRegex =
+          /^(\+?1[\s.\-]?)?(\(?\d{3}\)?[\s.\-]?)\d{3}[\s.\-]?\d{4}$/;
+        if (!phoneRegex.test(formData.phoneNumber)) {
           setError("Please enter a valid phone number.");
           return;
         }
@@ -114,27 +117,40 @@ function SellerDashboard() {
 
   return (
     <div style={styles.page}>
+      {showAccountModal && (
+        <EditAccountModal
+          accentColor={SELLER_COLOR}
+          onClose={() => setShowAccountModal(false)}
+        />
+      )}
 
       {/* Header Banner */}
       <div style={styles.banner}>
         <div style={styles.bannerInner}>
           <div style={styles.avatar}>{initials}</div>
           <div>
-            <h1 style={styles.bannerName}>{user?.firstName} {user?.lastName}</h1>
+            <h1 style={styles.bannerName}>
+              {user?.firstName} {user?.lastName}
+            </h1>
             <p style={styles.bannerEmail}>{user?.email}</p>
             <span style={styles.roleBadge}>SELLER</span>
+
+            <button
+              style={styles.editAccountBtn}
+              onClick={() => setShowAccountModal(true)}
+            >
+              Edit Account
+            </button>
           </div>
         </div>
       </div>
 
       {/* Content */}
       <div style={styles.content}>
-
         {error && <div style={styles.error}>{error}</div>}
 
         {/* Fields Grid */}
         <div style={styles.grid}>
-
           {/* Phone */}
           <div style={styles.fieldCard}>
             <p style={styles.fieldLabel}>Phone Number</p>
@@ -147,7 +163,13 @@ function SellerDashboard() {
                 style={styles.fieldInput}
               />
             ) : (
-              <p style={profile?.phoneNumber ? styles.fieldValue : styles.fieldValueEmpty}>
+              <p
+                style={
+                  profile?.phoneNumber
+                    ? styles.fieldValue
+                    : styles.fieldValueEmpty
+                }
+              >
                 {profile?.phoneNumber || "Not set"}
               </p>
             )}
@@ -165,7 +187,11 @@ function SellerDashboard() {
                 style={styles.fieldInput}
               />
             ) : (
-              <p style={profile?.shopName ? styles.fieldValue : styles.fieldValueEmpty}>
+              <p
+                style={
+                  profile?.shopName ? styles.fieldValue : styles.fieldValueEmpty
+                }
+              >
                 {profile?.shopName || "Not set"}
               </p>
             )}
@@ -183,7 +209,13 @@ function SellerDashboard() {
                 style={styles.fieldInput}
               />
             ) : (
-              <p style={profile?.shopAddress ? styles.fieldValue : styles.fieldValueEmpty}>
+              <p
+                style={
+                  profile?.shopAddress
+                    ? styles.fieldValue
+                    : styles.fieldValueEmpty
+                }
+              >
                 {profile?.shopAddress || "Not set"}
               </p>
             )}
@@ -206,7 +238,11 @@ function SellerDashboard() {
                 <option value="CONVENTIONAL">Conventional</option>
               </select>
             ) : (
-              <p style={profile?.category ? styles.fieldValue : styles.fieldValueEmpty}>
+              <p
+                style={
+                  profile?.category ? styles.fieldValue : styles.fieldValueEmpty
+                }
+              >
                 {profile?.category || "Not set"}
               </p>
             )}
@@ -225,29 +261,44 @@ function SellerDashboard() {
                 style={{ ...styles.fieldInput, resize: "vertical" }}
               />
             ) : (
-              <p style={profile?.description ? styles.fieldValue : styles.fieldValueEmpty}>
+              <p
+                style={
+                  profile?.description
+                    ? styles.fieldValue
+                    : styles.fieldValueEmpty
+                }
+              >
                 {profile?.description || "Not set"}
               </p>
             )}
           </div>
-
         </div>
 
         {/* Buttons */}
         <div style={styles.buttonRow}>
           {isEditing ? (
             <>
-              <button style={styles.secondaryButton} onClick={handleDiscard}>Discard</button>
-              <button style={styles.primaryButton} onClick={handleSave}>Save Changes</button>
+              <button style={styles.secondaryButton} onClick={handleDiscard}>
+                Discard
+              </button>
+              <button style={styles.primaryButton} onClick={handleSave}>
+                Save Changes
+              </button>
             </>
           ) : (
             <>
-              <button style={styles.secondaryButton} onClick={handleLogout}>Logout</button>
-              <button style={styles.primaryButton} onClick={() => setIsEditing(true)}>Edit Profile</button>
+              <button style={styles.secondaryButton} onClick={handleLogout}>
+                Logout
+              </button>
+              <button
+                style={styles.primaryButton}
+                onClick={() => setIsEditing(true)}
+              >
+                Edit Profile
+              </button>
             </>
           )}
         </div>
-
       </div>
     </div>
   );
@@ -388,6 +439,18 @@ const styles = {
     fontSize: "15px",
     fontWeight: "600",
     cursor: "pointer",
+  },
+  editAccountBtn: {
+    background: "rgba(255,255,255,0.15)",
+    border: "2px solid rgba(255,255,255,0.6)",
+    borderRadius: "6px",
+    color: "white",
+    fontSize: "13px",
+    fontWeight: "600",
+    padding: "6px 14px",
+    cursor: "pointer",
+    marginTop: "10px",
+    display: "inline-block",
   },
 };
 

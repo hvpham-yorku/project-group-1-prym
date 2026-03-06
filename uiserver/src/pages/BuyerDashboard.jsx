@@ -4,6 +4,7 @@ import { logout } from "../api/auth";
 import { useState, useEffect } from "react";
 import { getBuyerProfile, updateBuyerProfile } from "../api/buyer";
 import CowDiagram from "../components/CowDiagram";
+import EditAccountModal from "../components/EditAccountModal";
 
 // "Chuck, Rib x2, Sirloin"  →  { Chuck: 1, Rib: 2, Sirloin: 1 }
 function parseCuts(str) {
@@ -31,12 +32,13 @@ function BuyerDashboard() {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     phoneNumber: "",
-    selectedCuts: {},   // { [cutId]: quantity }
+    selectedCuts: {}, // { [cutId]: quantity }
     quantity: "",
   });
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [showAccountModal, setShowAccountModal] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -75,7 +77,8 @@ function BuyerDashboard() {
     setError("");
     try {
       if (formData.phoneNumber) {
-        const phoneRegex = /^(\+?1[\s.\-]?)?(\(?\d{3}\)?[\s.\-]?)\d{3}[\s.\-]?\d{4}$/;
+        const phoneRegex =
+          /^(\+?1[\s.\-]?)?(\(?\d{3}\)?[\s.\-]?)\d{3}[\s.\-]?\d{4}$/;
         if (!phoneRegex.test(formData.phoneNumber)) {
           setError("Please enter a valid phone number.");
           return;
@@ -145,7 +148,9 @@ function BuyerDashboard() {
     (user?.firstName?.charAt(0) || "") + (user?.lastName?.charAt(0) || "");
 
   // The cuts to show in the diagram — profile's saved cuts when viewing, form state when editing
-  const displayCuts = isEditing ? formData.selectedCuts : parseCuts(profile?.preferredCuts);
+  const displayCuts = isEditing
+    ? formData.selectedCuts
+    : parseCuts(profile?.preferredCuts);
 
   if (loading) {
     return (
@@ -157,30 +162,45 @@ function BuyerDashboard() {
 
   return (
     <div style={styles.page}>
+      {showAccountModal && (
+        <EditAccountModal
+          accentColor={BUYER_COLOR}
+          onClose={() => setShowAccountModal(false)}
+        />
+      )}
 
       {/* Header Banner */}
       <div style={styles.banner}>
         <div style={styles.bannerInner}>
-          <button style={styles.backBtn} onClick={() => navigate('/farmlistings')}>
+          <button
+            style={styles.backBtn}
+            onClick={() => navigate("/farmlistings")}
+          >
             ← Back
           </button>
           <div style={styles.avatar}>{initials}</div>
           <div>
-            <h1 style={styles.bannerName}>{user?.firstName} {user?.lastName}</h1>
+            <h1 style={styles.bannerName}>
+              {user?.firstName} {user?.lastName}
+            </h1>
             <p style={styles.bannerEmail}>{user?.email}</p>
             <span style={styles.roleBadge}>BUYER</span>
+            <button
+              style={styles.editAccountBtn}
+              onClick={() => setShowAccountModal(true)}
+            >
+              Edit Account
+            </button>
           </div>
         </div>
       </div>
 
       {/* Content */}
       <div style={styles.content}>
-
         {error && <div style={styles.error}>{error}</div>}
 
         {/* Fields Grid */}
         <div style={styles.grid}>
-
           {/* Phone */}
           <div style={styles.fieldCard}>
             <p style={styles.fieldLabel}>Phone Number</p>
@@ -193,7 +213,11 @@ function BuyerDashboard() {
                 style={styles.fieldInput}
               />
             ) : (
-              <p style={user?.phoneNumber ? styles.fieldValue : styles.fieldValueEmpty}>
+              <p
+                style={
+                  user?.phoneNumber ? styles.fieldValue : styles.fieldValueEmpty
+                }
+              >
                 {user?.phoneNumber || "Not set"}
               </p>
             )}
@@ -215,14 +239,24 @@ function BuyerDashboard() {
                 <option value="Whole cow">Whole cow</option>
               </select>
             ) : (
-              <p style={profile?.quantity ? styles.fieldValue : styles.fieldValueEmpty}>
+              <p
+                style={
+                  profile?.quantity ? styles.fieldValue : styles.fieldValueEmpty
+                }
+              >
                 {profile?.quantity || "Not set"}
               </p>
             )}
           </div>
 
           {/* Preferred Cuts — cow diagram, full width */}
-          <div style={{ ...styles.fieldCard, gridColumn: "1 / -1", padding: "20px 16px 12px" }}>
+          <div
+            style={{
+              ...styles.fieldCard,
+              gridColumn: "1 / -1",
+              padding: "20px 16px 12px",
+            }}
+          >
             <p style={styles.fieldLabel}>
               Preferred Cuts
               {isEditing && (
@@ -250,9 +284,12 @@ function BuyerDashboard() {
                     {Object.entries(displayCuts).map(([cut, qty], i, arr) => (
                       <span key={cut}>
                         <span style={styles.cutName}>
-                          {cut}{qty > 1 ? ` ×${qty}` : ''}
+                          {cut}
+                          {qty > 1 ? ` ×${qty}` : ""}
                         </span>
-                        {i < arr.length - 1 && <span style={styles.cutSep}>,  </span>}
+                        {i < arr.length - 1 && (
+                          <span style={styles.cutSep}>, </span>
+                        )}
                       </span>
                     ))}
                   </div>
@@ -260,24 +297,33 @@ function BuyerDashboard() {
               </>
             )}
           </div>
-
         </div>
 
         {/* Buttons */}
         <div style={styles.buttonRow}>
           {isEditing ? (
             <>
-              <button style={styles.secondaryButton} onClick={handleDiscard}>Discard</button>
-              <button style={styles.primaryButton} onClick={handleSave}>Save Changes</button>
+              <button style={styles.secondaryButton} onClick={handleDiscard}>
+                Discard
+              </button>
+              <button style={styles.primaryButton} onClick={handleSave}>
+                Save Changes
+              </button>
             </>
           ) : (
             <>
-              <button style={styles.secondaryButton} onClick={handleLogout}>Logout</button>
-              <button style={styles.primaryButton} onClick={() => setIsEditing(true)}>Edit Profile</button>
+              <button style={styles.secondaryButton} onClick={handleLogout}>
+                Logout
+              </button>
+              <button
+                style={styles.primaryButton}
+                onClick={() => setIsEditing(true)}
+              >
+                Edit Profile
+              </button>
             </>
           )}
         </div>
-
       </div>
     </div>
   );
@@ -304,15 +350,15 @@ const styles = {
     gap: "24px",
   },
   backBtn: {
-    background: 'none',
-    border: '2px solid rgba(255,255,255,0.6)',
-    borderRadius: '6px',
-    color: 'white',
-    fontSize: '14px',
-    fontWeight: '600',
-    padding: '6px 14px',
-    cursor: 'pointer',
-    marginRight: '8px',
+    background: "none",
+    border: "2px solid rgba(255,255,255,0.6)",
+    borderRadius: "6px",
+    color: "white",
+    fontSize: "14px",
+    fontWeight: "600",
+    padding: "6px 14px",
+    cursor: "pointer",
+    marginRight: "8px",
     flexShrink: 0,
   },
   avatar: {
@@ -460,6 +506,18 @@ const styles = {
     fontWeight: "600",
     cursor: "pointer",
   },
+  editAccountBtn: {
+  background: "rgba(255,255,255,0.15)",
+  border: "2px solid rgba(255,255,255,0.6)",
+  borderRadius: "6px",
+  color: "white",
+  fontSize: "13px",
+  fontWeight: "600",
+  padding: "6px 14px",
+  cursor: "pointer",
+  marginTop: "10px",
+  display: "inline-block",
+},
 };
 
 export default BuyerDashboard;
