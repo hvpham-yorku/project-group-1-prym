@@ -57,3 +57,5 @@ export async function updateSellerProfile(userId, profileData) {
 
     return data;
 }
+
+
