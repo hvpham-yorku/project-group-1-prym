@@ -1,27 +1,34 @@
-import {useParams} from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import farmImage from '../assets/rural-farm-landscape-stockcake.webp';
-import {getFarm} from '../api/farm';
+import { getFarm } from '../api/farm';
 
 function FarmListing(){
-	
-	let {farmname} = useParams();
-	console.log(farmname);
-	const farm = getFarm(farmname);
-	console.log(farm);
-	let f = farm.certifications;
-	const certs = f.map(c => <li style={styles.certification}>{c}</li>);
-	
+
+	let { farmname } = useParams();
+	const [farm, setFarm] = useState(null);
+
+	useEffect(() => {
+		getFarm(farmname).then(setFarm).catch(console.error);
+	}, [farmname]);
+
+	if (!farm) return <div>Loading...</div>;
+
+	const certs = (farm.certifications || []).map(c =>
+		<li key={c.id} style={styles.certification}>{c.name}</li>
+	);
+
 	return(
 		<div>
 			<img src={farmImage} width='100%' height='300' alt="farm image"/>
-			
+
 			<h1 style={styles.header}>{farm.shopName}</h1>
-			
+
 			<div style={styles.container}>
 				<p style={styles.descBox}>{farm.description}</p>
 				<ul style = {styles.certBox}>{certs}</ul>
 			</div>
-			
+
 			<div style={styles.container}>
 				<div style={styles.cowBox}> COW </div>
 				<div style={styles.cowBox}> COW </div>
@@ -38,7 +45,6 @@ const styles = {
 		fontFamily: 'Roboto',
 		display: 'flex',
 		alignItems: 'center',
-		//color: '#4a7c59',
 		color: 'black',
 		fontSize: 50,
 	},

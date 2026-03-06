@@ -1,5 +1,14 @@
 const API_URL = '/api/auth';
 
+async function parseResponse(response) {
+    const text = await response.text();
+    try {
+        return text ? JSON.parse(text) : {};
+    } catch {
+        throw new Error(`Server error: ${response.status}`);
+    }
+}
+
 export async function registerBuyer(userData) { // userData: { email, password, username, firstName, lastName, phoneNumber, profilePicture (optional) }
 
     const response = await fetch(`${API_URL}/register/buyer`, {
@@ -9,7 +18,7 @@ export async function registerBuyer(userData) { // userData: { email, password, 
         body: JSON.stringify(userData)
     });
 
-    const data = await response.json();
+    const data = await parseResponse(response);
 
     if (!response.ok) {
         throw new Error(data.error || 'Registration failed');
@@ -26,7 +35,7 @@ export async function registerSeller(userData) {
         body: JSON.stringify(userData)
     });
 
-    const data = await response.json();
+    const data = await parseResponse(response);
 
     if (!response.ok) {
         throw new Error(data.error || 'Registration failed');
@@ -43,7 +52,7 @@ export async function login(email, password) {
         body: JSON.stringify({ email, password })
     });
 
-    const data = await response.json();
+    const data = await parseResponse(response);
 
     if (!response.ok) {
         throw new Error(data.error || 'Login failed');
@@ -58,7 +67,7 @@ export async function logout() {
         credentials: 'include'
     });
 
-    const data = await response.json();
+    const data = await parseResponse(response);
 
     if (!response.ok) {
         throw new Error(data.error || 'Logout failed');
@@ -73,7 +82,7 @@ export async function getCurrentUser() {
         credentials: 'include'
     });
 
-    const data = await response.json();
+    const data = await parseResponse(response);
 
     if (!response.ok) {
         throw new Error(data.error || 'Not logged in');
