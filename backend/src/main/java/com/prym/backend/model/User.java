@@ -43,7 +43,7 @@ public class User {
     @Column(nullable = false)
     private String phoneNumber;
 
-    @Lob  // Large Object tag for storing image data
+   
     @Column(columnDefinition = "TEXT")
     private String profilePicture;  // Store as Base64 string
 
