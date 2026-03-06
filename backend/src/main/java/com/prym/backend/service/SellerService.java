@@ -78,7 +78,5 @@ public class SellerService {
         return sellerRepository.save(seller);
     }
     
-    public List<Seller> getAllFarms() {
-    	return sellerRepository.findAll();
-    }
+
 }
