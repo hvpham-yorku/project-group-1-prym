@@ -81,3 +81,18 @@ export async function getCurrentUser() {
 
     return data;
 }
+
+export async function updateUserInfo({firstName, lastName, email, username, profilePicture}){
+    const response = await fetch(`${API_URL}/user`,{
+        method: 'PATCH',
+        headers: {'Content-Type': 'application/json'},
+        credentials: 'include',
+        body: JSON.stringify({firstName, lastName, email, username, profilePicture})
+    });
+    
+    const data = await response.json();
+    if(!response.ok){
+        throw new Error(data.error || 'Failed to update account info');
+    }
+    return data;
+}
