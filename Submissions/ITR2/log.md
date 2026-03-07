@@ -88,7 +88,7 @@ ___
 | Search for a group | Jacob | 1.5 Days | 1.5 Days |
 | View group details | Jacob | 1 Days | 1 Days |
 | Join/leave a group | Jacob | 0.5 Days | 0.5 Days |
-| Jira Setup | Jacob | 0.5 | 0.5 |
+| Jira Setup | Jacob | 0.5 days | 0.5 days|
 | Basic UI decorations | Harleen |0.5 Day|0.5 Day|
 | Farm Listings Integration into dashboard | Katelyn | 30min | 20min |
 | Group creation tests | Jacob | 0.5 Days | 0.5 Days |
