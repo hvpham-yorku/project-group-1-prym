@@ -11,10 +11,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-// Handles all business logic for the group buying feature (Model 2).
+//Handles all business logic for the group buying feature (Model 2).
 // Groups are standalone entities — not tied to any specific seller cow.
 // Each group has a user-defined name, certifications, and members who
-// independently claim cuts of a generic virtual cow.
+//independently claim cuts of a generic virtual cow.
 @Service
 public class GroupService {
 
@@ -34,8 +34,6 @@ public class GroupService {
         this.buyerRepository = buyerRepository;
     }
 
-    // ── Cut parsing ──────────────────────────────────────────────────────────────
-
     // "Chuck, Rib x2, Short Loin"  →  { "Chuck": 1, "Rib": 2, "Short Loin": 1 }
     private Map<String, Integer> parseCuts(String cutsStr) {
         Map<String, Integer> result = new LinkedHashMap<>();
@@ -54,7 +52,7 @@ public class GroupService {
         return result;
     }
 
-    // Sums claimed qty per cut across a list of members.
+    //Sums claimed qty per cut across a list of members.
     private Map<String, Integer> computeTotalQty(List<BuyerGroupMember> members) {
         Map<String, Integer> total = new LinkedHashMap<>();
         for (BuyerGroupMember m : members) {
@@ -64,7 +62,7 @@ public class GroupService {
         return total;
     }
 
-    // ── DTO builder ──────────────────────────────────────────────────────────────
+//Group builder
 
     private Map<String, Object> buildGroupDTO(BuyerGroup group, Long buyerUserId) {
         Buyer buyer = buyerRepository.findByUserId(buyerUserId)
@@ -100,7 +98,7 @@ public class GroupService {
             return md;
         }).collect(Collectors.toList());
 
-        // Parse certifications string → list
+        //Parse certifications string → list
         List<String> certs = new ArrayList<>();
         if (group.getCertifications() != null && !group.getCertifications().isBlank()) {
             certs = Arrays.asList(group.getCertifications().split(","));
@@ -118,8 +116,6 @@ public class GroupService {
 
         return dto;
     }
-
-    // ── Public methods ───────────────────────────────────────────────────────────
 
     // Creates a new group and adds the creator as the first member (no cuts yet).
     @Transactional
