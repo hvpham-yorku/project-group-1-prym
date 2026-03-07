@@ -83,15 +83,15 @@ ___
 |------|-------------|----------------|------------|
 | Show Farms | Katelyn | 1 Day | 1 Day |
 | View Farm Listings | Katelyn | 0.5 Day | 0.5 Day |
-| Create a group | Jacob | | |
-| Show groups with matching preferences | Jacob | | |
-| Search for a group | Jacob | | |
-| View group details | Jacob | | |
-| Join/leave a group | Jacob | | |
-| Jira Setup | Jacob | | |
+| Create a group | Jacob | 1.5 Days | 2 Days |
+| Show groups with matching preferences | Jacob | 2 Days | 2 Days |
+| Search for a group | Jacob | 1.5 Days | 1.5 Days |
+| View group details | Jacob | 1 Days | 1 Days |
+| Join/leave a group | Jacob | 0.5 Days | 0.5 Days |
+| Jira Setup | Jacob | 0.5 | 0.5 |
 | Basic UI decorations | Harleen |0.5 Day|0.5 Day|
 | Farm Listings Integration into dashboard | Katelyn | 30min | 20min |
-| Group creation tests | Jacob | | |
+| Group creation tests | Jacob | 0.5 Days | 0.5 Days |
 | General user profile modification | Harleen |0.5 Day|0.5 Day|
 | View Farm details and ratings | Katelyn | 1 Day | 1 Day | 
 | Farm listing tests | Katelyn | 1 Day | 0.5 Day |
