@@ -29,18 +29,26 @@ ___
 | Decision | Rationale |
 |------|-------------|
 | Remove seller dashboard | We realised that the seller would have no need for a dashboard past looking at their own farm listing, so we just made that their dashboard and will make it editable |
+| Migrate from H2 to PostgreSQL | H2 is convenient for development but not suitable for production use. PostgreSQL gives us a proper relational database with real constraints, better data integrity, and a persistent data store that reflects how the app will behave in production |
+| Move group chat and farm communication to ITR3 | We lost a team member during reading week, which reduced our capacity. Group chat and farm communication were deprioritized in favour of completing core features (groups, farm listings, profile editing) that are more critical to the app's core functionality |
+| Use cookie-based session authentication | Session cookies are simpler to implement and manage compared to JWT tokens for our use case. The server controls session validity, making it easier to invalidate sessions on logout without needing token blacklisting |
+| Split tests into unit and integration suites | Unit tests using H2 and Mockito run fast and require no setup, making them useful for development feedback. Integration tests against real PostgreSQL catch issues that only surface with a real database (e.g. constraint violations, JPA mapping errors). Keeping them separate lets developers run unit tests quickly without needing a local database |
+| Use dependency injection for database switching | By configuring the datasource through `application.properties`, we can switch between H2 (unit tests), PostgreSQL (integration tests and production) without changing any application code — just one property change |
 
 ---
 
 ## Concerns
 
 - ITR2: we lost a member during the reading week, so we now need to redistribute user stories and move some to ITR3
+- Group chat and farm communication features were planned for ITR2 but had to be moved to ITR3 due to reduced team capacity — this may put pressure on the ITR3 workload
 ---
 
 ## Changes On Plan
 
 - Moved some user stories to ITR3 due to losing a team member during reading week.
-
+- Group chat, farm communication, and related tests were originally planned for ITR2 and have been deferred to ITR3.
+- Seller dashboard was removed and replaced with the seller's farm listing page, which now serves as their main view.
+- Redistributed remaining ITR2 tasks among the four remaining team members to maintain progress.
 ---
 
 ## Task Assignments
@@ -53,7 +61,7 @@ ___
 | Show groups with matching preferences | Jacob |
 | Search for a group | Jacob |
 | View group details | Jacob |
-| Join/leave a group | Jacon |
+| Join/leave a group | Jacob |
 | Jira Setup | Jacob |
 | Basic UI decorations | Harleen |
 | Farm Listings Integration into dashboard | Katelyn |
@@ -73,7 +81,12 @@ ___
 ## Development Tasks Per User Story
 | User Story | Details |
 |------|-------------|
-| Farm Listings | integrate with database, UI changes, have listings link to unique pages, create actual farm listing page with all info |
+| Farm Listings | Integrate with database, UI changes, have listings link to unique pages, create actual farm listing page with all info |
+| Groups | Backend: Group model, repository, service, controller; Frontend: create group page, group search, group details page, join/leave functionality, matched groups view |
+| User Profile Modification | Allow buyers and sellers to edit profile info (name, phone, category); profile picture display; fix CORS and session handling |
+| Farm Details & Ratings | View individual farm page with full details; next iteration we will display ratings submitted by buyers |
+| Database Migration | Migrate from H2 to PostgreSQL for production; configure datasource via dependency injection for easy switching |
+| Testing | Unit tests (Mockito + MockMvc) for all services and controllers; integration tests against real PostgreSQL with transactional rollback |
 
 ---
 
