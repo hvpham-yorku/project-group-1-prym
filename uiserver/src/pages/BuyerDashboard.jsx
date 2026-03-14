@@ -244,108 +244,113 @@ function BuyerDashboard() {
       <div style={styles.content}>
         {error && <div style={styles.error}>{error}</div>}
 
-        {/* Fields Grid */}
-        <div style={styles.grid}>
-          {/* Phone */}
-          <div style={styles.fieldCard}>
-            <p style={styles.fieldLabel}>Phone Number</p>
-            {isEditing ? (
-              <input
-                name="phoneNumber"
-                value={formData.phoneNumber}
-                onChange={handleChange}
-                placeholder="e.g. +1 416 555 0000"
-                style={styles.fieldInput}
-              />
-            ) : (
-              <p
-                style={
-                  user?.phoneNumber ? styles.fieldValue : styles.fieldValueEmpty
-                }
-              >
-                {user?.phoneNumber || "Not set"}
-              </p>
-            )}
-          </div>
+        {/* Two-column layout: profile on left, groups on right */}
+        <div style={styles.mainLayout}>
 
-          {/* Preferred Cuts — cow diagram, full width */}
-          <div
-            style={{
-              ...styles.fieldCard,
-              gridColumn: "1 / -1",
-              padding: "20px 16px 12px",
-            }}
-          >
-            <p style={styles.fieldLabel}>
-              Preferred Cuts
-              {isEditing && (
-                <span style={styles.editHint}>
-                  — click a section to select, use − / + to set quantity
-                </span>
-              )}
-            </p>
-
-            {Object.keys(displayCuts).length === 0 && !isEditing ? (
-              <p style={styles.fieldValueEmpty}>Not set</p>
-            ) : (
-              <>
-                <CowDiagram
-                  selectedCuts={displayCuts}
-                  onToggle={handleCutToggle}
-                  onQuantityChange={handleCutQty}
-                  readOnly={!isEditing}
-                />
-
-                {/* Cut text summary */}
-                {Object.keys(displayCuts).length > 0 && (
-                  <div style={styles.cutsTextRow}>
-                    <span style={styles.cutsLabel}>Selected cuts: </span>
-                    {Object.entries(displayCuts).map(([cut, qty], i, arr) => (
-                      <span key={cut}>
-                        <span style={styles.cutName}>
-                          {cut}
-                          {qty > 1 ? ` ×${qty}` : ""}
-                        </span>
-                        {i < arr.length - 1 && (
-                          <span style={styles.cutSep}>, </span>
-                        )}
-                      </span>
-                    ))}
-                  </div>
+          {/* Left panel: profile fields + buttons */}
+          <div style={styles.leftPanel}>
+            <div style={styles.grid}>
+              {/* Phone */}
+              <div style={styles.fieldCard}>
+                <p style={styles.fieldLabel}>Phone Number</p>
+                {isEditing ? (
+                  <input
+                    name="phoneNumber"
+                    value={formData.phoneNumber}
+                    onChange={handleChange}
+                    placeholder="e.g. +1 416 555 0000"
+                    style={styles.fieldInput}
+                  />
+                ) : (
+                  <p
+                    style={
+                      user?.phoneNumber ? styles.fieldValue : styles.fieldValueEmpty
+                    }
+                  >
+                    {user?.phoneNumber || "Not set"}
+                  </p>
                 )}
-              </>
-            )}
-          </div>
-        </div>
+              </div>
 
-        {/* Buttons */}
-        <div style={styles.buttonRow}>
-          {isEditing ? (
-            <>
-              <button style={styles.secondaryButton} onClick={handleDiscard}>
-                Discard
-              </button>
-              <button style={styles.primaryButton} onClick={handleSave}>
-                Save Changes
-              </button>
-            </>
-          ) : (
-            <>
-			<Link to={`/farmlistings`}><button style={styles.primaryButton}>View Farm Listings</button></Link>
-              <button style={styles.secondaryButton} onClick={handleLogout}>
-                Logout
-              </button>
-              <button
-                style={styles.primaryButton}
-                onClick={() => setIsEditing(true)}
+              {/* Preferred Cuts — cow diagram, full width */}
+              <div
+                style={{
+                  ...styles.fieldCard,
+                  padding: "20px 16px 12px",
+                }}
               >
-                Edit Profile
-              </button>
-            </>
-          )}
-        </div>
+                <p style={styles.fieldLabel}>
+                  Preferred Cuts
+                  {isEditing && (
+                    <span style={styles.editHint}>
+                      — click a section to select, use − / + to set quantity
+                    </span>
+                  )}
+                </p>
 
-        {/* ── Groups Section ── */}
+                {Object.keys(displayCuts).length === 0 && !isEditing ? (
+                  <p style={styles.fieldValueEmpty}>Not set</p>
+                ) : (
+                  <>
+                    <CowDiagram
+                      selectedCuts={displayCuts}
+                      onToggle={handleCutToggle}
+                      onQuantityChange={handleCutQty}
+                      readOnly={!isEditing}
+                    />
+
+                    {/* Cut text summary */}
+                    {Object.keys(displayCuts).length > 0 && (
+                      <div style={styles.cutsTextRow}>
+                        <span style={styles.cutsLabel}>Selected cuts: </span>
+                        {Object.entries(displayCuts).map(([cut, qty], i, arr) => (
+                          <span key={cut}>
+                            <span style={styles.cutName}>
+                              {cut}
+                              {qty > 1 ? ` ×${qty}` : ""}
+                            </span>
+                            {i < arr.length - 1 && (
+                              <span style={styles.cutSep}>, </span>
+                            )}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Buttons */}
+            <div style={styles.buttonRow}>
+              {isEditing ? (
+                <>
+                  <button style={styles.secondaryButton} onClick={handleDiscard}>
+                    Discard
+                  </button>
+                  <button style={styles.primaryButton} onClick={handleSave}>
+                    Save Changes
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link to={`/farmlistings`}><button style={styles.primaryButton}>View Farm Listings</button></Link>
+                  <button style={styles.secondaryButton} onClick={handleLogout}>
+                    Logout
+                  </button>
+                  <button
+                    style={styles.primaryButton}
+                    onClick={() => setIsEditing(true)}
+                  >
+                    Edit Profile
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Right panel: groups */}
+          <div style={styles.rightPanel}>
         <div style={styles.groupsSection}>
           <div style={styles.groupsHeader}>
             <h2 style={styles.sectionTitle}>Groups</h2>
@@ -477,7 +482,8 @@ function BuyerDashboard() {
             </>
           )}
         </div>
-
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -496,7 +502,7 @@ const styles = {
     padding: "40px 0",
   },
   bannerInner: {
-    maxWidth: "900px",
+    maxWidth: "1600px",
     margin: "0 auto",
     padding: "0 48px",
     display: "flex",
@@ -551,7 +557,7 @@ const styles = {
     letterSpacing: "0.08em",
   },
   content: {
-    maxWidth: "900px",
+    maxWidth: "1600px",
     margin: "0 auto",
     padding: "40px 48px",
   },
@@ -565,9 +571,9 @@ const styles = {
   },
   grid: {
     display: "grid",
-    gridTemplateColumns: "1fr 1fr",
+    gridTemplateColumns: "1fr",
     gap: "16px",
-    marginBottom: "32px",
+    marginBottom: "0",
   },
   fieldCard: {
     backgroundColor: "white",
@@ -635,10 +641,24 @@ const styles = {
   cutSep: {
     color: "#aaa",
   },
+  mainLayout: {
+    display: "flex",
+    gap: "32px",
+    alignItems: "flex-start",
+  },
+  leftPanel: {
+    flex: "3 1 0",
+    minWidth: 0,
+  },
+  rightPanel: {
+    flex: "2 1 0",
+    minWidth: 0,
+  },
   buttonRow: {
     display: "flex",
     justifyContent: "flex-end",
     gap: "12px",
+    marginTop: "16px",
   },
   primaryButton: {
     padding: "12px 28px",
@@ -661,9 +681,6 @@ const styles = {
     cursor: "pointer",
   },
   groupsSection: {
-    marginTop: "48px",
-    paddingTop: "32px",
-    borderTop: "2px solid #e8e4e0",
   },
   groupsHeader: {
     display: "flex",
