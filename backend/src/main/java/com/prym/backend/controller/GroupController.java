@@ -1,6 +1,8 @@
 package com.prym.backend.controller;
 
+import com.prym.backend.model.GroupMessage;
 import com.prym.backend.model.User;
+import com.prym.backend.repository.GroupMessageRepository;
 import com.prym.backend.repository.UserRepository;
 import com.prym.backend.service.GroupService;
 import org.springframework.http.ResponseEntity;
@@ -18,10 +20,13 @@ public class GroupController {
 
     private final GroupService groupService;
     private final UserRepository userRepository;
+    private final GroupMessageRepository groupMessageRepository;
 
-    public GroupController(GroupService groupService, UserRepository userRepository) {
+    public GroupController(GroupService groupService, UserRepository userRepository,
+                           GroupMessageRepository groupMessageRepository) {
         this.groupService = groupService;
         this.userRepository = userRepository;
+        this.groupMessageRepository = groupMessageRepository;
     }
 
     private Long getLoggedInUserId() {
@@ -165,6 +170,29 @@ public class GroupController {
             if (!getLoggedInUserId().equals(userId))
                 return ResponseEntity.status(403).body(Map.of("error", "Access denied"));
             return ResponseEntity.ok(groupService.getMatchingFarms(userId, groupId));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    // GET /api/buyer/groups/{groupId}/messages?userId={userId}
+    // Returns the last 50 chat messages for a group, oldest first.
+    @GetMapping("/groups/{groupId}/messages")
+    public ResponseEntity<?> getMessages(
+            @PathVariable Long groupId,
+            @RequestParam Long userId) {
+        try {
+            if (!getLoggedInUserId().equals(userId))
+                return ResponseEntity.status(403).body(Map.of("error", "Access denied"));
+            var messages = groupMessageRepository.findTop50ByGroupIdOrderBySentAtAsc(groupId);
+            var result = messages.stream().map(m -> Map.of(
+                "id", (Object) m.getId(),
+                "senderId", m.getSender().getId(),
+                "senderName", m.getSender().getFirstName(),
+                "content", m.getContent(),
+                "sentAt", m.getSentAt().toString()
+            )).toList();
+            return ResponseEntity.ok(result);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }

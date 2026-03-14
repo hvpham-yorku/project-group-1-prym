@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getGroup, saveCuts, leaveGroup, joinGroup, regenerateInviteCode, getMatchingFarms } from '../api/groups';
 import GroupCowDiagram from '../components/GroupCowDiagram';
+import { Client } from '@stomp/stompjs';
 
 const BUYER_COLOR = '#4a7c59';
 const BROWN = '#5c4033';
@@ -61,6 +62,12 @@ function GroupDetailPage() {
   const [codeCopied, setCodeCopied] = useState(false);
   const [farms, setFarms] = useState(null);
 
+  // Chat state
+  const [messages, setMessages] = useState([]);
+  const [chatInput, setChatInput] = useState('');
+  const stompClientRef = useRef(null);
+  const messagesContainerRef = useRef(null);
+
   const fetchGroup = async () => {
     if (!user?.id) return;
     try {
@@ -83,6 +90,60 @@ function GroupDetailPage() {
   useEffect(() => {
     fetchGroup();
   }, [user?.id, groupId]);
+
+  // Load message history and connect WebSocket when the user is a member
+  useEffect(() => {
+    if (!user?.id || !group?.alreadyJoined) return;
+
+    // Fetch message history
+    fetch(`http://localhost:8080/api/buyer/groups/${groupId}/messages?userId=${user.id}`, {
+      credentials: 'include',
+    })
+      .then((r) => r.json())
+      .then((data) => setMessages(Array.isArray(data) ? data : []))
+      .catch(() => {});
+
+    // Connect to WebSocket
+    const client = new Client({
+      brokerURL: 'ws://localhost:8080/ws/websocket',
+      reconnectDelay: 5000,
+      onConnect: () => {
+        client.subscribe(`/topic/group/${groupId}`, (frame) => {
+          const msg = JSON.parse(frame.body);
+          setMessages((prev) => [...prev, msg]);
+        });
+      },
+    });
+    client.activate();
+    stompClientRef.current = client;
+
+    return () => {
+      client.deactivate();
+    };
+  }, [user?.id, groupId, group?.alreadyJoined]);
+
+  // Auto-scroll chat container to bottom when new messages arrive
+  useEffect(() => {
+    const el = messagesContainerRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [messages]);
+
+  const handleSendMessage = () => {
+    const content = chatInput.trim();
+    if (!content || !stompClientRef.current?.connected) return;
+    stompClientRef.current.publish({
+      destination: `/app/chat/${groupId}`,
+      body: JSON.stringify({ content }),
+    });
+    setChatInput('');
+  };
+
+  const handleChatKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
 
   // Diagram interaction
   const handleToggle = (id) => {
@@ -352,8 +413,52 @@ function GroupDetailPage() {
 
           </div>
 
-          {/* Right: matching farms */}
+          {/* Right: chat + matching farms */}
           <div style={styles.rightPanel}>
+
+            {/* Group Chat — visible to members only */}
+            {group.alreadyJoined && (
+              <div style={styles.membersCard}>
+                <h2 style={styles.sectionTitle}>Group Chat</h2>
+                <div style={styles.chatMessages} ref={messagesContainerRef}>
+                  {messages.length === 0 && (
+                    <p style={styles.emptyText}>No messages yet. Say hello!</p>
+                  )}
+                  {messages.map((msg) => {
+                    const isMe = msg.senderId === user.id;
+                    return (
+                      <div key={msg.id ?? msg.sentAt} style={{ ...styles.chatBubbleRow, justifyContent: isMe ? 'flex-end' : 'flex-start' }}>
+                        <div style={{ ...styles.chatBubble, ...(isMe ? styles.chatBubbleMe : styles.chatBubbleOther) }}>
+                          {!isMe && <p style={styles.chatSender}>{msg.senderName}</p>}
+                          <p style={styles.chatContent}>{msg.content}</p>
+                          <p style={styles.chatTime}>
+                            {new Date(msg.sentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div style={styles.chatInputRow}>
+                  <input
+                    style={styles.chatInput}
+                    type="text"
+                    placeholder="Type a message..."
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    onKeyDown={handleChatKeyDown}
+                    maxLength={1000}
+                  />
+                  <button
+                    style={{ ...styles.chatSendBtn, ...((!chatInput.trim() || !stompClientRef.current?.connected) ? styles.chatSendBtnDisabled : {}) }}
+                    onClick={handleSendMessage}
+                    disabled={!chatInput.trim() || !stompClientRef.current?.connected}
+                  >
+                    Send
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Matching Farms */}
             {farms && (
@@ -577,6 +682,29 @@ const styles = {
   matchScore: {
     fontSize: '12px', fontWeight: '600', color: '#f57f17', margin: '4px 0 0 0',
   },
+  chatMessages: {
+    height: '320px', overflowY: 'auto', display: 'flex', flexDirection: 'column',
+    gap: '8px', padding: '8px 0', marginBottom: '12px',
+  },
+  chatBubbleRow: { display: 'flex' },
+  chatBubble: {
+    maxWidth: '75%', padding: '8px 12px', borderRadius: '12px', wordBreak: 'break-word',
+  },
+  chatBubbleMe: { backgroundColor: BUYER_COLOR, color: 'white', borderBottomRightRadius: '4px' },
+  chatBubbleOther: { backgroundColor: '#f0ede9', color: '#222', borderBottomLeftRadius: '4px' },
+  chatSender: { fontSize: '11px', fontWeight: '700', margin: '0 0 2px 0', opacity: 0.7 },
+  chatContent: { fontSize: '14px', margin: 0, lineHeight: 1.4 },
+  chatTime: { fontSize: '10px', margin: '4px 0 0 0', opacity: 0.6, textAlign: 'right' },
+  chatInputRow: { display: 'flex', gap: '8px' },
+  chatInput: {
+    flex: 1, padding: '9px 12px', borderRadius: '6px',
+    border: '1px solid #ddd', fontSize: '14px', outline: 'none',
+  },
+  chatSendBtn: {
+    padding: '9px 18px', backgroundColor: BUYER_COLOR, color: 'white',
+    border: 'none', borderRadius: '6px', fontSize: '14px', fontWeight: '600', cursor: 'pointer',
+  },
+  chatSendBtnDisabled: { opacity: 0.5, cursor: 'not-allowed' },
   leaveRow: {},
   leaveBtn: {
     padding: '10px 24px', backgroundColor: 'white', color: '#c0392b',

@@ -31,6 +31,7 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // prevents Spring from creating its own sessions since we are managing them ourselves with the Session table
             .authorizeHttpRequests(auth -> auth //defines who can access what urls
                 .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/ws/**").authenticated() // WebSocket handshake endpoint
                 .requestMatchers("/api/buyer/**").hasRole("BUYER") // only buyers can access
                 .requestMatchers("/api/seller/all").authenticated()//(SPECIAL CASE) allow anyone logged in to access the farm listings
                 .requestMatchers("/api/seller/**").hasRole("SELLER") //only Sellers can access
