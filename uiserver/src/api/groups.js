@@ -104,6 +104,18 @@ export async function regenerateInviteCode(userId, groupId) {
     return data;
 }
 
+// GET /api/buyer/groups/{groupId}/matching-farms?userId={userId}
+// Returns { perfectMatches, partialMatches } — farms whose certs match the group's requirements.
+export async function getMatchingFarms(userId, groupId) {
+    const response = await fetch(`${API_URL}/groups/${groupId}/matching-farms?userId=${userId}`, {
+        method: 'GET',
+        credentials: 'include',
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Failed to load matching farms');
+    return data;
+}
+
 // POST /api/buyer/groups/leave/{groupId}
 export async function leaveGroup(userId, groupId) {
     const response = await fetch(`${API_URL}/groups/leave/${groupId}`, {

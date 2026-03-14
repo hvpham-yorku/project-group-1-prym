@@ -155,6 +155,21 @@ public class GroupController {
         }
     }
 
+    // GET /api/buyer/groups/{groupId}/matching-farms?userId={userId}
+    // Returns perfect and partial farm matches based on the group's certifications.
+    @GetMapping("/groups/{groupId}/matching-farms")
+    public ResponseEntity<?> getMatchingFarms(
+            @PathVariable Long groupId,
+            @RequestParam Long userId) {
+        try {
+            if (!getLoggedInUserId().equals(userId))
+                return ResponseEntity.status(403).body(Map.of("error", "Access denied"));
+            return ResponseEntity.ok(groupService.getMatchingFarms(userId, groupId));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
     // POST /api/buyer/groups/leave/{groupId}
     // Body: { "userId": 5 }
     @PostMapping("/groups/leave/{groupId}")

@@ -22,6 +22,7 @@ public class GroupService {
     private final BuyerGroupRepository groupRepository;
     private final BuyerGroupMemberRepository memberRepository;
     private final BuyerRepository buyerRepository;
+    private final SellerRepository sellerRepository;
 
     private static final int MAX_QTY_PER_CUT = 2;
     private static final String CODE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -38,10 +39,12 @@ public class GroupService {
     public GroupService(
             BuyerGroupRepository groupRepository,
             BuyerGroupMemberRepository memberRepository,
-            BuyerRepository buyerRepository) {
+            BuyerRepository buyerRepository,
+            SellerRepository sellerRepository) {
         this.groupRepository = groupRepository;
         this.memberRepository = memberRepository;
         this.buyerRepository = buyerRepository;
+        this.sellerRepository = sellerRepository;
     }
 
     // "Chuck, Rib x2, Short Loin"  →  { "Chuck": 1, "Rib": 2, "Short Loin": 1 }
@@ -260,6 +263,70 @@ public class GroupService {
 
         BuyerGroup group = groupRepository.findById(groupId).orElseThrow();
         return buildGroupDTO(group, buyerUserId);
+    }
+
+    // Returns perfect and partial farm matches based on the group's certifications.
+    @Transactional(readOnly = true)
+    public Map<String, Object> getMatchingFarms(Long buyerUserId, Long groupId) {
+        BuyerGroup group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new RuntimeException("Group not found"));
+
+        // Parse group's required certifications into a set of uppercase strings
+        Set<String> required = new HashSet<>();
+        if (group.getCertifications() != null && !group.getCertifications().isBlank()) {
+            for (String c : group.getCertifications().split(",")) {
+                String trimmed = c.trim();
+                if (!trimmed.isEmpty()) required.add(trimmed.toUpperCase());
+            }
+        }
+        int totalRequired = required.size();
+
+        List<Map<String, Object>> perfectMatches = new ArrayList<>();
+        List<Map<String, Object>> partialMatches = new ArrayList<>();
+
+        for (Seller seller : sellerRepository.findAll()) {
+            // Collect seller's cert names
+            Set<String> sellerCerts = new HashSet<>();
+            if (seller.getCertifications() != null) {
+                for (com.prym.backend.model.Certification cert : seller.getCertifications()) {
+                    if (cert.getName() != null) {
+                        sellerCerts.add(cert.getName().name());
+                    }
+                }
+            }
+
+            int matchCount = 0;
+            for (String r : required) {
+                if (sellerCerts.contains(r)) matchCount++;
+            }
+
+            // Skip sellers with no overlap when group has certifications
+            if (totalRequired > 0 && matchCount == 0) continue;
+
+            Map<String, Object> farmDTO = new LinkedHashMap<>();
+            farmDTO.put("sellerId", seller.getId());
+            farmDTO.put("shopName", seller.getShopName());
+            farmDTO.put("sellerName", seller.getUser().getFirstName() + " " + seller.getUser().getLastName());
+            farmDTO.put("email", seller.getUser().getEmail());
+            farmDTO.put("phoneNumber", seller.getUser().getPhoneNumber());
+            farmDTO.put("certifications", new ArrayList<>(sellerCerts));
+            farmDTO.put("matchCount", matchCount);
+            farmDTO.put("totalRequired", totalRequired);
+
+            if (totalRequired == 0 || matchCount == totalRequired) {
+                perfectMatches.add(farmDTO);
+            } else {
+                partialMatches.add(farmDTO);
+            }
+        }
+
+        // Sort partial matches by matchCount descending
+        partialMatches.sort((a, b) -> Integer.compare((int) b.get("matchCount"), (int) a.get("matchCount")));
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("perfectMatches", perfectMatches);
+        result.put("partialMatches", partialMatches);
+        return result;
     }
 
     // Looks up a group by its invite code. Returns the full group DTO for preview.
