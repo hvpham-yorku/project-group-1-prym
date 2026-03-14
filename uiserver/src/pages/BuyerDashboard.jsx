@@ -34,7 +34,6 @@ function BuyerDashboard() {
   const [formData, setFormData] = useState({
     phoneNumber: "",
     selectedCuts: {}, // { [cutId]: quantity }
-    quantity: "",
   });
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -57,7 +56,6 @@ function BuyerDashboard() {
         setFormData({
           phoneNumber: user?.phoneNumber || "",
           selectedCuts: parseCuts(data.preferredCuts),
-          quantity: data.quantity || "",
         });
       } catch (err) {
         setError("Failed to load profile.");
@@ -117,7 +115,6 @@ function BuyerDashboard() {
 
       await updateBuyerProfile(user.id, {
         preferredCuts,
-        quantity: formData.quantity,
         phoneNumber: formData.phoneNumber,
       });
 
@@ -125,7 +122,6 @@ function BuyerDashboard() {
       setProfile((prev) => ({
         ...prev,
         preferredCuts,
-        quantity: formData.quantity,
       }));
       setFormData((prev) => ({ ...prev, phoneNumber: savedPhone }));
       saveUser({ ...user, phoneNumber: savedPhone });
@@ -178,7 +174,6 @@ function BuyerDashboard() {
     setFormData({
       phoneNumber: user?.phoneNumber || "",
       selectedCuts: parseCuts(profile?.preferredCuts),
-      quantity: profile?.quantity || "",
     });
     setError("");
     setIsEditing(false);
@@ -269,32 +264,6 @@ function BuyerDashboard() {
                 }
               >
                 {user?.phoneNumber || "Not set"}
-              </p>
-            )}
-          </div>
-
-          {/* Quantity */}
-          <div style={styles.fieldCard}>
-            <p style={styles.fieldLabel}>Quantity</p>
-            {isEditing ? (
-              <select
-                name="quantity"
-                value={formData.quantity}
-                onChange={handleChange}
-                style={styles.fieldInput}
-              >
-                <option value="">Select quantity</option>
-                <option value="Quarter cow">Quarter cow</option>
-                <option value="Half cow">Half cow</option>
-                <option value="Whole cow">Whole cow</option>
-              </select>
-            ) : (
-              <p
-                style={
-                  profile?.quantity ? styles.fieldValue : styles.fieldValueEmpty
-                }
-              >
-                {profile?.quantity || "Not set"}
               </p>
             )}
           </div>

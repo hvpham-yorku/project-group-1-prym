@@ -52,12 +52,11 @@ public class BuyerServiceTest {
         when(buyerRepository.save(any(Buyer.class))).thenAnswer(i -> i.getArgument(0));
 
         // Act: create the profile
-        Buyer result = buyerService.createBuyerProfile(1L, "Ribeye", "Half cow");
+        Buyer result = buyerService.createBuyerProfile(1L, "Ribeye");
 
         // Assert: check the profile was created correctly
         assertNotNull(result);
         assertEquals("Ribeye", result.getPreferredCuts());
-        assertEquals("Half cow", result.getQuantity());
         verify(buyerRepository).save(any(Buyer.class));
     }
 
@@ -69,7 +68,7 @@ public class BuyerServiceTest {
 
         // Act + Assert: should throw an error
         assertThrows(RuntimeException.class, () -> {
-            buyerService.createBuyerProfile(999L, "Ribeye", "Half cow");
+            buyerService.createBuyerProfile(999L, "Ribeye");
         });
     }
 
@@ -82,7 +81,7 @@ public class BuyerServiceTest {
 
         // Act + Assert: should throw an error
         assertThrows(RuntimeException.class, () -> {
-            buyerService.createBuyerProfile(1L, "Ribeye", "Half cow");
+            buyerService.createBuyerProfile(1L, "Ribeye");
         });
     }
 
@@ -92,7 +91,6 @@ public class BuyerServiceTest {
         // Arrange: create a buyer and tell the fake repo to return it
         Buyer buyer = new Buyer();
         buyer.setPreferredCuts("Ribeye");
-        buyer.setQuantity("Half cow");
         when(buyerRepository.findByUserId(1L)).thenReturn(Optional.of(buyer));
 
         // Act: get the profile
@@ -101,7 +99,6 @@ public class BuyerServiceTest {
         // Assert: check the right profile came back
         assertNotNull(result);
         assertEquals("Ribeye", result.getPreferredCuts());
-        assertEquals("Half cow", result.getQuantity());
     }
 
     // Test 5: Getting a profile that doesn't exist
@@ -122,16 +119,14 @@ public class BuyerServiceTest {
         // Arrange: create an existing buyer with old values
         Buyer existingBuyer = new Buyer();
         existingBuyer.setPreferredCuts("Ribeye");
-        existingBuyer.setQuantity("Half cow");
         when(buyerRepository.findByUserId(1L)).thenReturn(Optional.of(existingBuyer));
         when(buyerRepository.save(any(Buyer.class))).thenAnswer(i -> i.getArgument(0));
 
         // Act: update with new values
-        Buyer result = buyerService.updateBuyerProfile(1L, "T-Bone", "Whole cow", null);
+        Buyer result = buyerService.updateBuyerProfile(1L, "T-Bone", null);
 
         // Assert: check the fields were updated
         assertEquals("T-Bone", result.getPreferredCuts());
-        assertEquals("Whole cow", result.getQuantity());
         verify(buyerRepository).save(any(Buyer.class));
     }
 
@@ -143,7 +138,7 @@ public class BuyerServiceTest {
 
         // Act + Assert: should throw an error
         assertThrows(RuntimeException.class, () -> {
-            buyerService.updateBuyerProfile(999L, "Ribeye", "Half cow", "416-555-9999");
+            buyerService.updateBuyerProfile(999L, "Ribeye", "416-555-9999");
         });
     }
 
@@ -153,17 +148,15 @@ public class BuyerServiceTest {
         Buyer existingBuyer = new Buyer();
         existingBuyer.setUser(testUser);
         existingBuyer.setPreferredCuts("Ribeye");
-        existingBuyer.setQuantity("Half cow");
         when(buyerRepository.findByUserId(1L)).thenReturn(Optional.of(existingBuyer));
         when(buyerRepository.save(any(Buyer.class))).thenAnswer(i -> i.getArgument(0));
         when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
 
         // Act: update with new values
-        Buyer result = buyerService.updateBuyerProfile(1L, "T-Bone", "Whole cow", "415-555-9999");
+        Buyer result = buyerService.updateBuyerProfile(1L, "T-Bone", "415-555-9999");
 
         // Assert: check the fields were updated
         assertEquals("T-Bone", result.getPreferredCuts());
-        assertEquals("Whole cow", result.getQuantity());
         assertEquals("415-555-9999", existingBuyer.getUser().getPhoneNumber());
         verify(userRepository).save(any(User.class));
         verify(buyerRepository).save(any(Buyer.class));
@@ -175,11 +168,10 @@ public class BuyerServiceTest {
         Buyer existingBuyer = new Buyer();
         existingBuyer.setUser(testUser);
         existingBuyer.setPreferredCuts("Ribeye");
-        existingBuyer.setQuantity("Half cow");
         when(buyerRepository.findByUserId(1L)).thenReturn(Optional.of(existingBuyer));
         when(buyerRepository.save(any(Buyer.class))).thenAnswer(i -> i.getArgument(0));
-    
-        Buyer result = buyerService.updateBuyerProfile(1L, "T-Bone", "Whole cow", "          ");
+
+        buyerService.updateBuyerProfile(1L, "T-Bone", "          ");
         assertEquals("416-555-0000", existingBuyer.getUser().getPhoneNumber());
         verify(userRepository, never()).save(any(User.class));
     }

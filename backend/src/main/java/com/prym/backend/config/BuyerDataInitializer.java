@@ -37,7 +37,7 @@ public class BuyerDataInitializer implements CommandLineRunner {
                 "One",
                 "4165551234",
                 null);
-            this.buyerService.createBuyerProfile(buyer1.getId(), "Rib, Sirloin", "Half cow");
+            this.buyerService.createBuyerProfile(buyer1.getId(), "Rib, Sirloin");
             System.out.println("Buyer 1 created.");
         }
 
@@ -52,7 +52,7 @@ public class BuyerDataInitializer implements CommandLineRunner {
                 "Two",
                 "4165555678",
                 null);
-            this.buyerService.createBuyerProfile(buyer2.getId(), "Chuck, Brisket", "Quarter cow");
+            this.buyerService.createBuyerProfile(buyer2.getId(), "Chuck, Brisket");
             System.out.println("Buyer 2 created.");
         }
 

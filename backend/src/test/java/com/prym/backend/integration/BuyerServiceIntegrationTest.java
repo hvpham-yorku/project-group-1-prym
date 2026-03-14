@@ -37,22 +37,21 @@ public class BuyerServiceIntegrationTest {
         User user = registerBuyer("buyer_it1@example.com", "buyer_it_user1");
 
         Buyer buyer = buyerService.createBuyerProfile(
-                user.getId(), "Ribeye, Chuck", "Half cow"
+                user.getId(), "Ribeye, Chuck"
         );
 
         assertNotNull(buyer.getId()); // ID assigned by DB confirms it was inserted
         assertEquals("Ribeye, Chuck", buyer.getPreferredCuts());
-        assertEquals("Half cow", buyer.getQuantity());
     }
 
     // Test 2: createBuyerProfile_DuplicateProfile_ThrowsException
     @Test
     void createBuyerProfile_DuplicateProfile_ThrowsException() {
         User user = registerBuyer("buyer_it2@example.com", "buyer_it_user2");
-        buyerService.createBuyerProfile(user.getId(), "Chuck", "Quarter cow");
+        buyerService.createBuyerProfile(user.getId(), "Chuck");
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                buyerService.createBuyerProfile(user.getId(), "Rib", "Half cow")
+                buyerService.createBuyerProfile(user.getId(), "Rib")
         );
 
         assertEquals("Buyer profile already exists", ex.getMessage());
@@ -62,36 +61,34 @@ public class BuyerServiceIntegrationTest {
     @Test
     void getBuyerProfile_ReturnsCorrectProfile() {
         User user = registerBuyer("buyer_it3@example.com", "buyer_it_user3");
-        buyerService.createBuyerProfile(user.getId(), "Brisket", "Whole cow");
+        buyerService.createBuyerProfile(user.getId(), "Brisket");
 
         Buyer fetched = buyerService.getBuyerProfile(user.getId());
 
         assertNotNull(fetched);
         assertEquals("Brisket", fetched.getPreferredCuts());
-        assertEquals("Whole cow", fetched.getQuantity());
     }
 
     // Test 4: updateBuyerProfile_PersistsChanges — updates are saved to the DB
     @Test
     void updateBuyerProfile_PersistsChanges() {
         User user = registerBuyer("buyer_it4@example.com", "buyer_it_user4");
-        buyerService.createBuyerProfile(user.getId(), "Old cuts", "Quarter cow");
+        buyerService.createBuyerProfile(user.getId(), "Old cuts");
 
         Buyer updated = buyerService.updateBuyerProfile(
-                user.getId(), "New cuts", "Half cow", null
+                user.getId(), "New cuts", null
         );
 
         assertEquals("New cuts", updated.getPreferredCuts());
-        assertEquals("Half cow", updated.getQuantity());
     }
 
     // Test 5: updateBuyerProfile_WithPhoneNumber_UpdatesUser — phone number change is persisted on User
     @Test
     void updateBuyerProfile_WithPhoneNumber_UpdatesUser() {
         User user = registerBuyer("buyer_it5@example.com", "buyer_it_user5");
-        buyerService.createBuyerProfile(user.getId(), "Chuck", "Quarter cow");
+        buyerService.createBuyerProfile(user.getId(), "Chuck");
 
-        buyerService.updateBuyerProfile(user.getId(), "Chuck", "Quarter cow", "647-888-5555");
+        buyerService.updateBuyerProfile(user.getId(), "Chuck", "647-888-5555");
 
         Buyer fetched = buyerService.getBuyerProfile(user.getId());
         assertEquals("647-888-5555", fetched.getUser().getPhoneNumber());

@@ -23,7 +23,4 @@ public class Buyer {
     private User user;
 
     private String preferredCuts;
-
-    // ITR2: Replace preferredCuts and quantity with a questionnaire-based flow
-    private String quantity;
 }

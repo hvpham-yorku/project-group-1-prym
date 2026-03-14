@@ -45,10 +45,9 @@ public class BuyerController {
             }
 
             String preferredCuts = request.get("preferredCuts");
-            String quantity = request.get("quantity");
 
             // Pass to the service, which checks the rules and saves it
-            Buyer buyer = buyerService.createBuyerProfile(userId, preferredCuts, quantity);
+            Buyer buyer = buyerService.createBuyerProfile(userId, preferredCuts);
 
             return ResponseEntity.ok(buyer);
 
@@ -82,10 +81,9 @@ public class BuyerController {
             }
             // Extract the updated fields from the JSON request body
             String preferredCuts = request.get("preferredCuts");
-            String quantity = request.get("quantity");
             String phoneNumber = request.get("phoneNumber");
             // Pass to the service, which finds the existing profile and updates it
-            Buyer buyer = buyerService.updateBuyerProfile(userId, preferredCuts, quantity,phoneNumber);
+            Buyer buyer = buyerService.updateBuyerProfile(userId, preferredCuts, phoneNumber);
 
             return ResponseEntity.ok(buyer);
 
