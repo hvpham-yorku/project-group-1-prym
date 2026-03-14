@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getGroup, saveCuts, leaveGroup } from '../api/groups';
+import { getGroup, saveCuts, leaveGroup, joinGroup } from '../api/groups';
 import GroupCowDiagram from '../components/GroupCowDiagram';
 
 const BUYER_COLOR = '#4a7c59';
@@ -56,6 +56,7 @@ function GroupDetailPage() {
   const [saveLoading, setSaveLoading] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [leaveLoading, setLeaveLoading] = useState(false);
+  const [joinLoading, setJoinLoading] = useState(false);
 
   const fetchGroup = async () => {
     if (!user?.id) return;
@@ -113,6 +114,18 @@ function GroupDetailPage() {
       setError(err.message || 'Failed to save cuts.');
     } finally {
       setSaveLoading(false);
+    }
+  };
+
+  const handleJoin = async () => {
+    setJoinLoading(true);
+    setError('');
+    try {
+      await joinGroup(user.id, groupId);
+      await fetchGroup();
+    } catch (err) {
+      setError(err.message || 'Failed to join group.');
+      setJoinLoading(false);
     }
   };
 
@@ -246,6 +259,15 @@ function GroupDetailPage() {
                 selectedCuts={{}}
                 othersQty={group.othersClaimedQty || {}}
               />
+              <div style={styles.joinRow}>
+                <button
+                  style={{ ...styles.joinBtn, ...(joinLoading ? styles.joinBtnDisabled : {}) }}
+                  onClick={handleJoin}
+                  disabled={joinLoading}
+                >
+                  {joinLoading ? 'Joining...' : 'Join Group'}
+                </button>
+              </div>
             </>
           )}
         </div>
@@ -361,6 +383,12 @@ const styles = {
   },
   memberName: { fontSize: '15px', fontWeight: '700', color: '#222', margin: '0 0 4px 0' },
   memberCuts: { fontSize: '13px', color: '#555', margin: 0 },
+  joinRow: { marginTop: '18px' },
+  joinBtn: {
+    padding: '11px 28px', backgroundColor: BUYER_COLOR, color: 'white',
+    border: 'none', borderRadius: '6px', fontSize: '14px', fontWeight: '700', cursor: 'pointer',
+  },
+  joinBtnDisabled: { opacity: 0.6, cursor: 'not-allowed' },
   leaveRow: { marginTop: '8px' },
   leaveBtn: {
     padding: '10px 24px', backgroundColor: 'white', color: '#c0392b',
