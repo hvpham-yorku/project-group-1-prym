@@ -124,6 +124,37 @@ public class GroupController {
         }
     }
 
+    // GET /api/buyer/groups/by-code/{code}?userId={userId}
+    // Looks up a group by invite code — navigates the user to the group detail page for preview.
+    @GetMapping("/groups/by-code/{code}")
+    public ResponseEntity<?> getGroupByCode(
+            @PathVariable String code,
+            @RequestParam Long userId) {
+        try {
+            if (!getLoggedInUserId().equals(userId))
+                return ResponseEntity.status(403).body(Map.of("error", "Access denied"));
+            return ResponseEntity.ok(groupService.getGroupByCode(userId, code));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    // POST /api/buyer/groups/{groupId}/regenerate-code
+    // Body: { "userId": 5 }
+    @PostMapping("/groups/{groupId}/regenerate-code")
+    public ResponseEntity<?> regenerateInviteCode(
+            @PathVariable Long groupId,
+            @RequestBody Map<String, Object> body) {
+        try {
+            Long userId = Long.parseLong(body.get("userId").toString());
+            if (!getLoggedInUserId().equals(userId))
+                return ResponseEntity.status(403).body(Map.of("error", "Access denied"));
+            return ResponseEntity.ok(groupService.regenerateInviteCode(userId, groupId));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
     // POST /api/buyer/groups/leave/{groupId}
     // Body: { "userId": 5 }
     @PostMapping("/groups/leave/{groupId}")

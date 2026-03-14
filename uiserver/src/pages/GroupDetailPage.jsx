@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getGroup, saveCuts, leaveGroup, joinGroup } from '../api/groups';
+import { getGroup, saveCuts, leaveGroup, joinGroup, regenerateInviteCode } from '../api/groups';
 import GroupCowDiagram from '../components/GroupCowDiagram';
 
 const BUYER_COLOR = '#4a7c59';
@@ -57,6 +57,8 @@ function GroupDetailPage() {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [leaveLoading, setLeaveLoading] = useState(false);
   const [joinLoading, setJoinLoading] = useState(false);
+  const [regenLoading, setRegenLoading] = useState(false);
+  const [codeCopied, setCodeCopied] = useState(false);
 
   const fetchGroup = async () => {
     if (!user?.id) return;
@@ -126,6 +128,26 @@ function GroupDetailPage() {
     } catch (err) {
       setError(err.message || 'Failed to join group.');
       setJoinLoading(false);
+    }
+  };
+
+  const handleCopyCode = () => {
+    navigator.clipboard.writeText(group.inviteCode);
+    setCodeCopied(true);
+    setTimeout(() => setCodeCopied(false), 2000);
+  };
+
+  const handleRegenCode = async () => {
+    if (!window.confirm('Generate a new invite code? The old one will stop working immediately.')) return;
+    setRegenLoading(true);
+    setError('');
+    try {
+      const updated = await regenerateInviteCode(user.id, groupId);
+      setGroup(updated);
+    } catch (err) {
+      setError(err.message || 'Failed to regenerate code.');
+    } finally {
+      setRegenLoading(false);
     }
   };
 
@@ -287,6 +309,29 @@ function GroupDetailPage() {
           </div>
         )}
 
+        {/* Invite code — visible to all members, regenerate only for creator */}
+        {group.alreadyJoined && (
+          <div style={styles.inviteCard}>
+            <p style={styles.inviteLabel}>Invite Code</p>
+            <div style={styles.inviteRow}>
+              <span style={styles.inviteCode}>{group.inviteCode}</span>
+              <button style={styles.copyBtn} onClick={handleCopyCode}>
+                {codeCopied ? 'Copied!' : 'Copy'}
+              </button>
+              {group.isCreator && (
+                <button
+                  style={{ ...styles.regenBtn, ...(regenLoading ? styles.regenBtnDisabled : {}) }}
+                  onClick={handleRegenCode}
+                  disabled={regenLoading}
+                >
+                  {regenLoading ? 'Regenerating...' : 'Regenerate'}
+                </button>
+              )}
+            </div>
+            <p style={styles.inviteHint}>Share this code with friends so they can find and join this group.</p>
+          </div>
+        )}
+
         {/* Leave group */}
         {group.alreadyJoined && (
           <div style={styles.leaveRow}>
@@ -389,6 +434,32 @@ const styles = {
     border: 'none', borderRadius: '6px', fontSize: '14px', fontWeight: '700', cursor: 'pointer',
   },
   joinBtnDisabled: { opacity: 0.6, cursor: 'not-allowed' },
+  inviteCard: {
+    backgroundColor: 'white', borderRadius: '10px', padding: '20px 24px',
+    boxShadow: '0 1px 4px rgba(0,0,0,0.07)', border: '1px solid #e8e4e0',
+  },
+  inviteLabel: {
+    fontSize: '11px', fontWeight: '700', letterSpacing: '0.07em',
+    textTransform: 'uppercase', color: BUYER_COLOR, margin: '0 0 10px 0',
+  },
+  inviteRow: { display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' },
+  inviteCode: {
+    fontFamily: 'monospace', fontSize: '22px', fontWeight: '700',
+    letterSpacing: '0.15em', color: '#222', backgroundColor: '#f5f5f0',
+    padding: '6px 16px', borderRadius: '6px', border: '1px solid #e0dbd5',
+  },
+  copyBtn: {
+    padding: '7px 16px', backgroundColor: 'white', color: BUYER_COLOR,
+    border: `2px solid ${BUYER_COLOR}`, borderRadius: '6px',
+    fontSize: '13px', fontWeight: '600', cursor: 'pointer',
+  },
+  regenBtn: {
+    padding: '7px 16px', backgroundColor: 'white', color: '#888',
+    border: '2px solid #ccc', borderRadius: '6px',
+    fontSize: '13px', fontWeight: '600', cursor: 'pointer',
+  },
+  regenBtnDisabled: { opacity: 0.6, cursor: 'not-allowed' },
+  inviteHint: { fontSize: '12px', color: '#999', margin: '10px 0 0 0', fontStyle: 'italic' },
   leaveRow: { marginTop: '8px' },
   leaveBtn: {
     padding: '10px 24px', backgroundColor: 'white', color: '#c0392b',

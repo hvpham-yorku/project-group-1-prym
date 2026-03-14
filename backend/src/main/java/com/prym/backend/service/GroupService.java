@@ -5,6 +5,7 @@ import com.prym.backend.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -22,8 +23,17 @@ public class GroupService {
     private final BuyerGroupMemberRepository memberRepository;
     private final BuyerRepository buyerRepository;
 
-    // Each of the 11 cuts has 2 slots (left/right). Max claimable qty per cut = 2.
     private static final int MAX_QTY_PER_CUT = 2;
+    private static final String CODE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+
+    private String generateInviteCode() {
+        StringBuilder sb = new StringBuilder(8);
+        for (int i = 0; i < 8; i++) {
+            sb.append(CODE_CHARS.charAt(SECURE_RANDOM.nextInt(CODE_CHARS.length())));
+        }
+        return sb.toString();
+    }
 
     public GroupService(
             BuyerGroupRepository groupRepository,
@@ -73,6 +83,8 @@ public class GroupService {
         boolean alreadyJoined = allMembers.stream()
                 .anyMatch(m -> m.getBuyer().getId().equals(buyer.getId()));
 
+        boolean isCreator = group.getCreator().getId().equals(buyer.getId());
+
         String myClaimedCuts = null;
         if (alreadyJoined) {
             myClaimedCuts = allMembers.stream()
@@ -111,8 +123,18 @@ public class GroupService {
         dto.put("memberCount", allMembers.size());
         dto.put("members", memberDTOs);
         dto.put("alreadyJoined", alreadyJoined);
+        dto.put("isCreator", isCreator);
         dto.put("myClaimedCuts", myClaimedCuts);
         dto.put("othersClaimedQty", othersClaimedQty);
+        // Lazily assign an invite code to groups that pre-date this feature
+        if (group.getInviteCode() == null) {
+            group.setInviteCode(generateInviteCode());
+            groupRepository.save(group);
+        }
+        // Only expose the invite code to current members
+        if (alreadyJoined) {
+            dto.put("inviteCode", group.getInviteCode());
+        }
 
         return dto;
     }
@@ -133,6 +155,7 @@ public class GroupService {
         BuyerGroup group = new BuyerGroup();
         group.setName(name.trim());
         group.setCreator(buyer);
+        group.setInviteCode(generateInviteCode());
         group.setCertifications(certifications != null ? certifications.trim() : "");
         group.setCreatedAt(LocalDateTime.now());
         BuyerGroup saved = groupRepository.save(group);
@@ -244,22 +267,55 @@ public class GroupService {
         return buildGroupDTO(group, buyerUserId);
     }
 
+    // Looks up a group by its invite code. Returns the full group DTO for preview.
+    @Transactional(readOnly = true)
+    public Map<String, Object> getGroupByCode(Long buyerUserId, String code) {
+        BuyerGroup group = groupRepository.findByInviteCode(code.trim().toUpperCase())
+                .orElseThrow(() -> new RuntimeException("No group found with that code."));
+        return buildGroupDTO(group, buyerUserId);
+    }
+
+    // Generates a new invite code for the group. Only the current creator can do this.
+    @Transactional
+    public Map<String, Object> regenerateInviteCode(Long buyerUserId, Long groupId) {
+        Buyer buyer = buyerRepository.findByUserId(buyerUserId)
+                .orElseThrow(() -> new RuntimeException("Buyer not found"));
+        BuyerGroup group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new RuntimeException("Group not found"));
+        if (!group.getCreator().getId().equals(buyer.getId())) {
+            throw new RuntimeException("Only the group creator can regenerate the invite code.");
+        }
+        group.setInviteCode(generateInviteCode());
+        groupRepository.save(group);
+        return buildGroupDTO(group, buyerUserId);
+    }
+
     // Removes the buyer from the group. If the group has no members left, it is deleted.
     @Transactional
     public void leaveGroup(Long buyerUserId, Long groupId) {
         Buyer buyer = buyerRepository.findByUserId(buyerUserId)
                 .orElseThrow(() -> new RuntimeException("Buyer not found"));
+        BuyerGroup group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new RuntimeException("Group not found"));
         BuyerGroupMember membership = memberRepository
                 .findByGroupIdAndBuyerId(groupId, buyer.getId())
                 .orElseThrow(() -> new RuntimeException("You are not a member of this group."));
 
-        memberRepository.delete(membership);
+        boolean wasCreator = group.getCreator().getId().equals(buyer.getId());
 
-        // Flush so the count check below reflects the deletion
+        memberRepository.delete(membership);
         memberRepository.flush();
 
-        if (memberRepository.findByGroupId(groupId).isEmpty()) {
+        List<BuyerGroupMember> remaining = memberRepository.findByGroupId(groupId);
+        if (remaining.isEmpty()) {
             groupRepository.deleteById(groupId);
+        } else if (wasCreator) {
+            // Transfer creator to the earliest-joined remaining member (lowest ID = joined first)
+            BuyerGroupMember next = remaining.stream()
+                    .min(Comparator.comparing(BuyerGroupMember::getId))
+                    .orElseThrow();
+            group.setCreator(next.getBuyer());
+            groupRepository.save(group);
         }
     }
 }

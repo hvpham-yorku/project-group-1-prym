@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { logout } from "../api/auth";
 import { useState, useEffect } from "react";
 import { getBuyerProfile, updateBuyerProfile } from "../api/buyer";
-import { getAvailableGroups, getMyGroups, joinGroup } from "../api/groups";
+import { getAvailableGroups, getMyGroups, joinGroup, getGroupByCode } from "../api/groups";
 import CowDiagram from "../components/CowDiagram";
 import EditAccountModal from "../components/EditAccountModal";
 
@@ -45,6 +45,8 @@ function BuyerDashboard() {
   const [groupsLoading, setGroupsLoading] = useState(true);
   const [groupsError, setGroupsError] = useState("");
   const [joiningGroupId, setJoiningGroupId] = useState(null);
+  const [inviteCode, setInviteCode] = useState("");
+  const [codeError, setCodeError] = useState("");
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -167,6 +169,17 @@ function BuyerDashboard() {
     } catch (err) {
       setGroupsError(err.message || "Failed to join group.");
       setJoiningGroupId(null);
+    }
+  };
+
+  const handleJoinByCode = async () => {
+    if (!inviteCode.trim()) return;
+    setCodeError("");
+    try {
+      const group = await getGroupByCode(user.id, inviteCode.trim());
+      navigate(`/buyer/groups/${group.groupId}`);
+    } catch (err) {
+      setCodeError(err.message || "Invalid invite code.");
     }
   };
 
@@ -365,6 +378,24 @@ function BuyerDashboard() {
               </div>
             )}
           </div>
+
+          {/* ── Join by invite code ── */}
+          {myGroups.length === 0 && !groupsLoading && (
+            <div style={styles.codeRow}>
+              <input
+                style={styles.codeInput}
+                placeholder="Enter invite code (e.g. X7K2AB3F)"
+                value={inviteCode}
+                onChange={(e) => { setInviteCode(e.target.value.toUpperCase()); setCodeError(""); }}
+                onKeyDown={(e) => e.key === "Enter" && handleJoinByCode()}
+                maxLength={8}
+              />
+              <button style={styles.codeBtn} onClick={handleJoinByCode}>
+                Go
+              </button>
+            </div>
+          )}
+          {codeError && <p style={styles.codeError}>{codeError}</p>}
 
           {groupsError && <div style={styles.error}>{groupsError}</div>}
 
@@ -707,6 +738,37 @@ const styles = {
     fontSize: "14px",
     fontWeight: "600",
     cursor: "pointer",
+  },
+  codeRow: {
+    display: "flex",
+    gap: "8px",
+    margin: "12px 0 4px",
+  },
+  codeInput: {
+    flex: 1,
+    padding: "8px 12px",
+    border: `1px solid #ccc`,
+    borderRadius: "6px",
+    fontSize: "14px",
+    fontFamily: "monospace",
+    letterSpacing: "0.1em",
+    textTransform: "uppercase",
+    outline: "none",
+  },
+  codeBtn: {
+    padding: "8px 18px",
+    backgroundColor: BUYER_COLOR,
+    color: "white",
+    border: "none",
+    borderRadius: "6px",
+    fontSize: "14px",
+    fontWeight: "700",
+    cursor: "pointer",
+  },
+  codeError: {
+    fontSize: "13px",
+    color: "#c00",
+    margin: "0 0 8px 0",
   },
   sectionTitle: {
     fontSize: "22px",
