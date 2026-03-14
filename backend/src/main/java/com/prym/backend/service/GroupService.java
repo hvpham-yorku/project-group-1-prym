@@ -126,11 +126,6 @@ public class GroupService {
         dto.put("isCreator", isCreator);
         dto.put("myClaimedCuts", myClaimedCuts);
         dto.put("othersClaimedQty", othersClaimedQty);
-        // Lazily assign an invite code to groups that pre-date this feature
-        if (group.getInviteCode() == null) {
-            group.setInviteCode(generateInviteCode());
-            groupRepository.save(group);
-        }
         // Only expose the invite code to current members
         if (alreadyJoined) {
             dto.put("inviteCode", group.getInviteCode());
