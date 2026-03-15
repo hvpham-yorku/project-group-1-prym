@@ -7,7 +7,6 @@ import CowDiagram from '../components/CowDiagram';
 function BuyerProfileSetup() {
     // { cutId: quantity }  e.g. { 'Chuck': 1, 'Rib': 2 }
     const [selectedCuts, setSelectedCuts] = useState({});
-    const [quantity, setQuantity] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
@@ -55,7 +54,7 @@ function BuyerProfileSetup() {
                 .map(([cut, qty]) => qty > 1 ? `${cut} x${qty}` : cut)
                 .join(', ');
 
-            await createBuyerProfile({ userId: user.id, preferredCuts, quantity });
+            await createBuyerProfile({ userId: user.id, preferredCuts });
             navigate('/farmlistings');
         } catch (err) {
             setError(err.message);
@@ -106,20 +105,6 @@ function BuyerProfileSetup() {
                                 ))}
                             </div>
                         )}
-                    </div>
-
-                    <div style={styles.inputGroup}>
-                        <label style={styles.label}>Quantity</label>
-                        <select
-                            value={quantity}
-                            onChange={(e) => setQuantity(e.target.value)}
-                            style={styles.input}
-                        >
-                            <option value="">Select quantity</option>
-                            <option value="Quarter cow">Quarter cow</option>
-                            <option value="Half cow">Half cow</option>
-                            <option value="Whole cow">Whole cow</option>
-                        </select>
                     </div>
 
                     <button type="submit" style={styles.button} disabled={loading}>
@@ -199,15 +184,6 @@ const styles = {
         fontStyle: 'italic',
         fontSize: '14px',
         margin: 0
-    },
-    inputGroup: {
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '4px'
-    },
-    label: {
-        color: '#333',
-        fontWeight: '500'
     },
     input: {
         padding: '12px',

@@ -79,6 +79,43 @@ export async function saveCuts(userId, groupId, cuts) {
     return data;
 }
 
+// GET /api/buyer/groups/by-code/{code}?userId={userId}
+// Looks up a group by invite code and returns its detail DTO for preview.
+export async function getGroupByCode(userId, code) {
+    const response = await fetch(`${API_URL}/groups/by-code/${encodeURIComponent(code)}?userId=${userId}`, {
+        method: 'GET',
+        credentials: 'include',
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Invalid invite code');
+    return data;
+}
+
+// POST /api/buyer/groups/{groupId}/regenerate-code
+export async function regenerateInviteCode(userId, groupId) {
+    const response = await fetch(`${API_URL}/groups/${groupId}/regenerate-code`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ userId }),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Failed to regenerate code');
+    return data;
+}
+
+// GET /api/buyer/groups/{groupId}/matching-farms?userId={userId}
+// Returns { perfectMatches, partialMatches } — farms whose certs match the group's requirements.
+export async function getMatchingFarms(userId, groupId) {
+    const response = await fetch(`${API_URL}/groups/${groupId}/matching-farms?userId=${userId}`, {
+        method: 'GET',
+        credentials: 'include',
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Failed to load matching farms');
+    return data;
+}
+
 // POST /api/buyer/groups/leave/{groupId}
 export async function leaveGroup(userId, groupId) {
     const response = await fetch(`${API_URL}/groups/leave/${groupId}`, {

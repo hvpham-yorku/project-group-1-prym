@@ -44,7 +44,6 @@ public class BuyerControllerTest {
         testBuyer = new Buyer();
         testBuyer.setUser(testUser);
         testBuyer.setPreferredCuts("Chuck, Rib x2");
-        testBuyer.setQuantity("Half cow");
 
         // Simulate logged-in user via Spring Security
         org.springframework.security.core.Authentication auth = new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
@@ -62,9 +61,8 @@ public class BuyerControllerTest {
         Map<String, String> request = new HashMap<>();
         request.put("userId", "1");
         request.put("preferredCuts", "Chuck, Rib x2");
-        request.put("quantity", "Half cow");
 
-        when(buyerService.createBuyerProfile(1L, "Chuck, Rib x2", "Half cow"))
+        when(buyerService.createBuyerProfile(1L, "Chuck, Rib x2"))
                 .thenReturn(testBuyer);
 
         ResponseEntity<?> response = buyerController.createProfile(request);
@@ -79,7 +77,6 @@ public class BuyerControllerTest {
         Map<String, String> request = new HashMap<>();
         request.put("userId", "2"); // different from logged-in user ID 1
         request.put("preferredCuts", "Chuck");
-        request.put("quantity", "Half cow");
 
         ResponseEntity<?> response = buyerController.createProfile(request);
 
@@ -92,9 +89,8 @@ public class BuyerControllerTest {
         Map<String, String> request = new HashMap<>();
         request.put("userId", "1");
         request.put("preferredCuts", "Chuck");
-        request.put("quantity", "Half cow");
 
-        when(buyerService.createBuyerProfile(1L, "Chuck", "Half cow"))
+        when(buyerService.createBuyerProfile(1L, "Chuck"))
                 .thenThrow(new RuntimeException("Buyer profile already exists"));
 
         ResponseEntity<?> response = buyerController.createProfile(request);
@@ -141,10 +137,9 @@ public class BuyerControllerTest {
     public void updateProfile_Success() {
         Map<String, String> request = new HashMap<>();
         request.put("preferredCuts", "Chuck, Rib x2");
-        request.put("quantity", "Half cow");
         request.put("phoneNumber", "416-555-9999");
 
-        when(buyerService.updateBuyerProfile(1L, "Chuck, Rib x2", "Half cow", "416-555-9999"))
+        when(buyerService.updateBuyerProfile(1L, "Chuck, Rib x2", "416-555-9999"))
                 .thenReturn(testBuyer);
 
         ResponseEntity<?> response = buyerController.updateProfile(1L, request);
@@ -158,7 +153,6 @@ public class BuyerControllerTest {
     public void updateProfile_ForbiddenForOtherUser() {
         Map<String, String> request = new HashMap<>();
         request.put("preferredCuts", "Chuck");
-        request.put("quantity", "Half cow");
 
         ResponseEntity<?> response = buyerController.updateProfile(2L, request);
 
@@ -170,10 +164,9 @@ public class BuyerControllerTest {
     public void updateProfile_ServiceError() {
         Map<String, String> request = new HashMap<>();
         request.put("preferredCuts", "Chuck");
-        request.put("quantity", "Half cow");
         request.put("phoneNumber", null);
 
-        when(buyerService.updateBuyerProfile(1L, "Chuck", "Half cow", null))
+        when(buyerService.updateBuyerProfile(1L, "Chuck", null))
                 .thenThrow(new RuntimeException("Buyer profile not found"));
 
         ResponseEntity<?> response = buyerController.updateProfile(1L, request);

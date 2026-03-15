@@ -1,6 +1,8 @@
 package com.prym.backend.controller;
 
+import com.prym.backend.model.GroupMessage;
 import com.prym.backend.model.User;
+import com.prym.backend.repository.GroupMessageRepository;
 import com.prym.backend.repository.UserRepository;
 import com.prym.backend.service.GroupService;
 import org.springframework.http.ResponseEntity;
@@ -18,10 +20,13 @@ public class GroupController {
 
     private final GroupService groupService;
     private final UserRepository userRepository;
+    private final GroupMessageRepository groupMessageRepository;
 
-    public GroupController(GroupService groupService, UserRepository userRepository) {
+    public GroupController(GroupService groupService, UserRepository userRepository,
+                           GroupMessageRepository groupMessageRepository) {
         this.groupService = groupService;
         this.userRepository = userRepository;
+        this.groupMessageRepository = groupMessageRepository;
     }
 
     private Long getLoggedInUserId() {
@@ -119,6 +124,75 @@ public class GroupController {
                 return ResponseEntity.status(403).body(Map.of("error", "Access denied"));
             String cuts = body.containsKey("cuts") ? (String) body.get("cuts") : null;
             return ResponseEntity.ok(groupService.saveCuts(userId, groupId, cuts));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    // GET /api/buyer/groups/by-code/{code}?userId={userId}
+    // Looks up a group by invite code — navigates the user to the group detail page for preview.
+    @GetMapping("/groups/by-code/{code}")
+    public ResponseEntity<?> getGroupByCode(
+            @PathVariable String code,
+            @RequestParam Long userId) {
+        try {
+            if (!getLoggedInUserId().equals(userId))
+                return ResponseEntity.status(403).body(Map.of("error", "Access denied"));
+            return ResponseEntity.ok(groupService.getGroupByCode(userId, code));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    // POST /api/buyer/groups/{groupId}/regenerate-code
+    // Body: { "userId": 5 }
+    @PostMapping("/groups/{groupId}/regenerate-code")
+    public ResponseEntity<?> regenerateInviteCode(
+            @PathVariable Long groupId,
+            @RequestBody Map<String, Object> body) {
+        try {
+            Long userId = Long.parseLong(body.get("userId").toString());
+            if (!getLoggedInUserId().equals(userId))
+                return ResponseEntity.status(403).body(Map.of("error", "Access denied"));
+            return ResponseEntity.ok(groupService.regenerateInviteCode(userId, groupId));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    // GET /api/buyer/groups/{groupId}/matching-farms?userId={userId}
+    // Returns perfect and partial farm matches based on the group's certifications.
+    @GetMapping("/groups/{groupId}/matching-farms")
+    public ResponseEntity<?> getMatchingFarms(
+            @PathVariable Long groupId,
+            @RequestParam Long userId) {
+        try {
+            if (!getLoggedInUserId().equals(userId))
+                return ResponseEntity.status(403).body(Map.of("error", "Access denied"));
+            return ResponseEntity.ok(groupService.getMatchingFarms(userId, groupId));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    // GET /api/buyer/groups/{groupId}/messages?userId={userId}
+    // Returns the last 50 chat messages for a group, oldest first.
+    @GetMapping("/groups/{groupId}/messages")
+    public ResponseEntity<?> getMessages(
+            @PathVariable Long groupId,
+            @RequestParam Long userId) {
+        try {
+            if (!getLoggedInUserId().equals(userId))
+                return ResponseEntity.status(403).body(Map.of("error", "Access denied"));
+            var messages = groupMessageRepository.findTop50ByGroupIdOrderBySentAtAsc(groupId);
+            var result = messages.stream().map(m -> Map.of(
+                "id", (Object) m.getId(),
+                "senderId", m.getSender().getId(),
+                "senderName", m.getSender().getFirstName(),
+                "content", m.getContent(),
+                "sentAt", m.getSentAt().toString()
+            )).toList();
+            return ResponseEntity.ok(result);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }

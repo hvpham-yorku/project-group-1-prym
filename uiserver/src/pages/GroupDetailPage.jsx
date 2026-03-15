@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getGroup, saveCuts, leaveGroup } from '../api/groups';
+import { getGroup, saveCuts, leaveGroup, joinGroup, regenerateInviteCode, getMatchingFarms } from '../api/groups';
 import GroupCowDiagram from '../components/GroupCowDiagram';
+import { Client } from '@stomp/stompjs';
 
 const BUYER_COLOR = '#4a7c59';
 const BROWN = '#5c4033';
@@ -56,13 +57,27 @@ function GroupDetailPage() {
   const [saveLoading, setSaveLoading] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [leaveLoading, setLeaveLoading] = useState(false);
+  const [joinLoading, setJoinLoading] = useState(false);
+  const [regenLoading, setRegenLoading] = useState(false);
+  const [codeCopied, setCodeCopied] = useState(false);
+  const [farms, setFarms] = useState(null);
+
+  // Chat state
+  const [messages, setMessages] = useState([]);
+  const [chatInput, setChatInput] = useState('');
+  const stompClientRef = useRef(null);
+  const messagesContainerRef = useRef(null);
 
   const fetchGroup = async () => {
     if (!user?.id) return;
     try {
       setLoading(true);
-      const data = await getGroup(user.id, groupId);
+      const [data, farmsData] = await Promise.all([
+        getGroup(user.id, groupId),
+        getMatchingFarms(user.id, groupId),
+      ]);
       setGroup(data);
+      setFarms(farmsData);
       // Pre-fill diagram with the user's currently saved cuts
       setSelectedCuts(parseCuts(data.myClaimedCuts));
     } catch (err) {
@@ -75,6 +90,60 @@ function GroupDetailPage() {
   useEffect(() => {
     fetchGroup();
   }, [user?.id, groupId]);
+
+  // Load message history and connect WebSocket when the user is a member
+  useEffect(() => {
+    if (!user?.id || !group?.alreadyJoined) return;
+
+    // Fetch message history
+    fetch(`http://localhost:8080/api/buyer/groups/${groupId}/messages?userId=${user.id}`, {
+      credentials: 'include',
+    })
+      .then((r) => r.json())
+      .then((data) => setMessages(Array.isArray(data) ? data : []))
+      .catch(() => {});
+
+    // Connect to WebSocket
+    const client = new Client({
+      brokerURL: 'ws://localhost:8080/ws/websocket',
+      reconnectDelay: 5000,
+      onConnect: () => {
+        client.subscribe(`/topic/group/${groupId}`, (frame) => {
+          const msg = JSON.parse(frame.body);
+          setMessages((prev) => [...prev, msg]);
+        });
+      },
+    });
+    client.activate();
+    stompClientRef.current = client;
+
+    return () => {
+      client.deactivate();
+    };
+  }, [user?.id, groupId, group?.alreadyJoined]);
+
+  // Auto-scroll chat container to bottom when new messages arrive
+  useEffect(() => {
+    const el = messagesContainerRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [messages]);
+
+  const handleSendMessage = () => {
+    const content = chatInput.trim();
+    if (!content || !stompClientRef.current?.connected) return;
+    stompClientRef.current.publish({
+      destination: `/app/chat/${groupId}`,
+      body: JSON.stringify({ content }),
+    });
+    setChatInput('');
+  };
+
+  const handleChatKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
 
   // Diagram interaction
   const handleToggle = (id) => {
@@ -113,6 +182,38 @@ function GroupDetailPage() {
       setError(err.message || 'Failed to save cuts.');
     } finally {
       setSaveLoading(false);
+    }
+  };
+
+  const handleJoin = async () => {
+    setJoinLoading(true);
+    setError('');
+    try {
+      await joinGroup(user.id, groupId);
+      await fetchGroup();
+    } catch (err) {
+      setError(err.message || 'Failed to join group.');
+      setJoinLoading(false);
+    }
+  };
+
+  const handleCopyCode = () => {
+    navigator.clipboard.writeText(group.inviteCode);
+    setCodeCopied(true);
+    setTimeout(() => setCodeCopied(false), 2000);
+  };
+
+  const handleRegenCode = async () => {
+    if (!window.confirm('Generate a new invite code? The old one will stop working immediately.')) return;
+    setRegenLoading(true);
+    setError('');
+    try {
+      const updated = await regenerateInviteCode(user.id, groupId);
+      setGroup(updated);
+    } catch (err) {
+      setError(err.message || 'Failed to regenerate code.');
+    } finally {
+      setRegenLoading(false);
     }
   };
 
@@ -176,107 +277,259 @@ function GroupDetailPage() {
       <div style={styles.content}>
 
         {error && <div style={styles.errorBox}>{error}</div>}
-        {saveSuccess && (
-          <div style={styles.successBox}>Your cuts have been saved!</div>
-        )}
+        {saveSuccess && <div style={styles.successBox}>Your cuts have been saved!</div>}
 
-        {/* Diagram section */}
-        <div style={styles.diagramCard}>
-          <h2 style={styles.sectionTitle}>Divide the Cow</h2>
+        {/* ── Two-column layout ── */}
+        <div style={styles.mainLayout}>
 
-          {group.alreadyJoined ? (
-            <>
-              {/* Legend */}
-              <div style={styles.legend}>
-                <span style={styles.legendItem}>
-                  <span style={{ ...styles.legendDot, backgroundColor: BUYER_COLOR }} /> My cuts
-                </span>
-                <span style={styles.legendItem}>
-                  <span style={{ ...styles.legendDot, backgroundColor: '#888' }} /> Taken by others
-                </span>
-                <span style={styles.legendItem}>
-                  <span style={{ ...styles.legendDot, backgroundColor: '#b03030' }} /> Available
-                </span>
-              </div>
+          {/* Left: cow diagram */}
+          <div style={styles.leftPanel}>
+            <div style={styles.diagramCard}>
+              <h2 style={styles.sectionTitle}>Divide the Cow</h2>
 
-              <GroupCowDiagram
-                selectedCuts={selectedCuts}
-                othersQty={group.othersClaimedQty || {}}
-                onToggle={handleToggle}
-                onQuantityChange={handleQtyChange}
-              />
-
-              {Object.keys(selectedCuts).length > 0 && (
-                <div style={styles.cutsTextRow}>
-                  <span style={styles.cutsLabel}>Selected: </span>
-                  {Object.entries(selectedCuts).map(([cut, qty], i, arr) => (
-                    <span key={cut}>
-                      <span style={styles.cutName}>{cut}{qty > 1 ? ` ×${qty}` : ''}</span>
-                      {i < arr.length - 1 && <span style={{ color: '#aaa' }}>,  </span>}
+              {group.alreadyJoined ? (
+                <>
+                  <div style={styles.legend}>
+                    <span style={styles.legendItem}>
+                      <span style={{ ...styles.legendDot, backgroundColor: BUYER_COLOR }} /> My cuts
                     </span>
+                    <span style={styles.legendItem}>
+                      <span style={{ ...styles.legendDot, backgroundColor: '#888' }} /> Taken by others
+                    </span>
+                    <span style={styles.legendItem}>
+                      <span style={{ ...styles.legendDot, backgroundColor: '#b03030' }} /> Available
+                    </span>
+                  </div>
+
+                  <GroupCowDiagram
+                    selectedCuts={selectedCuts}
+                    othersQty={group.othersClaimedQty || {}}
+                    onToggle={handleToggle}
+                    onQuantityChange={handleQtyChange}
+                  />
+
+                  {Object.keys(selectedCuts).length > 0 && (
+                    <div style={styles.cutsTextRow}>
+                      <span style={styles.cutsLabel}>Selected: </span>
+                      {Object.entries(selectedCuts).map(([cut, qty], i, arr) => (
+                        <span key={cut}>
+                          <span style={styles.cutName}>{cut}{qty > 1 ? ` ×${qty}` : ''}</span>
+                          {i < arr.length - 1 && <span style={{ color: '#aaa' }}>,  </span>}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  <div style={styles.saveRow}>
+                    <button
+                      style={{ ...styles.saveBtn, ...(saveLoading ? styles.saveBtnDisabled : {}) }}
+                      onClick={handleSave}
+                      disabled={saveLoading}
+                    >
+                      {saveLoading ? 'Saving...' : 'Save Changes'}
+                    </button>
+                    <span style={styles.saveHint}>Saved cuts are locked in for your group members.</span>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div style={styles.legend}>
+                    <span style={styles.legendItem}>
+                      <span style={{ ...styles.legendDot, backgroundColor: '#888' }} /> Taken
+                    </span>
+                    <span style={styles.legendItem}>
+                      <span style={{ ...styles.legendDot, backgroundColor: '#b03030' }} /> Available
+                    </span>
+                  </div>
+                  <GroupCowDiagram
+                    selectedCuts={{}}
+                    othersQty={group.othersClaimedQty || {}}
+                  />
+                  <div style={styles.joinRow}>
+                    <button
+                      style={{ ...styles.joinBtn, ...(joinLoading ? styles.joinBtnDisabled : {}) }}
+                      onClick={handleJoin}
+                      disabled={joinLoading}
+                    >
+                      {joinLoading ? 'Joining...' : 'Join Group'}
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Members */}
+            <div style={styles.membersCard}>
+              <h2 style={styles.sectionTitle}>Members ({group.memberCount})</h2>
+              {group.memberCount === 0 ? (
+                <p style={styles.emptyText}>No members yet.</p>
+              ) : (
+                <div style={styles.memberGrid}>
+                  {group.members.map((m, i) => (
+                    <div key={i} style={styles.memberCard}>
+                      <p style={styles.memberName}>{m.firstName}</p>
+                      <p style={styles.memberCuts}>{m.claimedCuts || 'No cuts selected yet'}</p>
+                    </div>
                   ))}
                 </div>
               )}
+            </div>
 
-              <div style={styles.saveRow}>
+            {/* Invite code */}
+            {group.alreadyJoined && (
+              <div style={styles.inviteCard}>
+                <p style={styles.inviteLabel}>Invite Code</p>
+                <div style={styles.inviteRow}>
+                  <span style={styles.inviteCode}>{group.inviteCode}</span>
+                  <button style={styles.copyBtn} onClick={handleCopyCode}>
+                    {codeCopied ? 'Copied!' : 'Copy'}
+                  </button>
+                  {group.isCreator && (
+                    <button
+                      style={{ ...styles.regenBtn, ...(regenLoading ? styles.regenBtnDisabled : {}) }}
+                      onClick={handleRegenCode}
+                      disabled={regenLoading}
+                    >
+                      {regenLoading ? 'Regenerating...' : 'Regenerate'}
+                    </button>
+                  )}
+                </div>
+                <p style={styles.inviteHint}>Share this code with friends so they can find and join this group.</p>
+              </div>
+            )}
+
+            {/* Leave group */}
+            {group.alreadyJoined && (
+              <div style={styles.leaveRow}>
                 <button
-                  style={{ ...styles.saveBtn, ...(saveLoading ? styles.saveBtnDisabled : {}) }}
-                  onClick={handleSave}
-                  disabled={saveLoading}
+                  style={{ ...styles.leaveBtn, ...(leaveLoading ? styles.leaveBtnDisabled : {}) }}
+                  onClick={handleLeave}
+                  disabled={leaveLoading}
                 >
-                  {saveLoading ? 'Saving...' : 'Save Changes'}
+                  {leaveLoading ? 'Leaving...' : 'Leave Group'}
                 </button>
-                <span style={styles.saveHint}>
-                  Saved cuts are locked in for your group members.
-                </span>
               </div>
-            </>
-          ) : (
-            /* Read-only diagram for non-members */
-            <>
-              <div style={styles.legend}>
-                <span style={styles.legendItem}>
-                  <span style={{ ...styles.legendDot, backgroundColor: '#888' }} /> Taken
-                </span>
-                <span style={styles.legendItem}>
-                  <span style={{ ...styles.legendDot, backgroundColor: '#b03030' }} /> Available
-                </span>
+            )}
+
+          </div>
+
+          {/* Right: chat + matching farms */}
+          <div style={styles.rightPanel}>
+
+            {/* Group Chat — visible to members only */}
+            {group.alreadyJoined && (
+              <div style={styles.membersCard}>
+                <h2 style={styles.sectionTitle}>Group Chat</h2>
+                <div style={styles.chatMessages} ref={messagesContainerRef}>
+                  {messages.length === 0 && (
+                    <p style={styles.emptyText}>No messages yet. Say hello!</p>
+                  )}
+                  {messages.map((msg) => {
+                    const isMe = msg.senderId === user.id;
+                    return (
+                      <div key={msg.id ?? msg.sentAt} style={{ ...styles.chatBubbleRow, justifyContent: isMe ? 'flex-end' : 'flex-start' }}>
+                        <div style={{ ...styles.chatBubble, ...(isMe ? styles.chatBubbleMe : styles.chatBubbleOther) }}>
+                          {!isMe && <p style={styles.chatSender}>{msg.senderName}</p>}
+                          <p style={styles.chatContent}>{msg.content}</p>
+                          <p style={styles.chatTime}>
+                            {new Date(msg.sentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div style={styles.chatInputRow}>
+                  <input
+                    style={styles.chatInput}
+                    type="text"
+                    placeholder="Type a message..."
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    onKeyDown={handleChatKeyDown}
+                    maxLength={1000}
+                  />
+                  <button
+                    style={{ ...styles.chatSendBtn, ...((!chatInput.trim() || !stompClientRef.current?.connected) ? styles.chatSendBtnDisabled : {}) }}
+                    onClick={handleSendMessage}
+                    disabled={!chatInput.trim() || !stompClientRef.current?.connected}
+                  >
+                    Send
+                  </button>
+                </div>
               </div>
-              <GroupCowDiagram
-                selectedCuts={{}}
-                othersQty={group.othersClaimedQty || {}}
-              />
-            </>
-          )}
+            )}
+
+            {/* Matching Farms */}
+            {farms && (
+              <div style={styles.membersCard}>
+                <h2 style={styles.sectionTitle}>Matching Farms</h2>
+
+                <div style={styles.farmsSubheading}>
+                  <span style={styles.perfectBadge}>Perfect Match</span>
+                  <span style={styles.farmsSub}>
+                    {farms.perfectMatches.length === 0
+                      ? 'No farms match all certifications.'
+                      : `${farms.perfectMatches.length} farm${farms.perfectMatches.length > 1 ? 's' : ''} meet${farms.perfectMatches.length === 1 ? 's' : ''} all requirements`}
+                  </span>
+                </div>
+                {farms.perfectMatches.length > 0 && (
+                  <div style={styles.farmList}>
+                    {farms.perfectMatches.map((f) => (
+                      <div key={f.sellerId} style={{ ...styles.farmCard, borderLeft: '4px solid #2e7d32' }}>
+                        <p style={styles.farmShop}>{f.shopName || 'Unnamed Farm'}</p>
+                        <p style={styles.farmName}>{f.sellerName}</p>
+                        <p style={styles.farmContact}>{f.email}</p>
+                        {f.phoneNumber && <p style={styles.farmContact}>{f.phoneNumber}</p>}
+                        {f.certifications.length > 0 && (
+                          <div style={styles.farmCerts}>
+                            {f.certifications.map((c) => (
+                              <span key={c} style={{ ...styles.badge, ...(BADGE_STYLES[c] || { backgroundColor: '#eee', color: '#555' }), fontSize: '10px' }}>
+                                {CERT_LABELS[c] || c}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {farms.partialMatches.length > 0 && (
+                  <>
+                    <div style={{ ...styles.farmsSubheading, marginTop: '16px' }}>
+                      <span style={styles.partialBadge}>Partial Match</span>
+                      <span style={styles.farmsSub}>
+                        {farms.partialMatches.length} farm{farms.partialMatches.length > 1 ? 's' : ''} with some matching certifications
+                      </span>
+                    </div>
+                    <div style={styles.farmList}>
+                      {farms.partialMatches.map((f) => (
+                        <div key={f.sellerId} style={{ ...styles.farmCard, borderLeft: '4px solid #f9a825' }}>
+                          <p style={styles.farmShop}>{f.shopName || 'Unnamed Farm'}</p>
+                          <p style={styles.farmName}>{f.sellerName}</p>
+                          <p style={styles.farmContact}>{f.email}</p>
+                          {f.phoneNumber && <p style={styles.farmContact}>{f.phoneNumber}</p>}
+                          <p style={styles.matchScore}>{f.matchCount} of {f.totalRequired} certs matched</p>
+                          {f.certifications.length > 0 && (
+                            <div style={styles.farmCerts}>
+                              {f.certifications.map((c) => (
+                                <span key={c} style={{ ...styles.badge, ...(BADGE_STYLES[c] || { backgroundColor: '#eee', color: '#555' }), fontSize: '10px' }}>
+                                  {CERT_LABELS[c] || c}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+
+          </div>
         </div>
-
-        {/* Members */}
-        <h2 style={styles.sectionTitle}>Members ({group.memberCount})</h2>
-        {group.memberCount === 0 ? (
-          <p style={styles.emptyText}>No members yet.</p>
-        ) : (
-          <div style={styles.memberGrid}>
-            {group.members.map((m, i) => (
-              <div key={i} style={styles.memberCard}>
-                <p style={styles.memberName}>{m.firstName}</p>
-                <p style={styles.memberCuts}>{m.claimedCuts || 'No cuts selected yet'}</p>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Leave group */}
-        {group.alreadyJoined && (
-          <div style={styles.leaveRow}>
-            <button
-              style={{ ...styles.leaveBtn, ...(leaveLoading ? styles.leaveBtnDisabled : {}) }}
-              onClick={handleLeave}
-              disabled={leaveLoading}
-            >
-              {leaveLoading ? 'Leaving...' : 'Leave Group'}
-            </button>
-          </div>
-        )}
 
       </div>
     </div>
@@ -287,7 +540,7 @@ const styles = {
   page: { minHeight: '100vh', backgroundColor: '#f5f5f0' },
   banner: { backgroundColor: BUYER_COLOR, padding: '40px 0' },
   bannerInner: {
-    maxWidth: '900px', margin: '0 auto', padding: '0 48px',
+    maxWidth: '1600px', margin: '0 auto', padding: '0 48px',
     display: 'flex', alignItems: 'flex-start', gap: '24px',
   },
   backBtn: {
@@ -309,9 +562,14 @@ const styles = {
     textTransform: 'uppercase',
   },
   content: {
-    maxWidth: '900px', margin: '0 auto', padding: '32px 48px 72px',
+    maxWidth: '1600px', margin: '0 auto', padding: '32px 48px 72px',
     display: 'flex', flexDirection: 'column', gap: '24px',
   },
+  mainLayout: {
+    display: 'flex', gap: '24px', alignItems: 'flex-start',
+  },
+  leftPanel: { flex: 3, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '16px' },
+  rightPanel: { flex: 2, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '16px' },
   errorBox: {
     backgroundColor: '#fee', color: '#c00',
     padding: '12px 16px', borderRadius: '6px', fontSize: '14px',
@@ -352,16 +610,102 @@ const styles = {
   saveBtnDisabled: { opacity: 0.6, cursor: 'not-allowed' },
   saveHint: { fontSize: '12px', color: '#888', fontStyle: 'italic' },
   emptyText: { fontSize: '14px', color: '#bbb', fontStyle: 'italic', margin: 0 },
+  membersCard: {
+    backgroundColor: 'white', borderRadius: '10px', padding: '20px 24px',
+    boxShadow: '0 1px 4px rgba(0,0,0,0.07)', border: '1px solid #e8e4e0',
+  },
   memberGrid: {
     display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '12px',
   },
   memberCard: {
-    backgroundColor: 'white', borderRadius: '8px', padding: '16px 20px',
-    boxShadow: '0 1px 4px rgba(0,0,0,0.07)', border: '1px solid #e8e4e0',
+    backgroundColor: '#f9f7f5', borderRadius: '8px', padding: '12px 16px',
+    border: '1px solid #e8e4e0',
   },
   memberName: { fontSize: '15px', fontWeight: '700', color: '#222', margin: '0 0 4px 0' },
   memberCuts: { fontSize: '13px', color: '#555', margin: 0 },
-  leaveRow: { marginTop: '8px' },
+  joinRow: { marginTop: '18px' },
+  joinBtn: {
+    padding: '11px 28px', backgroundColor: BUYER_COLOR, color: 'white',
+    border: 'none', borderRadius: '6px', fontSize: '14px', fontWeight: '700', cursor: 'pointer',
+  },
+  joinBtnDisabled: { opacity: 0.6, cursor: 'not-allowed' },
+  inviteCard: {
+    backgroundColor: 'white', borderRadius: '10px', padding: '20px 24px',
+    boxShadow: '0 1px 4px rgba(0,0,0,0.07)', border: '1px solid #e8e4e0',
+  },
+  inviteLabel: {
+    fontSize: '11px', fontWeight: '700', letterSpacing: '0.07em',
+    textTransform: 'uppercase', color: BUYER_COLOR, margin: '0 0 10px 0',
+  },
+  inviteRow: { display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' },
+  inviteCode: {
+    fontFamily: 'monospace', fontSize: '22px', fontWeight: '700',
+    letterSpacing: '0.15em', color: '#222', backgroundColor: '#f5f5f0',
+    padding: '6px 16px', borderRadius: '6px', border: '1px solid #e0dbd5',
+  },
+  copyBtn: {
+    padding: '7px 16px', backgroundColor: 'white', color: BUYER_COLOR,
+    border: `2px solid ${BUYER_COLOR}`, borderRadius: '6px',
+    fontSize: '13px', fontWeight: '600', cursor: 'pointer',
+  },
+  regenBtn: {
+    padding: '7px 16px', backgroundColor: 'white', color: '#888',
+    border: '2px solid #ccc', borderRadius: '6px',
+    fontSize: '13px', fontWeight: '600', cursor: 'pointer',
+  },
+  regenBtnDisabled: { opacity: 0.6, cursor: 'not-allowed' },
+  inviteHint: { fontSize: '12px', color: '#999', margin: '10px 0 0 0', fontStyle: 'italic' },
+  farmsSubheading: { display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' },
+  farmsSub: { fontSize: '13px', color: '#777' },
+  perfectBadge: {
+    backgroundColor: '#e8f5e9', color: '#2e7d32',
+    fontSize: '11px', fontWeight: '700', letterSpacing: '0.05em',
+    textTransform: 'uppercase', padding: '3px 10px', borderRadius: '99px',
+  },
+  partialBadge: {
+    backgroundColor: '#fff8e1', color: '#f57f17',
+    fontSize: '11px', fontWeight: '700', letterSpacing: '0.05em',
+    textTransform: 'uppercase', padding: '3px 10px', borderRadius: '99px',
+  },
+  farmList: { display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '8px' },
+  farmGrid: {
+    display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '12px',
+  },
+  farmCard: {
+    backgroundColor: 'white', borderRadius: '8px', padding: '16px 20px',
+    boxShadow: '0 1px 4px rgba(0,0,0,0.07)', border: '1px solid #e8e4e0',
+  },
+  farmShop: { fontSize: '15px', fontWeight: '700', color: '#222', margin: '0 0 2px 0' },
+  farmName: { fontSize: '13px', color: '#555', margin: '0 0 6px 0' },
+  farmContact: { fontSize: '12px', color: '#777', margin: '0 0 2px 0' },
+  farmCerts: { display: 'flex', gap: '4px', flexWrap: 'wrap', marginTop: '8px' },
+  matchScore: {
+    fontSize: '12px', fontWeight: '600', color: '#f57f17', margin: '4px 0 0 0',
+  },
+  chatMessages: {
+    height: '320px', overflowY: 'auto', display: 'flex', flexDirection: 'column',
+    gap: '8px', padding: '8px 0', marginBottom: '12px',
+  },
+  chatBubbleRow: { display: 'flex' },
+  chatBubble: {
+    maxWidth: '75%', padding: '8px 12px', borderRadius: '12px', wordBreak: 'break-word',
+  },
+  chatBubbleMe: { backgroundColor: BUYER_COLOR, color: 'white', borderBottomRightRadius: '4px' },
+  chatBubbleOther: { backgroundColor: '#f0ede9', color: '#222', borderBottomLeftRadius: '4px' },
+  chatSender: { fontSize: '11px', fontWeight: '700', margin: '0 0 2px 0', opacity: 0.7 },
+  chatContent: { fontSize: '14px', margin: 0, lineHeight: 1.4 },
+  chatTime: { fontSize: '10px', margin: '4px 0 0 0', opacity: 0.6, textAlign: 'right' },
+  chatInputRow: { display: 'flex', gap: '8px' },
+  chatInput: {
+    flex: 1, padding: '9px 12px', borderRadius: '6px',
+    border: '1px solid #ddd', fontSize: '14px', outline: 'none',
+  },
+  chatSendBtn: {
+    padding: '9px 18px', backgroundColor: BUYER_COLOR, color: 'white',
+    border: 'none', borderRadius: '6px', fontSize: '14px', fontWeight: '600', cursor: 'pointer',
+  },
+  chatSendBtnDisabled: { opacity: 0.5, cursor: 'not-allowed' },
+  leaveRow: {},
   leaveBtn: {
     padding: '10px 24px', backgroundColor: 'white', color: '#c0392b',
     border: '2px solid #c0392b', borderRadius: '6px', fontSize: '14px',

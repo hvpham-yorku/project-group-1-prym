@@ -31,7 +31,7 @@ public class GroupServiceIntegrationTest {
                 email, "pass123", User.Role.BUYER,
                 username, "Test", "Buyer", "416-555-0000", null
         );
-        buyerService.createBuyerProfile(user.getId(), "Chuck", "Quarter cow");
+        buyerService.createBuyerProfile(user.getId(), "Chuck");
         return user;
     }
 

@@ -6,7 +6,7 @@ const API_URL = '/api/buyer';
 
 // Creates a new buyer profile after signup
 // Calls POST /api/buyer/profile
-// profileData contains: userId, preferredCuts, quantity
+// profileData contains: userId, preferredCuts
 export async function createBuyerProfile(profileData) {
     const response = await fetch(`${API_URL}/profile`, {
         method: 'POST',
@@ -43,7 +43,7 @@ export async function getBuyerProfile(userId) {
 
 // Updates an existing buyer profile
 // Calls PATCH /api/buyer/profile/{userId}
-// profileData contains: preferredCuts, quantity
+// profileData contains: preferredCuts, phoneNumber
 export async function updateBuyerProfile(userId, profileData) {
     const response = await fetch(`${API_URL}/profile/${userId}`, {
         method: 'PATCH',

@@ -32,6 +32,10 @@ public class BuyerGroup {
     @JoinColumn(name = "creator_id", nullable = false)
     private Buyer creator;
 
+    // Unique 8-character alphanumeric code used to invite buyers to this group
+    @Column(unique = true, nullable = false)
+    private String inviteCode;
+
     // Comma-separated certification enum names, e.g. "KOSHER,ORGANIC"
     @Column
     private String certifications;

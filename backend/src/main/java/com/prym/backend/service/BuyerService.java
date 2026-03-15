@@ -24,7 +24,7 @@ public class BuyerService {
     }
 
     // Creates a new buyer profile linked to an existing user
-    public Buyer createBuyerProfile(Long userId, String preferredCuts, String quantity) {
+    public Buyer createBuyerProfile(Long userId, String preferredCuts) {
         // Rule 1: The user must exist in the database before we can create a buyer profile
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -38,7 +38,6 @@ public class BuyerService {
         Buyer buyer = new Buyer();
         buyer.setUser(user);
         buyer.setPreferredCuts(preferredCuts);
-        buyer.setQuantity(quantity);
 
         // Save to the database and return the created profile
         return buyerRepository.save(buyer);
@@ -54,14 +53,13 @@ public class BuyerService {
     // Updates an existing buyer's meat preferences
     // Called when a buyer edits their profile and clicks save
     @Transactional
-    public Buyer updateBuyerProfile(Long userId, String preferredCuts, String quantity, String phoneNumber) {
+    public Buyer updateBuyerProfile(Long userId, String preferredCuts, String phoneNumber) {
         // Find the existing profile, can't update something that doesn't exist
         Buyer buyer = buyerRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Buyer profile not found"));
 
         // Overwrite the old values with the new ones
         buyer.setPreferredCuts(preferredCuts);
-        buyer.setQuantity(quantity);
     if (phoneNumber != null && !phoneNumber.isBlank()) {
             User user = buyer.getUser();
             user.setPhoneNumber(phoneNumber);

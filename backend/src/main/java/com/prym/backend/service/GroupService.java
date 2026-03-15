@@ -5,6 +5,7 @@ import com.prym.backend.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -21,17 +22,29 @@ public class GroupService {
     private final BuyerGroupRepository groupRepository;
     private final BuyerGroupMemberRepository memberRepository;
     private final BuyerRepository buyerRepository;
+    private final SellerRepository sellerRepository;
 
-    // Each of the 11 cuts has 2 slots (left/right). Max claimable qty per cut = 2.
     private static final int MAX_QTY_PER_CUT = 2;
+    private static final String CODE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+
+    private String generateInviteCode() {
+        StringBuilder sb = new StringBuilder(8);
+        for (int i = 0; i < 8; i++) {
+            sb.append(CODE_CHARS.charAt(SECURE_RANDOM.nextInt(CODE_CHARS.length())));
+        }
+        return sb.toString();
+    }
 
     public GroupService(
             BuyerGroupRepository groupRepository,
             BuyerGroupMemberRepository memberRepository,
-            BuyerRepository buyerRepository) {
+            BuyerRepository buyerRepository,
+            SellerRepository sellerRepository) {
         this.groupRepository = groupRepository;
         this.memberRepository = memberRepository;
         this.buyerRepository = buyerRepository;
+        this.sellerRepository = sellerRepository;
     }
 
     // "Chuck, Rib x2, Short Loin"  →  { "Chuck": 1, "Rib": 2, "Short Loin": 1 }
@@ -73,6 +86,8 @@ public class GroupService {
         boolean alreadyJoined = allMembers.stream()
                 .anyMatch(m -> m.getBuyer().getId().equals(buyer.getId()));
 
+        boolean isCreator = group.getCreator().getId().equals(buyer.getId());
+
         String myClaimedCuts = null;
         if (alreadyJoined) {
             myClaimedCuts = allMembers.stream()
@@ -111,8 +126,13 @@ public class GroupService {
         dto.put("memberCount", allMembers.size());
         dto.put("members", memberDTOs);
         dto.put("alreadyJoined", alreadyJoined);
+        dto.put("isCreator", isCreator);
         dto.put("myClaimedCuts", myClaimedCuts);
         dto.put("othersClaimedQty", othersClaimedQty);
+        // Only expose the invite code to current members
+        if (alreadyJoined) {
+            dto.put("inviteCode", group.getInviteCode());
+        }
 
         return dto;
     }
@@ -133,6 +153,7 @@ public class GroupService {
         BuyerGroup group = new BuyerGroup();
         group.setName(name.trim());
         group.setCreator(buyer);
+        group.setInviteCode(generateInviteCode());
         group.setCertifications(certifications != null ? certifications.trim() : "");
         group.setCreatedAt(LocalDateTime.now());
         BuyerGroup saved = groupRepository.save(group);
@@ -244,22 +265,119 @@ public class GroupService {
         return buildGroupDTO(group, buyerUserId);
     }
 
+    // Returns perfect and partial farm matches based on the group's certifications.
+    @Transactional(readOnly = true)
+    public Map<String, Object> getMatchingFarms(Long buyerUserId, Long groupId) {
+        BuyerGroup group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new RuntimeException("Group not found"));
+
+        // Parse group's required certifications into a set of uppercase strings
+        Set<String> required = new HashSet<>();
+        if (group.getCertifications() != null && !group.getCertifications().isBlank()) {
+            for (String c : group.getCertifications().split(",")) {
+                String trimmed = c.trim();
+                if (!trimmed.isEmpty()) required.add(trimmed.toUpperCase());
+            }
+        }
+        int totalRequired = required.size();
+
+        List<Map<String, Object>> perfectMatches = new ArrayList<>();
+        List<Map<String, Object>> partialMatches = new ArrayList<>();
+
+        for (Seller seller : sellerRepository.findAll()) {
+            // Collect seller's cert names
+            Set<String> sellerCerts = new HashSet<>();
+            if (seller.getCertifications() != null) {
+                for (com.prym.backend.model.Certification cert : seller.getCertifications()) {
+                    if (cert.getName() != null) {
+                        sellerCerts.add(cert.getName().name());
+                    }
+                }
+            }
+
+            int matchCount = 0;
+            for (String r : required) {
+                if (sellerCerts.contains(r)) matchCount++;
+            }
+
+            // Skip sellers with no overlap when group has certifications
+            if (totalRequired > 0 && matchCount == 0) continue;
+
+            Map<String, Object> farmDTO = new LinkedHashMap<>();
+            farmDTO.put("sellerId", seller.getId());
+            farmDTO.put("shopName", seller.getShopName());
+            farmDTO.put("sellerName", seller.getUser().getFirstName() + " " + seller.getUser().getLastName());
+            farmDTO.put("email", seller.getUser().getEmail());
+            farmDTO.put("phoneNumber", seller.getUser().getPhoneNumber());
+            farmDTO.put("certifications", new ArrayList<>(sellerCerts));
+            farmDTO.put("matchCount", matchCount);
+            farmDTO.put("totalRequired", totalRequired);
+
+            if (totalRequired == 0 || matchCount == totalRequired) {
+                perfectMatches.add(farmDTO);
+            } else {
+                partialMatches.add(farmDTO);
+            }
+        }
+
+        // Sort partial matches by matchCount descending
+        partialMatches.sort((a, b) -> Integer.compare((int) b.get("matchCount"), (int) a.get("matchCount")));
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("perfectMatches", perfectMatches);
+        result.put("partialMatches", partialMatches);
+        return result;
+    }
+
+    // Looks up a group by its invite code. Returns the full group DTO for preview.
+    @Transactional(readOnly = true)
+    public Map<String, Object> getGroupByCode(Long buyerUserId, String code) {
+        BuyerGroup group = groupRepository.findByInviteCode(code.trim().toUpperCase())
+                .orElseThrow(() -> new RuntimeException("No group found with that code."));
+        return buildGroupDTO(group, buyerUserId);
+    }
+
+    // Generates a new invite code for the group. Only the current creator can do this.
+    @Transactional
+    public Map<String, Object> regenerateInviteCode(Long buyerUserId, Long groupId) {
+        Buyer buyer = buyerRepository.findByUserId(buyerUserId)
+                .orElseThrow(() -> new RuntimeException("Buyer not found"));
+        BuyerGroup group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new RuntimeException("Group not found"));
+        if (!group.getCreator().getId().equals(buyer.getId())) {
+            throw new RuntimeException("Only the group creator can regenerate the invite code.");
+        }
+        group.setInviteCode(generateInviteCode());
+        groupRepository.save(group);
+        return buildGroupDTO(group, buyerUserId);
+    }
+
     // Removes the buyer from the group. If the group has no members left, it is deleted.
     @Transactional
     public void leaveGroup(Long buyerUserId, Long groupId) {
         Buyer buyer = buyerRepository.findByUserId(buyerUserId)
                 .orElseThrow(() -> new RuntimeException("Buyer not found"));
+        BuyerGroup group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new RuntimeException("Group not found"));
         BuyerGroupMember membership = memberRepository
                 .findByGroupIdAndBuyerId(groupId, buyer.getId())
                 .orElseThrow(() -> new RuntimeException("You are not a member of this group."));
 
-        memberRepository.delete(membership);
+        boolean wasCreator = group.getCreator().getId().equals(buyer.getId());
 
-        // Flush so the count check below reflects the deletion
+        memberRepository.delete(membership);
         memberRepository.flush();
 
-        if (memberRepository.findByGroupId(groupId).isEmpty()) {
+        List<BuyerGroupMember> remaining = memberRepository.findByGroupId(groupId);
+        if (remaining.isEmpty()) {
             groupRepository.deleteById(groupId);
+        } else if (wasCreator) {
+            // Transfer creator to the earliest-joined remaining member (lowest ID = joined first)
+            BuyerGroupMember next = remaining.stream()
+                    .min(Comparator.comparing(BuyerGroupMember::getId))
+                    .orElseThrow();
+            group.setCreator(next.getBuyer());
+            groupRepository.save(group);
         }
     }
 }

@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { logout } from "../api/auth";
 import { useState, useEffect } from "react";
 import { getBuyerProfile, updateBuyerProfile } from "../api/buyer";
-import { getAvailableGroups, getMyGroups, joinGroup } from "../api/groups";
+import { getAvailableGroups, getMyGroups, joinGroup, getGroupByCode } from "../api/groups";
 import CowDiagram from "../components/CowDiagram";
 import EditAccountModal from "../components/EditAccountModal";
 
@@ -34,7 +34,6 @@ function BuyerDashboard() {
   const [formData, setFormData] = useState({
     phoneNumber: "",
     selectedCuts: {}, // { [cutId]: quantity }
-    quantity: "",
   });
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -46,6 +45,8 @@ function BuyerDashboard() {
   const [groupsLoading, setGroupsLoading] = useState(true);
   const [groupsError, setGroupsError] = useState("");
   const [joiningGroupId, setJoiningGroupId] = useState(null);
+  const [inviteCode, setInviteCode] = useState("");
+  const [codeError, setCodeError] = useState("");
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -57,7 +58,6 @@ function BuyerDashboard() {
         setFormData({
           phoneNumber: user?.phoneNumber || "",
           selectedCuts: parseCuts(data.preferredCuts),
-          quantity: data.quantity || "",
         });
       } catch (err) {
         setError("Failed to load profile.");
@@ -117,7 +117,6 @@ function BuyerDashboard() {
 
       await updateBuyerProfile(user.id, {
         preferredCuts,
-        quantity: formData.quantity,
         phoneNumber: formData.phoneNumber,
       });
 
@@ -125,7 +124,6 @@ function BuyerDashboard() {
       setProfile((prev) => ({
         ...prev,
         preferredCuts,
-        quantity: formData.quantity,
       }));
       setFormData((prev) => ({ ...prev, phoneNumber: savedPhone }));
       saveUser({ ...user, phoneNumber: savedPhone });
@@ -174,11 +172,21 @@ function BuyerDashboard() {
     }
   };
 
+  const handleJoinByCode = async () => {
+    if (!inviteCode.trim()) return;
+    setCodeError("");
+    try {
+      const group = await getGroupByCode(user.id, inviteCode.trim());
+      navigate(`/buyer/groups/${group.groupId}`);
+    } catch (err) {
+      setCodeError(err.message || "Invalid invite code.");
+    }
+  };
+
   const handleDiscard = () => {
     setFormData({
       phoneNumber: user?.phoneNumber || "",
       selectedCuts: parseCuts(profile?.preferredCuts),
-      quantity: profile?.quantity || "",
     });
     setError("");
     setIsEditing(false);
@@ -249,134 +257,113 @@ function BuyerDashboard() {
       <div style={styles.content}>
         {error && <div style={styles.error}>{error}</div>}
 
-        {/* Fields Grid */}
-        <div style={styles.grid}>
-          {/* Phone */}
-          <div style={styles.fieldCard}>
-            <p style={styles.fieldLabel}>Phone Number</p>
-            {isEditing ? (
-              <input
-                name="phoneNumber"
-                value={formData.phoneNumber}
-                onChange={handleChange}
-                placeholder="e.g. +1 416 555 0000"
-                style={styles.fieldInput}
-              />
-            ) : (
-              <p
-                style={
-                  user?.phoneNumber ? styles.fieldValue : styles.fieldValueEmpty
-                }
-              >
-                {user?.phoneNumber || "Not set"}
-              </p>
-            )}
-          </div>
+        {/* Two-column layout: profile on left, groups on right */}
+        <div style={styles.mainLayout}>
 
-          {/* Quantity */}
-          <div style={styles.fieldCard}>
-            <p style={styles.fieldLabel}>Quantity</p>
-            {isEditing ? (
-              <select
-                name="quantity"
-                value={formData.quantity}
-                onChange={handleChange}
-                style={styles.fieldInput}
-              >
-                <option value="">Select quantity</option>
-                <option value="Quarter cow">Quarter cow</option>
-                <option value="Half cow">Half cow</option>
-                <option value="Whole cow">Whole cow</option>
-              </select>
-            ) : (
-              <p
-                style={
-                  profile?.quantity ? styles.fieldValue : styles.fieldValueEmpty
-                }
-              >
-                {profile?.quantity || "Not set"}
-              </p>
-            )}
-          </div>
-
-          {/* Preferred Cuts — cow diagram, full width */}
-          <div
-            style={{
-              ...styles.fieldCard,
-              gridColumn: "1 / -1",
-              padding: "20px 16px 12px",
-            }}
-          >
-            <p style={styles.fieldLabel}>
-              Preferred Cuts
-              {isEditing && (
-                <span style={styles.editHint}>
-                  — click a section to select, use − / + to set quantity
-                </span>
-              )}
-            </p>
-
-            {Object.keys(displayCuts).length === 0 && !isEditing ? (
-              <p style={styles.fieldValueEmpty}>Not set</p>
-            ) : (
-              <>
-                <CowDiagram
-                  selectedCuts={displayCuts}
-                  onToggle={handleCutToggle}
-                  onQuantityChange={handleCutQty}
-                  readOnly={!isEditing}
-                />
-
-                {/* Cut text summary */}
-                {Object.keys(displayCuts).length > 0 && (
-                  <div style={styles.cutsTextRow}>
-                    <span style={styles.cutsLabel}>Selected cuts: </span>
-                    {Object.entries(displayCuts).map(([cut, qty], i, arr) => (
-                      <span key={cut}>
-                        <span style={styles.cutName}>
-                          {cut}
-                          {qty > 1 ? ` ×${qty}` : ""}
-                        </span>
-                        {i < arr.length - 1 && (
-                          <span style={styles.cutSep}>, </span>
-                        )}
-                      </span>
-                    ))}
-                  </div>
+          {/* Left panel: profile fields + buttons */}
+          <div style={styles.leftPanel}>
+            <div style={styles.grid}>
+              {/* Phone */}
+              <div style={styles.fieldCard}>
+                <p style={styles.fieldLabel}>Phone Number</p>
+                {isEditing ? (
+                  <input
+                    name="phoneNumber"
+                    value={formData.phoneNumber}
+                    onChange={handleChange}
+                    placeholder="e.g. +1 416 555 0000"
+                    style={styles.fieldInput}
+                  />
+                ) : (
+                  <p
+                    style={
+                      user?.phoneNumber ? styles.fieldValue : styles.fieldValueEmpty
+                    }
+                  >
+                    {user?.phoneNumber || "Not set"}
+                  </p>
                 )}
-              </>
-            )}
-          </div>
-        </div>
+              </div>
 
-        {/* Buttons */}
-        <div style={styles.buttonRow}>
-          {isEditing ? (
-            <>
-              <button style={styles.secondaryButton} onClick={handleDiscard}>
-                Discard
-              </button>
-              <button style={styles.primaryButton} onClick={handleSave}>
-                Save Changes
-              </button>
-            </>
-          ) : (
-            <>
-			<Link to={`/farmlistings`}><button style={styles.primaryButton}>View Farm Listings</button></Link>
-              <button style={styles.secondaryButton} onClick={handleLogout}>
-                Logout
-              </button>
-              <button
-                style={styles.primaryButton}
-                onClick={() => setIsEditing(true)}
+              {/* Preferred Cuts — cow diagram, full width */}
+              <div
+                style={{
+                  ...styles.fieldCard,
+                  padding: "20px 16px 12px",
+                }}
               >
-                Edit Profile
-              </button>
-            </>
-          )}
-        </div>
+                <p style={styles.fieldLabel}>
+                  Preferred Cuts
+                  {isEditing && (
+                    <span style={styles.editHint}>
+                      — click a section to select, use − / + to set quantity
+                    </span>
+                  )}
+                </p>
 
-        {/* ── Groups Section ── */}
+                {Object.keys(displayCuts).length === 0 && !isEditing ? (
+                  <p style={styles.fieldValueEmpty}>Not set</p>
+                ) : (
+                  <>
+                    <CowDiagram
+                      selectedCuts={displayCuts}
+                      onToggle={handleCutToggle}
+                      onQuantityChange={handleCutQty}
+                      readOnly={!isEditing}
+                    />
+
+                    {/* Cut text summary */}
+                    {Object.keys(displayCuts).length > 0 && (
+                      <div style={styles.cutsTextRow}>
+                        <span style={styles.cutsLabel}>Selected cuts: </span>
+                        {Object.entries(displayCuts).map(([cut, qty], i, arr) => (
+                          <span key={cut}>
+                            <span style={styles.cutName}>
+                              {cut}
+                              {qty > 1 ? ` ×${qty}` : ""}
+                            </span>
+                            {i < arr.length - 1 && (
+                              <span style={styles.cutSep}>, </span>
+                            )}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Buttons */}
+            <div style={styles.buttonRow}>
+              {isEditing ? (
+                <>
+                  <button style={styles.secondaryButton} onClick={handleDiscard}>
+                    Discard
+                  </button>
+                  <button style={styles.primaryButton} onClick={handleSave}>
+                    Save Changes
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link to={`/farmlistings`}><button style={styles.primaryButton}>View Farm Listings</button></Link>
+                  <button style={styles.secondaryButton} onClick={handleLogout}>
+                    Logout
+                  </button>
+                  <button
+                    style={styles.primaryButton}
+                    onClick={() => setIsEditing(true)}
+                  >
+                    Edit Profile
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Right panel: groups */}
+          <div style={styles.rightPanel}>
         <div style={styles.groupsSection}>
           <div style={styles.groupsHeader}>
             <h2 style={styles.sectionTitle}>Groups</h2>
@@ -391,6 +378,24 @@ function BuyerDashboard() {
               </div>
             )}
           </div>
+
+          {/* ── Join by invite code ── */}
+          {myGroups.length === 0 && !groupsLoading && (
+            <div style={styles.codeRow}>
+              <input
+                style={styles.codeInput}
+                placeholder="Enter invite code (e.g. X7K2AB3F)"
+                value={inviteCode}
+                onChange={(e) => { setInviteCode(e.target.value.toUpperCase()); setCodeError(""); }}
+                onKeyDown={(e) => e.key === "Enter" && handleJoinByCode()}
+                maxLength={8}
+              />
+              <button style={styles.codeBtn} onClick={handleJoinByCode}>
+                Go
+              </button>
+            </div>
+          )}
+          {codeError && <p style={styles.codeError}>{codeError}</p>}
 
           {groupsError && <div style={styles.error}>{groupsError}</div>}
 
@@ -508,7 +513,8 @@ function BuyerDashboard() {
             </>
           )}
         </div>
-
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -527,7 +533,7 @@ const styles = {
     padding: "40px 0",
   },
   bannerInner: {
-    maxWidth: "900px",
+    maxWidth: "1600px",
     margin: "0 auto",
     padding: "0 48px",
     display: "flex",
@@ -582,7 +588,7 @@ const styles = {
     letterSpacing: "0.08em",
   },
   content: {
-    maxWidth: "900px",
+    maxWidth: "1600px",
     margin: "0 auto",
     padding: "40px 48px",
   },
@@ -596,9 +602,9 @@ const styles = {
   },
   grid: {
     display: "grid",
-    gridTemplateColumns: "1fr 1fr",
+    gridTemplateColumns: "1fr",
     gap: "16px",
-    marginBottom: "32px",
+    marginBottom: "0",
   },
   fieldCard: {
     backgroundColor: "white",
@@ -666,10 +672,24 @@ const styles = {
   cutSep: {
     color: "#aaa",
   },
+  mainLayout: {
+    display: "flex",
+    gap: "32px",
+    alignItems: "flex-start",
+  },
+  leftPanel: {
+    flex: "3 1 0",
+    minWidth: 0,
+  },
+  rightPanel: {
+    flex: "2 1 0",
+    minWidth: 0,
+  },
   buttonRow: {
     display: "flex",
     justifyContent: "flex-end",
     gap: "12px",
+    marginTop: "16px",
   },
   primaryButton: {
     padding: "12px 28px",
@@ -692,9 +712,6 @@ const styles = {
     cursor: "pointer",
   },
   groupsSection: {
-    marginTop: "48px",
-    paddingTop: "32px",
-    borderTop: "2px solid #e8e4e0",
   },
   groupsHeader: {
     display: "flex",
@@ -721,6 +738,37 @@ const styles = {
     fontSize: "14px",
     fontWeight: "600",
     cursor: "pointer",
+  },
+  codeRow: {
+    display: "flex",
+    gap: "8px",
+    margin: "12px 0 4px",
+  },
+  codeInput: {
+    flex: 1,
+    padding: "8px 12px",
+    border: `1px solid #ccc`,
+    borderRadius: "6px",
+    fontSize: "14px",
+    fontFamily: "monospace",
+    letterSpacing: "0.1em",
+    textTransform: "uppercase",
+    outline: "none",
+  },
+  codeBtn: {
+    padding: "8px 18px",
+    backgroundColor: BUYER_COLOR,
+    color: "white",
+    border: "none",
+    borderRadius: "6px",
+    fontSize: "14px",
+    fontWeight: "700",
+    cursor: "pointer",
+  },
+  codeError: {
+    fontSize: "13px",
+    color: "#c00",
+    margin: "0 0 8px 0",
   },
   sectionTitle: {
     fontSize: "22px",
