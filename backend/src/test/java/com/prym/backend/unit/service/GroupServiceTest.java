@@ -164,6 +164,7 @@ public class GroupServiceTest {
     public void leaveGroup_DeletesGroupWhenEmpty() {
         BuyerGroupMember membership = makeMember(testGroup, testBuyer, null);
         when(buyerRepository.findByUserId(1L)).thenReturn(Optional.of(testBuyer));
+        when(groupRepository.findById(100L)).thenReturn(Optional.of(testGroup));
         when(memberRepository.findByGroupIdAndBuyerId(100L, 10L)).thenReturn(Optional.of(membership));
         when(memberRepository.findByGroupId(100L)).thenReturn(Collections.emptyList()); // no members left
 
@@ -186,6 +187,7 @@ public class GroupServiceTest {
 
         BuyerGroupMember membership = makeMember(testGroup, testBuyer, null);
         when(buyerRepository.findByUserId(1L)).thenReturn(Optional.of(testBuyer));
+        when(groupRepository.findById(100L)).thenReturn(Optional.of(testGroup));
         when(memberRepository.findByGroupIdAndBuyerId(100L, 10L)).thenReturn(Optional.of(membership));
         when(memberRepository.findByGroupId(100L)).thenReturn(List.of(otherMember)); // one member still remains
 
@@ -193,12 +195,15 @@ public class GroupServiceTest {
 
         verify(memberRepository).delete(membership);
         verify(groupRepository, never()).deleteById(any()); // group must NOT be deleted
+        verify(groupRepository).save(testGroup); // creator transfer triggers a save
+        assertEquals(buyer2, testGroup.getCreator()); // creator transferred to remaining member
     }
 
     // Test 10: leaveGroup_NotMember — buyer is not in this group → throws
     @Test
     public void leaveGroup_NotMember() {
         when(buyerRepository.findByUserId(1L)).thenReturn(Optional.of(testBuyer));
+        when(groupRepository.findById(100L)).thenReturn(Optional.of(testGroup));
         when(memberRepository.findByGroupIdAndBuyerId(100L, 10L)).thenReturn(Optional.empty());
 
         assertThrows(RuntimeException.class,
@@ -305,5 +310,53 @@ public class GroupServiceTest {
         List<Map<String, Object>> result = groupService.getMyGroups(1L);
 
         assertTrue(result.isEmpty());
+    }
+
+    // Test 18: parseCuts format — "Cut x2" format is correctly parsed via saveCuts round-trip
+    @Test
+    public void saveCuts_ParsesQuantityFormat() {
+        // Other member has "Chuck x2" — both slots taken
+        User user2 = new User();
+        user2.setId(2L);
+        user2.setFirstName("Bob");
+        Buyer buyer2 = new Buyer();
+        buyer2.setId(20L);
+        buyer2.setUser(user2);
+        BuyerGroupMember otherMember = makeMember(testGroup, buyer2, "Chuck x2");
+
+        BuyerGroupMember membership = makeMember(testGroup, testBuyer, null);
+        when(buyerRepository.findByUserId(1L)).thenReturn(Optional.of(testBuyer));
+        when(memberRepository.findByGroupIdAndBuyerId(100L, 10L)).thenReturn(Optional.of(membership));
+        when(memberRepository.findByGroupId(100L)).thenReturn(List.of(membership, otherMember));
+
+        // "Chuck x2" should be parsed as 2 slots, leaving 0 — requesting even 1 should fail
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> groupService.saveCuts(1L, 100L, "Chuck"));
+        assertTrue(ex.getMessage().contains("0 slot(s) left"));
+    }
+
+    // Test 19: parseCuts format — single cut name (no "xN" suffix) counts as 1
+    @Test
+    public void saveCuts_ParsesSingleCutFormat() {
+        // Other member has "Chuck" (no quantity suffix) — 1 slot taken, 1 remaining
+        User user2 = new User();
+        user2.setId(2L);
+        user2.setFirstName("Bob");
+        Buyer buyer2 = new Buyer();
+        buyer2.setId(20L);
+        buyer2.setUser(user2);
+        BuyerGroupMember otherMember = makeMember(testGroup, buyer2, "Chuck");
+
+        BuyerGroupMember membership = makeMember(testGroup, testBuyer, null);
+        when(buyerRepository.findByUserId(1L)).thenReturn(Optional.of(testBuyer));
+        when(memberRepository.findByGroupIdAndBuyerId(100L, 10L)).thenReturn(Optional.of(membership));
+        when(memberRepository.findByGroupId(100L)).thenReturn(List.of(membership, otherMember));
+        when(memberRepository.save(any(BuyerGroupMember.class))).thenReturn(membership);
+        when(groupRepository.findById(100L)).thenReturn(Optional.of(testGroup));
+
+        // 1 slot taken by other, 1 remaining — requesting 1 should succeed
+        Map<String, Object> result = groupService.saveCuts(1L, 100L, "Chuck");
+        assertNotNull(result);
+        assertEquals("Chuck", membership.getClaimedCuts());
     }
 }
