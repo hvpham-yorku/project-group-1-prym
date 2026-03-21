@@ -27,7 +27,7 @@ public class BuyerServiceIntegrationTest {
     private User registerBuyer(String email, String username) {
         return authService.register(
                 email, "pass123", User.Role.BUYER,
-                username, "Test", "Buyer", "416-555-2000", null
+                username, "Test", "Buyer", "416-555-2000", null, "10001"
         );
     }
 

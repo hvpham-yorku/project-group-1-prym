@@ -12,7 +12,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-// Loads the full Spring application context and tests against the real PostgreSQL database.
+//Loads the full Spring application context and tests against the real PostgreSQL database.
 // @Transactional rolls back all DB changes after each test, so tests don't leave dirty data.
 @SpringBootTest
 @ActiveProfiles("integration")
@@ -33,7 +33,8 @@ public class AuthServiceIntegrationTest {
                 "Integration",
                 "Test",
                 "416-555-0001",
-                null
+                null,
+                "10001"
         );
 
         assertNotNull(user.getId()); // ID is assigned by the DB — proves it was actually inserted
@@ -53,7 +54,8 @@ public class AuthServiceIntegrationTest {
                 "Dup",
                 "Email",
                 "416-555-0002",
-                null
+                null,
+                "10001"
         );
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
@@ -65,7 +67,8 @@ public class AuthServiceIntegrationTest {
                         "Dup",
                         "Email2",
                         "416-555-0003",
-                        null
+                        null,
+                        "10001"
                 )
         );
 
@@ -83,7 +86,8 @@ public class AuthServiceIntegrationTest {
                 "User",
                 "One",
                 "416-555-0004",
-                null
+                null,
+                "10001"
         );
 
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
@@ -95,7 +99,8 @@ public class AuthServiceIntegrationTest {
                         "User",
                         "Two",
                         "416-555-0005",
-                        null
+                        null,
+                        "10001"
                 )
         );
 
@@ -113,7 +118,8 @@ public class AuthServiceIntegrationTest {
                 "Login",
                 "Test",
                 "416-555-0006",
-                null
+                null,
+                "10001"
         );
 
         Optional<User> result = authService.login("login_test@example.com", "myPassword");
@@ -134,7 +140,8 @@ public class AuthServiceIntegrationTest {
                 "Wrong",
                 "Pass",
                 "416-555-0007",
-                null
+                null,
+                "10001"
         );
 
         Optional<User> result = authService.login("wrong_pass_test@example.com", "wrongPassword");
@@ -153,7 +160,8 @@ public class AuthServiceIntegrationTest {
                 "Old",
                 "Name",
                 "416-555-0008",
-                null
+                null,
+                "10001"
         );
 
         User updated = authService.updateUserInfo(
@@ -162,6 +170,7 @@ public class AuthServiceIntegrationTest {
                 "Name",
                 "update_test@example.com",
                 "update_test_user",
+                null,
                 null
         );
 

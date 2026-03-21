@@ -29,7 +29,7 @@ public class SellerServiceIntegrationTest {
     private User registerSeller(String email, String username) {
         return authService.register(
                 email, "pass123", User.Role.SELLER,
-                username, "Test", "Seller", "416-555-1000", null
+                username, "Test", "Seller", "416-555-1000", null, "10001"
         );
     }
 
