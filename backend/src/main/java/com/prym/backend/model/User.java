@@ -43,7 +43,12 @@ public class User {
     @Column(nullable = false)
     private String phoneNumber;
 
-   
+    // Geographic location fields for farm-to-buyer matching
+    private String zipCode;        // 5-digit US ZIP code (e.g., "10001")
+    private Double latitude;       // Decimal degrees (e.g., 40.7589)
+    private Double longitude;      // Decimal degrees (e.g., -73.9851)
+
+
     @Column(columnDefinition = "TEXT")
     private String profilePicture;  // Store as Base64 string
 
