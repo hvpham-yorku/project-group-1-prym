@@ -8,7 +8,7 @@ import com.prym.backend.service.AuthService;
 import com.prym.backend.service.BuyerService;
 import com.prym.backend.repository.UserRepository;
 
-// Creates mock buyer accounts on startup for testing purposes
+//creates mock buyer accounts on startup for testing purposes
 @Component
 public class BuyerDataInitializer implements CommandLineRunner {
 
@@ -36,7 +36,8 @@ public class BuyerDataInitializer implements CommandLineRunner {
                 "Buyer",
                 "One",
                 "4165551234",
-                null);
+                null,
+                "M5H 2N2");  // Toronto Downtown
             this.buyerService.createBuyerProfile(buyer1.getId(), "Rib, Sirloin");
             System.out.println("Buyer 1 created.");
         }
@@ -51,7 +52,8 @@ public class BuyerDataInitializer implements CommandLineRunner {
                 "Buyer",
                 "Two",
                 "4165555678",
-                null);
+                null,
+                "10001");  // New York City
             this.buyerService.createBuyerProfile(buyer2.getId(), "Chuck, Brisket");
             System.out.println("Buyer 2 created.");
         }
