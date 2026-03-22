@@ -51,6 +51,12 @@ function AppRoutes() {
                     <FarmListing />
                 </ProtectedRoute>
             } />
+			
+			<Route path="/buyer/saved_farms" element={
+				<ProtectedRoute allowedRole="BUYER">
+					<SavedFarms />
+				</ProtectedRoute>
+			} />
 
             {/* Buyer */}
             <Route path="/buyer/profile" element={
