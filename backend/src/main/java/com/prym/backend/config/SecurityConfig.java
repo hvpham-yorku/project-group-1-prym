@@ -33,7 +33,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/ws/**").authenticated() // WebSocket handshake endpoint
                 .requestMatchers("/api/buyer/**").hasRole("BUYER") // only buyers can access
-                .requestMatchers("/api/seller/all").authenticated()//(SPECIAL CASE) allow anyone logged in to access the farm listings
+                .requestMatchers("/api/seller/all").hasRole("BUYER")//(SPECIAL CASE) allow buyers to access the farm listings
                 .requestMatchers("/api/seller/**").hasRole("SELLER") //only Sellers can access
                 .anyRequest().authenticated() //everything else requires just being logged in
             )
