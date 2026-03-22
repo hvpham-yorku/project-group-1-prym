@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import farmImage from '../assets/rural-farm-landscape-stockcake.webp';
 import {getFarm} from '../api/farm';
 
@@ -34,6 +35,12 @@ function FarmListing(){
 				<div style={styles.cowBox}> COW </div>
 				<div style={styles.cowBox}> COW </div>
 				<div style={styles.cowBox}> COW </div>
+			</div>
+			
+			<div style={styles.bottomButtonContainer}>
+				<button style={styles.button}>Save Farm</button>
+				<button style={styles.button}>Rate Farm</button>
+				<Link to={`/buyer/farmlistings`}><button style={{...styles.button, width: 200}}>Return To Farm Listings</button></Link>
 			</div>
 		</div>
 	);
@@ -102,6 +109,28 @@ const styles = {
 		width: 400,
 		height: 600,
 	},
+	bottomButtonContainer: {
+		display: 'flex',
+		flexDirection:'row',
+		justifyContent: 'right',
+		border: 'none',
+		margin: 5,
+	},
+	button: {
+		display: 'flex',
+		margin: 10,
+		padding: "12px 10px",
+		justifyContent: 'center',
+		alignItems: 'center',
+		backgroundColor: "#4a7c59",
+		color: "white",
+		border: "none",
+		borderRadius: "6px",
+		fontSize: "15px",
+		fontWeight: "600",
+		width: 100,
+	},
+	
 };
 
 export default FarmListing;

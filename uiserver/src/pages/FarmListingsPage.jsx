@@ -22,7 +22,18 @@ function FarmListingsPage() {
 	const listItems = farms.map(farm =>
 		<li key={farm.id}>
 			<Link to={`/buyer/farmlistings/${farm.id}`}>
-				<button style={{...styles.button, borderLeft: '10px solid #2e7d32'}}>{farm.shopName}</button>
+				<button style={{...styles.button, borderLeft: '10px solid #2e7d32'}}>
+					<div style={styles.colContainer}>
+						{/* IMAGE GOES HERE */}
+						<p>{farm.shopName}</p>
+						{/* RATING GOES HERE */}
+					</div>
+					<div style={styles.colContainer}>
+						<p>{farm.description}</p>
+						<p>{farm.shopAddress}</p>
+						{/* CERTIFICATIONS GO HERE */}
+					</div>
+				</button>
 			</Link>
 		</li>
 	);
@@ -57,10 +68,10 @@ function FarmListingsPage() {
 
 			<div style={styles.containerMain}>
 				{/* where all the farm listings are shown */}
-				<div style={styles.containerSide}>
+				<div style={{...styles.containerSide, width: '60%'}}>
 					<ul>{listItems}</ul>
 				</div>
-				<div style={styles.containerSide}>
+				<div style={{...styles.containerSide, width: '40%'}}>
 					{/* recently viewed farms and a button to navigate to saved farms */}
 					<Link to={`/buyer/saved_farms`}><button style={styles.savedButton}>Go To My Saved Farms</button></Link>
 					{/*<p style={styles.recentlyViewedContainer}>Coming Soon...</p>*/}
@@ -133,7 +144,6 @@ const styles = {
 		display: 'flex',
 		flexDirection: 'column',
 		alignItems: 'center',
-		width: '50%',
 		margin: 30,
 	},
 	recentlyViewedContainer: {
@@ -158,21 +168,22 @@ const styles = {
 		fontFamily: 'Roboto',
 	},
 	button: {
+		display: 'flex',
+		flexDirection: 'row',
 		backgroundColor: 'white',
-		color: '#4a7c59',
 		fontSize: 50,
 		fontFamily: 'Roboto',
-		width: 700,
-		height: 200,
+		width: 800,
+		height: 300,
 		border: '1px solid',
 		borderRadius: 10,
-		margin: 3,
+		margin: 5,
 	},
-	buttonListingContainer: {
+	colContainer: {
 		display: 'flex',
-		flexDirection: 'column',
-		alignItems: 'center',
-		width: '100%',
+		flexDirection:'column',
+		border: 'none',
+		margin: 5,
 	},
 	header: {
 		fontFamily: 'Roboto',
