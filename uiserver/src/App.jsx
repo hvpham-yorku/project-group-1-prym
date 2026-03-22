@@ -12,6 +12,7 @@ import SellerProfileSetup from './pages/SellerProfileSetup';
 import GroupDetailPage from './pages/GroupDetailPage';
 import CreateGroupPage from './pages/CreateGroupPage';
 import BrowseGroupsPage from './pages/BrowseGroupsPage';
+import SavedFarms from './pages/SavedFarms';
 
 function ProtectedRoute({ children, allowedRole }) {
     const { user } = useAuth();
@@ -40,13 +41,13 @@ function AppRoutes() {
             <Route path="/register/seller" element={user ? <Navigate to="/seller/profile-setup" /> : <SellerSignup />} />
 
             {/* Farm listings — accessible to any logged-in user */}
-            <Route path="/farmlistings" element={
-                <ProtectedRoute>
+            <Route path="/buyer/farmlistings" element={
+                <ProtectedRoute allowedRole="BUYER">
                     <FarmListingsPage />
                 </ProtectedRoute>
             } />
-            <Route path="/farmlistings/:farmname" element={
-                <ProtectedRoute>
+            <Route path="/buyer/farmlistings/:farmname" element={
+                <ProtectedRoute allowedRole="BUYER">
                     <FarmListing />
                 </ProtectedRoute>
             } />
@@ -93,8 +94,8 @@ function AppRoutes() {
 
             {/* Legacy redirects — keep old URLs working */}
             <Route path="/buyer/dashboard"        element={<Navigate to="/buyer/profile"  replace />} />
-            <Route path="/farmlistingspage"        element={<Navigate to="/farmlistings"   replace />} />
-            <Route path="/farmlistingspage/:farmname" element={<Navigate to="/farmlistings/:farmname" replace />} />
+            <Route path="/farmlistingspage"        element={<Navigate to="/buyer/farmlistings"   replace />} />
+            <Route path="/farmlistingspage/:farmname" element={<Navigate to="/buyer/farmlistings/:farmname" replace />} />
 
             {/* Fallback */}
             <Route path="/" element={<Navigate to="/login" />} />

@@ -9,3 +9,8 @@ export async function getFarm(id) {
 	const farms = await getAllFarms();
 	return farms.find((f) => f.id === Number(id));
 }
+
+export async function getSavedFarms(){
+	const response = await fetch('/api/buyer/');
+	return response.json();
+}

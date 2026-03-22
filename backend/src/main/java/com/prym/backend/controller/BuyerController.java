@@ -9,6 +9,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.List;
+import com.prym.backend.model.Seller;
 
 // Handles all HTTP requests related to buyer profiles
 // Base path is /api/buyer, which is already protected by SecurityConfig (only logged-in buyers can access)
@@ -91,4 +93,26 @@ public class BuyerController {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
+
+
+	// return list of saved farms
+	@GetMapping("/all")
+	public ResponseEntity<?> getSavedFarms(){
+		try {
+			List<Seller> savedFarms = buyerService.getSavedFarms(getLoggedInUserId());
+			return ResponseEntity.ok(savedFarms);
+		} catch (RuntimeException e) {
+			return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+		}
+	}
+	
+	@PatchMapping("/all")
+	public ResponseEntity<?> saveFarm(Seller farm){
+		try {
+			Buyer buyer = buyerService.saveFarm(getLoggedInUserId(), farm);
+			return ResponseEntity.ok(buyer);
+		} catch (RuntimeException e) {
+			return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+		}
+	}
 }

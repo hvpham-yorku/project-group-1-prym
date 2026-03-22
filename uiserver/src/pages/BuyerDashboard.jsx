@@ -222,7 +222,7 @@ function BuyerDashboard() {
         <div style={styles.bannerInner}>
           <button
             style={styles.backBtn}
-            onClick={() => navigate("/farmlistings")}
+            onClick={() => navigate("/buyer/farmlistings")}
           >
             ← Back
           </button>
@@ -347,7 +347,7 @@ function BuyerDashboard() {
                 </>
               ) : (
                 <>
-                  <Link to={`/farmlistings`}><button style={styles.primaryButton}>View Farm Listings</button></Link>
+                  <Link to={`/buyer/farmlistings`}><button style={styles.primaryButton}>View Farm Listings</button></Link>
                   <button style={styles.secondaryButton} onClick={handleLogout}>
                     Logout
                   </button>
