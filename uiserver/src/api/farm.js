@@ -12,9 +12,9 @@ export async function getSavedFarms(){
 	const response = await fetch('/api/buyer/');//help
 	return response.json();
 }
-/*
+
 export async function saveFarm(farm){
-	const response = await fetch("URL", {
+	const response = await fetch("URL", {//help
 		method: 'PATCH',
 		headers: { 'Content-Type': 'application/json' },
 		credentials: 'include',
@@ -22,4 +22,3 @@ export async function saveFarm(farm){
 	});
 	return response.json();
 }
-*/

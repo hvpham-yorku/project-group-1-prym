@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import farmImage from '../assets/rural-farm-landscape-stockcake.webp';
-import {getFarm} from '../api/farm';
+import { getFarm, saveFarm } from '../api/farm';
 
 function FarmListing(){
 	
@@ -38,7 +38,7 @@ function FarmListing(){
 			</div>
 			
 			<div style={styles.bottomButtonContainer}>
-				<button style={styles.button}>Save Farm</button>
+				<button style={styles.button} OnClick={saveFarm(farm)}>Save Farm</button>
 				<button style={styles.button}>Rate Farm</button>
 				<Link to={`/buyer/farmlistings`}><button style={{...styles.button, width: 200}}>Return To Farm Listings</button></Link>
 			</div>

@@ -31,4 +31,8 @@ public class Buyer {
     public void saveFarm(Seller farm) {
     	savedFarms.add(farm);
     }
+    
+    public void removeSavedFarm(Seller farm) {
+    	savedFarms.remove(farm);
+    }
 }

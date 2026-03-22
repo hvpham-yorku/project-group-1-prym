@@ -1,5 +1,8 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { getSavedFarms } from '../api/farm';
+import { useState, useEffect } from 'react';
+
 function savedFarms(){
 	
 	const { user } = useAuth();
@@ -8,6 +11,31 @@ function savedFarms(){
 	const initials =
 		(user?.firstName?.charAt(0) || '') + (user?.lastName?.charAt(0) || '');
 	const profilePath = user?.role === 'BUYER' ? '/buyer/profile' : '/seller/dashboard';
+	
+	const [farms, setFarms] = useState([]);
+		
+	useEffect(() => {
+		getSavedFarms().then(setFarms).catch(console.error);
+	}, []);
+	
+	const listItems = farms.map(farm =>
+			<li key={farm.id}>
+				<Link to={`/buyer/farmlistings/${farm.id}`}>
+					<button style={{...styles.button, borderLeft: '10px solid #2e7d32'}}>
+						<div style={styles.colContainer}>
+							{/* IMAGE GOES HERE */}
+							<p>{farm.shopName}</p>
+							{/* RATING GOES HERE */}
+						</div>
+						<div style={styles.colContainer}>
+							<p>{farm.description}</p>
+							<p>{farm.shopAddress}</p>
+							{/* CERTIFICATIONS GO HERE */}
+						</div>
+					</button>
+				</Link>
+			</li>
+		);
 		
 	return(
 		<div style={styles.page}>
@@ -31,16 +59,19 @@ function savedFarms(){
 					{/* spacer so brand stays centred */}
 					<div style={{ width: 90 }} />
 				</nav>
-		
-		<h1> Saved Farms Page Coming Soon! </h1>
+			
+			<p style={styles.header}>Saved Farms</p>
+			<div style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+				<ul>{listItems}</ul>
+			</div>
 		</div>
 	);
 }
 
 const styles = {
 	page: {
-			minHeight: '100vh',
-			backgroundColor: '#faf8f4',
+		minHeight: '100vh',
+		backgroundColor: '#faf8f4',
 	},
 	navbar: {
 		display: 'flex',
@@ -88,7 +119,33 @@ const styles = {
 		position: 'absolute',
 		left: '50%',
 		transform: 'translateX(-50%)',
-	}
+	},
+	button: {
+		display: 'flex',
+		flexDirection: 'row',
+		backgroundColor: 'white',
+		fontSize: 50,
+		fontFamily: 'Roboto',
+		width: 1200,
+		height: 300,
+		border: '1px solid',
+		borderRadius: 10,
+		margin: 10,
+	},
+	colContainer: {
+		display: 'flex',
+		flexDirection:'column',
+		border: 'none',
+		margin: 5,
+	},
+	header: {
+		fontFamily: 'Roboto',	
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+		color: '#4a7c59',
+		fontSize: 100,
+	},
 };
 
 export default savedFarms;
