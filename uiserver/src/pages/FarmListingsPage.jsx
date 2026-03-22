@@ -24,15 +24,15 @@ function FarmListingsPage() {
 		return (<li key={farm.id}>
 			<Link to={`/buyer/farmlistings/${farm.id}`}>
 				<button style={{...styles.button, borderLeft: '10px solid #2e7d32'}}>
-					<div style={styles.colContainer}>
+					<div style={{...styles.colContainer, width: "40%"}}>
 						<div style={styles.farmImage}>FARM IMAGE</div>
 						<div style={styles.farmName}>{farm.shopName}</div>
-						<div style={styles.rating}>RATING</div>
 					</div>
-					<div style={styles.colContainer}>
+					<div style={{...styles.colContainer, width: "60%"}}>
 						<div style={styles.description}>{farm.description}</div>
 						<div style={styles.location}>{farm.shopAddress}</div>
 						<div style={styles.certifications}>{certs}</div>
+						<div style={styles.rating}>RATING</div>
 					</div>
 				</button>
 			</Link>
@@ -214,22 +214,21 @@ const styles = {
 		fontSize: 20,
 	},
 	description: {
-		height: '50%',
-		color: 'grey',
+		height: '40%',
 		border: 'solid',
-		margin: 5,
-		alignItens: 'right',
-		justifyContent: 'right',
+		borderColor: 'grey',
+		borderRadius: 8,
+		margin: 10,
 		fontSize: 20,
 	},
 	location: {
-		width: '100%',
 		color: '#4a7c59',
 		fontSize: 30,
 	},
 	certifications: {
 		display: 'flex',
 		flex: 'column',
+		flexWrap: "wrap",
 		margin: 5,
 		fontSize: 50,
 	},

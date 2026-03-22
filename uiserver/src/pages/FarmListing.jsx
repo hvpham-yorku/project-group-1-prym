@@ -17,7 +17,7 @@ function FarmListing(){
 	
 	if (!farm) return <div>Loading...</div>;
 	
-	const certs = (farm.certifications || []).map(c => <li key={c.id}>{c.name}</li>);
+	const certs = (farm.certifications || []).map(c => <li key={c.id} style={styles.cert}>{c.name}</li>);
 	
 	return(
 		<div>
@@ -27,7 +27,7 @@ function FarmListing(){
 
 			<div style={styles.container}>
 				<p style={styles.descBox}>{farm.description}</p>
-				<ul style = {styles.certBox}>{certs}</ul>
+				<ul style = {styles.certBox}><p>Our Farm Is:</p>{certs}</ul>
 			</div>
 
 			<div style={styles.container}>
@@ -84,19 +84,6 @@ const styles = {
 		width: '40%',
 		height: 100,
 	},
-	certification: {
-		margin: 5,
-		display: 'flex',
-		flexDirection: 'row',
-		alignItems: 'center',
-		justifyContent: 'center',
-		backgroundColor: '#f5f5f0',
-		border: 'solid',
-		borderColor: '#333',
-		borderRadius: '50%',
-		width: '20%',
-		height: '80%',
-	},
 	cowBox:	{
 		margin: 20,
 		display: 'flex',
@@ -135,21 +122,21 @@ const styles = {
 			border: 'solid',
 			margin: 5,
 			color: 'grey',
-		},
-		farmName: {
+	},
+	farmName: {
 			backgroundColor: '#4a7c59',
 			borderRadius: 10,
 			color: 'white',
 			padding: "5px 5px",
 			margin: 5,
 			fontSize: 30,
-		},
-		rating: {
+	},
+	rating: {
 			color: 'yellow',
 			margin: 5,
 			fontSize: 20,
-		},
-		description: {
+	},
+	description: {
 			height: '50%',
 			color: 'grey',
 			border: 'solid',
@@ -157,16 +144,29 @@ const styles = {
 			alignItens: 'right',
 			justifyContent: 'right',
 			fontSize: 20,
-		},
-		location: {
+	},
+	location: {
 			width: '100%',
 			color: '#4a7c59',
 			fontSize: 30,
-		},
-		certifications: {
-			margin: 5,
-			fontSize: 50,
-		},
+	},
+	certifications: {
+				display: 'flex',
+				flex: 'column',
+				margin: 5,
+				fontSize: 50,
+	},
+	cert: {
+				display: 'flex',
+				alignItems: 'center',
+				justifyContent: 'center',
+				height: 25,
+				backgroundColor: 'green',
+				borderRadius: 5,
+				fontSize: 20,
+				margin: 5,
+				padding: '4px 8px',
+	},
 	
 };
 

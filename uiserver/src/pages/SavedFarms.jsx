@@ -18,24 +18,25 @@ function savedFarms(){
 		getSavedFarms().then(setFarms).catch(console.error);
 	}, []);
 	
-	const listItems = farms.map(farm =>
-			<li key={farm.id}>
+	const listItems = farms.map(farm => {
+			let certs = (farm.certifications || []).map(c => <li key={c.id} style={styles.cert}>{c.name}</li>);
+			return (<li key={farm.id}>
 				<Link to={`/buyer/farmlistings/${farm.id}`}>
 					<button style={{...styles.button, borderLeft: '10px solid #2e7d32'}}>
 						<div style={styles.colContainer}>
 							<div style={styles.farmImage}>FARM IMAGE</div>
 							<div style={styles.farmName}>{farm.shopName}</div>
-							<div style={styles.rating}>RATING</div>
 						</div>
 						<div style={styles.colContainer}>
 							<div style={styles.description}>{farm.description}</div>
 							<div style={styles.location}>{farm.shopAddress}</div>
-							<div style={styles.certifications}>CERTIFICATIONS</div>
+							<div style={styles.certifications}>{certs}</div>
+							<div style={styles.rating}>RATING</div>
 						</div>
 					</button>
 				</Link>
-			</li>
-		);
+			</li> );
+		});
 		
 	return(
 		<div style={styles.page}>
@@ -145,6 +146,55 @@ const styles = {
 		justifyContent: 'center',
 		color: '#4a7c59',
 		fontSize: 100,
+	},
+	farmImage: {
+			height: '60%',
+			border: 'solid',
+			margin: 5,
+			color: 'grey',
+	},
+	farmName: {
+			backgroundColor: '#4a7c59',
+			borderRadius: 10,
+			color: 'white',
+			padding: "5px 5px",
+			margin: 5,
+			fontSize: 30,
+	},
+	rating: {
+			color: 'yellow',
+			margin: 5,
+			fontSize: 20,
+	},
+	description: {
+			height: '40%',
+			border: 'solid',
+			borderColor: 'grey',
+			borderRadius: 8,
+			margin: 10,
+			fontSize: 20,
+		},
+	location: {
+			width: '100%',
+			color: '#4a7c59',
+			fontSize: 30,
+	},
+	certifications: {
+			display: 'flex',
+			flex: 'column',
+			margin: 5,
+			fontSize: 50,
+	},
+	cert: {
+			display: 'flex',
+			alignItems: 'center',
+			justifyContent: 'center',
+			height: 25,
+			backgroundColor: 'green',
+			borderRadius: 5,
+			fontSize: 20,
+			margin: 5,
+			padding: '4px 8px',
 	},
 };
 
