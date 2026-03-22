@@ -40,7 +40,7 @@ function AppRoutes() {
             <Route path="/register/buyer"  element={user ? <Navigate to="/buyer/profile-setup" /> : <BuyerSignup />} />
             <Route path="/register/seller" element={user ? <Navigate to="/seller/profile-setup" /> : <SellerSignup />} />
 
-            {/* Farm listings — accessible to any logged-in user */}
+            {/* Farm listings — accessible buyers */}
             <Route path="/buyer/farmlistings" element={
                 <ProtectedRoute allowedRole="BUYER">
                     <FarmListingsPage />

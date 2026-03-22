@@ -63,7 +63,7 @@ function FarmListingsPage() {
 				<div style={styles.containerSide}>
 					{/* recently viewed farms and a button to navigate to saved farms */}
 					<p style={styles.recentlyViewedContainer}>Coming Soon...</p>
-					<button style={styles.savedButton}>Coming Soon...</button>
+					<Link to={`/buyer/saved_farms`}><button style={styles.savedButton}>Go To My Saved Farms</button></Link>
 				</div>
 			</div>
 		</div>
@@ -156,18 +156,23 @@ const styles = {
 		borderColor: 'black',
 	},
 	savedButton: {
-		width: '90%',
+		width: 600,
 		height: 100,
-		border: 'solid',
-		borderColor: 'black',
+		border: 'none',
+		//borderColor: 'black',
+		borderRadius: 10,
 		margin: 30,
+		backgroundColor: '#4a7c59',
+		color: 'white',
+		fontSize: 50,
+		fontFamily: 'Roboto',
 	},
 	button: {
 		backgroundColor: 'white',
 		color: '#4a7c59',
 		fontSize: 50,
 		fontFamily: 'Roboto',
-		width: 800,
+		width: 700,
 		height: 200,
 	},
 	header: {

@@ -1,5 +1,3 @@
-import {useState, useEffect} from 'react';
-
 export async function getAllFarms() {
 	const response = await fetch('/api/seller/all');
 	return response.json();
@@ -11,6 +9,17 @@ export async function getFarm(id) {
 }
 
 export async function getSavedFarms(){
-	const response = await fetch('/api/buyer/');
+	const response = await fetch('/api/buyer/');//help
 	return response.json();
 }
+/*
+export async function saveFarm(farm){
+	const response = await fetch("URL", {
+		method: 'PATCH',
+		headers: { 'Content-Type': 'application/json' },
+		credentials: 'include',
+		body: JSON.stringify(farm)
+	});
+	return response.json();
+}
+*/
