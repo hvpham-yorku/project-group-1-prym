@@ -19,8 +19,9 @@ function FarmListingsPage() {
 		getAllFarms().then(setFarms).catch(console.error);
 	}, []);
 	
-	const listItems = farms.map(farm =>
-		<li key={farm.id}>
+	const listItems = farms.map(farm => {
+		let certs = (farm.certifications || []).map(c => <li key={c.id} style={styles.cert}>{c.name}</li>);
+		return (<li key={farm.id}>
 			<Link to={`/buyer/farmlistings/${farm.id}`}>
 				<button style={{...styles.button, borderLeft: '10px solid #2e7d32'}}>
 					<div style={styles.colContainer}>
@@ -31,12 +32,12 @@ function FarmListingsPage() {
 					<div style={styles.colContainer}>
 						<div style={styles.description}>{farm.description}</div>
 						<div style={styles.location}>{farm.shopAddress}</div>
-						<div style={styles.certifications}>CERTIFICATIONS</div>
+						<div style={styles.certifications}>{certs}</div>
 					</div>
 				</button>
 			</Link>
-		</li>
-	);
+		</li> );
+	});
 
 	return (
 		<div style={styles.page}>
@@ -68,10 +69,10 @@ function FarmListingsPage() {
 
 			<div style={styles.containerMain}>
 				{/* where all the farm listings are shown */}
-				<div style={{...styles.containerSide, width: '60%'}}>
+				<div style={{...styles.containerSide, width: '80%'}}>
 					<ul>{listItems}</ul>
 				</div>
-				<div style={{...styles.containerSide, width: '40%'}}>
+				<div style={{...styles.containerSide, width: '20%'}}>
 					{/* recently viewed farms and a button to navigate to saved farms */}
 					<Link to={`/buyer/saved_farms`}><button style={styles.savedButton}>Go To My Saved Farms</button></Link>
 					{/*<p style={styles.recentlyViewedContainer}>Coming Soon...</p>*/}
@@ -157,14 +158,14 @@ const styles = {
 		borderColor: 'black',
 	},
 	savedButton: {
-		width: 600,
+		width: 300,
 		height: 100,
 		border: 'none',
 		borderRadius: 10,
 		margin: 30,
 		backgroundColor: '#4a7c59',
 		color: 'white',
-		fontSize: 50,
+		fontSize: 40,
 		fontFamily: 'Roboto',
 	},
 	button: {
@@ -173,7 +174,7 @@ const styles = {
 		backgroundColor: 'white',
 		fontSize: 50,
 		fontFamily: 'Roboto',
-		width: 800,
+		width: 1100,
 		height: 300,
 		border: '1px solid',
 		borderRadius: 10,
@@ -227,8 +228,21 @@ const styles = {
 		fontSize: 30,
 	},
 	certifications: {
+		display: 'flex',
+		flex: 'column',
 		margin: 5,
 		fontSize: 50,
+	},
+	cert: {
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+		height: 25,
+		backgroundColor: 'green',
+		borderRadius: 5,
+		fontSize: 20,
+		margin: 5,
+		padding: '4px 8px',
 	},
 };
 

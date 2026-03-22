@@ -17,7 +17,7 @@ function FarmListing(){
 	
 	if (!farm) return <div>Loading...</div>;
 	
-	const certs = (farm.certifications || []).map(c => <li key={c.id} style={styles.certification}>{c.name}</li>);
+	const certs = (farm.certifications || []).map(c => <li key={c.id}>{c.name}</li>);
 	
 	return(
 		<div>
@@ -130,6 +130,43 @@ const styles = {
 		fontWeight: "600",
 		width: 100,
 	},
+	farmImage: {
+			height: '60%',
+			border: 'solid',
+			margin: 5,
+			color: 'grey',
+		},
+		farmName: {
+			backgroundColor: '#4a7c59',
+			borderRadius: 10,
+			color: 'white',
+			padding: "5px 5px",
+			margin: 5,
+			fontSize: 30,
+		},
+		rating: {
+			color: 'yellow',
+			margin: 5,
+			fontSize: 20,
+		},
+		description: {
+			height: '50%',
+			color: 'grey',
+			border: 'solid',
+			margin: 5,
+			alignItens: 'right',
+			justifyContent: 'right',
+			fontSize: 20,
+		},
+		location: {
+			width: '100%',
+			color: '#4a7c59',
+			fontSize: 30,
+		},
+		certifications: {
+			margin: 5,
+			fontSize: 50,
+		},
 	
 };
 

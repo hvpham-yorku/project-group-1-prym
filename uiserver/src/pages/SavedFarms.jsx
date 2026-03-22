@@ -23,14 +23,14 @@ function savedFarms(){
 				<Link to={`/buyer/farmlistings/${farm.id}`}>
 					<button style={{...styles.button, borderLeft: '10px solid #2e7d32'}}>
 						<div style={styles.colContainer}>
-							{/* IMAGE GOES HERE */}
-							<p>{farm.shopName}</p>
-							{/* RATING GOES HERE */}
+							<div style={styles.farmImage}>FARM IMAGE</div>
+							<div style={styles.farmName}>{farm.shopName}</div>
+							<div style={styles.rating}>RATING</div>
 						</div>
 						<div style={styles.colContainer}>
-							<p>{farm.description}</p>
-							<p>{farm.shopAddress}</p>
-							{/* CERTIFICATIONS GO HERE */}
+							<div style={styles.description}>{farm.description}</div>
+							<div style={styles.location}>{farm.shopAddress}</div>
+							<div style={styles.certifications}>CERTIFICATIONS</div>
 						</div>
 					</button>
 				</Link>

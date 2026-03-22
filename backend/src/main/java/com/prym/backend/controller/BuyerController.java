@@ -97,9 +97,9 @@ public class BuyerController {
 
 	// return list of saved farms
 	@GetMapping("/all")
-	public ResponseEntity<?> getSavedFarms(){
+	public ResponseEntity<?> getSavedFarms(@PathVariable Long userId){
 		try {
-			List<Seller> savedFarms = buyerService.getSavedFarms(getLoggedInUserId());
+			List<Seller> savedFarms = buyerService.getSavedFarms(userId);
 			return ResponseEntity.ok(savedFarms);
 		} catch (RuntimeException e) {
 			return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
@@ -107,9 +107,9 @@ public class BuyerController {
 	}
 	
 	@PatchMapping("/all")
-	public ResponseEntity<?> saveFarm(Seller farm){
+	public ResponseEntity<?> saveFarm(@PathVariable Long userId, @RequestBody Seller farm){
 		try {
-			Buyer buyer = buyerService.saveFarm(getLoggedInUserId(), farm);
+			Buyer buyer = buyerService.saveFarm(userId, farm);
 			return ResponseEntity.ok(buyer);
 		} catch (RuntimeException e) {
 			return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
