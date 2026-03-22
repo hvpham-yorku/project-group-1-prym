@@ -10,8 +10,6 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 // Handles all seller profile business logic (creating, retrieving, and updating profiles)
 // This layer enforces rules before anything touches the database
 @Service

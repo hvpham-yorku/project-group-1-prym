@@ -32,6 +32,9 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth //defines who can access what urls
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/ws/**").authenticated() // WebSocket handshake endpoint
+                .requestMatchers("/api/ratings/generate-code").hasRole("SELLER")
+                .requestMatchers("/api/ratings/submit").hasRole("BUYER")
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/ratings/**").permitAll() // anyone can view farm ratings
                 .requestMatchers("/api/buyer/**").hasRole("BUYER") // only buyers can access
                 .requestMatchers("/api/seller/all").hasRole("BUYER")//(SPECIAL CASE) allow buyers to access the farm listings
                 .requestMatchers("/api/seller/**").hasRole("SELLER") //only Sellers can access
