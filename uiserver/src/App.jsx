@@ -35,7 +35,7 @@ function AppRoutes() {
         <Routes>
             {/* Auth */}
             <Route path="/login" element={
-                user ? <Navigate to={user.role === 'BUYER' ? '/farmlistings' : '/seller/dashboard'} /> : <Login />
+                user ? <Navigate to={user.role === 'BUYER' ? '/buyer/farmlistings' : '/seller/dashboard'} /> : <Login />
             } />
             <Route path="/register/buyer"  element={user ? <Navigate to="/buyer/profile-setup" /> : <BuyerSignup />} />
             <Route path="/register/seller" element={user ? <Navigate to="/seller/profile-setup" /> : <SellerSignup />} />
