@@ -205,17 +205,21 @@ const styles = {
 		color: 'white',
 		padding: "5px 5px",
 		margin: 5,
+		fontSize: 30,
 	},
 	rating: {
 		color: 'yellow',
 		margin: 5,
-		fontSize: 30,
+		fontSize: 20,
 	},
 	description: {
 		height: '50%',
 		color: 'grey',
 		border: 'solid',
 		margin: 5,
+		alignItens: 'right',
+		justifyContent: 'right',
+		fontSize: 20,
 	},
 	location: {
 		width: '100%',

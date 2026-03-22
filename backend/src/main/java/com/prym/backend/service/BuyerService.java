@@ -78,6 +78,7 @@ public class BuyerService {
     	return buyer.getSavedFarms();
     }
     
+    @Transactional
     public Buyer saveFarm(Long userId, Seller farm){
     	Buyer buyer = buyerRepository.findByUserId(userId)
     			.orElseThrow(() -> new RuntimeException("Buyer profile not found"));

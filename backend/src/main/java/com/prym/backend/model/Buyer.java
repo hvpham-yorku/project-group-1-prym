@@ -24,8 +24,8 @@ public class Buyer {
 
     private String preferredCuts;
     
-    @OneToMany()
-    @JoinColumn(name="buyer_id", referencedColumnName="id")
+    @ManyToMany()
+    @JoinTable(name="buyer_id")
     private List<Seller> savedFarms;
     
     public void saveFarm(Seller farm) {
