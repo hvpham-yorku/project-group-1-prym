@@ -22,7 +22,7 @@ function FarmListingsPage() {
 	const listItems = farms.map(farm =>
 		<li key={farm.id}>
 			<Link to={`/buyer/farmlistings/${farm.id}`}>
-				<button style={styles.button}>{farm.shopName}</button>
+				<button style={{...styles.button, borderLeft: '10px solid #2e7d32'}}>{farm.shopName}</button>
 			</Link>
 		</li>
 	);
@@ -164,10 +164,9 @@ const styles = {
 		fontFamily: 'Roboto',
 		width: 700,
 		height: 200,
-		border: 'solid',
+		border: '1px solid',
 		borderRadius: 10,
-		margin: 2,
-		borderLeft: '10px solid #2e7d32',
+		margin: 3,
 	},
 	buttonListingContainer: {
 		display: 'flex',
