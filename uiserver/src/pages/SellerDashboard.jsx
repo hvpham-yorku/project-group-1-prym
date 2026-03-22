@@ -22,7 +22,7 @@ function SellerDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showAccountModal, setShowAccountModal] = useState(false);
-  const [generatedCode, setgeneratedCode] = useState("");
+  const [generatedCode, setGeneratedCode] = useState("");
   const [showCodeModal, setShowCodeModal] = useState(false);
 
   useEffect(() => {
