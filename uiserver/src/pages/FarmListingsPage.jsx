@@ -57,13 +57,13 @@ function FarmListingsPage() {
 
 			<div style={styles.containerMain}>
 				{/* where all the farm listings are shown */}
-				<div style={styles.listingContainer}>
+				<div style={styles.containerSide}>
 					<ul>{listItems}</ul>
 				</div>
 				<div style={styles.containerSide}>
 					{/* recently viewed farms and a button to navigate to saved farms */}
-					<p style={styles.recentlyViewedContainer}>Coming Soon...</p>
 					<Link to={`/buyer/saved_farms`}><button style={styles.savedButton}>Go To My Saved Farms</button></Link>
+					{/*<p style={styles.recentlyViewedContainer}>Coming Soon...</p>*/}
 				</div>
 			</div>
 		</div>
@@ -136,15 +136,6 @@ const styles = {
 		width: '50%',
 		margin: 30,
 	},
-	listingContainer: {
-		display: 'flex',
-		flexDirection: 'column',
-		alignItems: 'center',
-		backgroundColor: '#f5f5f0',
-		width: '50%',
-		border: 'solid',
-		margin: 30,
-	},
 	recentlyViewedContainer: {
 		display: 'flex',
 		flexDirection: 'column',
@@ -159,7 +150,6 @@ const styles = {
 		width: 600,
 		height: 100,
 		border: 'none',
-		//borderColor: 'black',
 		borderRadius: 10,
 		margin: 30,
 		backgroundColor: '#4a7c59',
@@ -174,6 +164,16 @@ const styles = {
 		fontFamily: 'Roboto',
 		width: 700,
 		height: 200,
+		border: 'solid',
+		borderRadius: 10,
+		margin: 2,
+		borderLeft: '10px solid #2e7d32',
+	},
+	buttonListingContainer: {
+		display: 'flex',
+		flexDirection: 'column',
+		alignItems: 'center',
+		width: '100%',
 	},
 	header: {
 		fontFamily: 'Roboto',
