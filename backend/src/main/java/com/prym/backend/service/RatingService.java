@@ -53,15 +53,21 @@ public class RatingService {
         Buyer buyer = buyerRepository.findByUserId(buyerUserId)
                 .orElseThrow(() -> new RuntimeException("Buyer not found"));
 
-        RatingCode ratingCode = ratingCodeRepository.findByCode(code.trim().toUpperCase())
-                .orElseThrow(() -> new RuntimeException("Invalid code."));
-
-        if(ratingCode.isUsed()){
-            throw new RuntimeException("This code has already been used.");
-        }
         if(score < 1 || score > 5){
             throw new RuntimeException("Score must be between 1 and 5.");
         }
+
+        String normalizedCode = code.trim().toUpperCase();
+
+        // Atomically claim the code: only one concurrent request can win this update.
+        // If 0 rows are affected, the code either doesn't exist or was already used.
+        int claimed = ratingCodeRepository.markAsUsed(normalizedCode);
+        if(claimed == 0){
+            throw new RuntimeException("Invalid or already-used code.");
+        }
+
+        RatingCode ratingCode = ratingCodeRepository.findByCode(normalizedCode)
+                .orElseThrow(() -> new RuntimeException("Code not found after claim."));
 
         Seller seller = ratingCode.getSeller();
         if(ratingRepository.existsBySellerAndBuyer(seller, buyer)){
@@ -74,8 +80,6 @@ public class RatingService {
         rating.setScore(score);
         ratingRepository.save(rating);
 
-        ratingCode.setUsed(true);
-        ratingCodeRepository.save(ratingCode);
         return Map.of("message", "Rating submitted successfully!");
     }
 
