@@ -24,14 +24,14 @@ function FarmListingsPage() {
 			<Link to={`/buyer/farmlistings/${farm.id}`}>
 				<button style={{...styles.button, borderLeft: '10px solid #2e7d32'}}>
 					<div style={styles.colContainer}>
-						{/* IMAGE GOES HERE */}
-						<p>{farm.shopName}</p>
-						{/* RATING GOES HERE */}
+						<div style={styles.farmImage}>FARM IMAGE</div>
+						<div style={styles.farmName}>{farm.shopName}</div>
+						<div style={styles.rating}>RATING</div>
 					</div>
 					<div style={styles.colContainer}>
-						<p>{farm.description}</p>
-						<p>{farm.shopAddress}</p>
-						{/* CERTIFICATIONS GO HERE */}
+						<div style={styles.description}>{farm.description}</div>
+						<div style={styles.location}>{farm.shopAddress}</div>
+						<div style={styles.certifications}>CERTIFICATIONS</div>
 					</div>
 				</button>
 			</Link>
@@ -192,6 +192,39 @@ const styles = {
 		justifyContent: 'center',
 		color: '#4a7c59',
 		fontSize: 100,
+	},
+	farmImage: {
+		height: '60%',
+		border: 'solid',
+		margin: 5,
+		color: 'grey',
+	},
+	farmName: {
+		backgroundColor: '#4a7c59',
+		borderRadius: 10,
+		color: 'white',
+		padding: "5px 5px",
+		margin: 5,
+	},
+	rating: {
+		color: 'yellow',
+		margin: 5,
+		fontSize: 30,
+	},
+	description: {
+		height: '50%',
+		color: 'grey',
+		border: 'solid',
+		margin: 5,
+	},
+	location: {
+		width: '100%',
+		color: '#4a7c59',
+		fontSize: 30,
+	},
+	certifications: {
+		margin: 5,
+		fontSize: 50,
 	},
 };
 
