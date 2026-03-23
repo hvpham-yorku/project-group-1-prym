@@ -12,6 +12,7 @@ function EditAccountModal({ onClose, accentColor }) {
     lastName: user?.lastName || "",
     email: user?.email || "",
     profilePicture: user?.profilePicture || "",
+    zipCode: user?.zipCode || "",
   });
 
   const [saving, setSaving] = useState(false);
@@ -64,6 +65,7 @@ function EditAccountModal({ onClose, accentColor }) {
         lastName: form.lastName.trim(),
         email: form.email.trim(),
         profilePicture: form.profilePicture,
+        zipCode: form.zipCode.trim() || undefined,
       });
 
       saveUser({ ...user, ...updatedUser });
@@ -197,6 +199,19 @@ function EditAccountModal({ onClose, accentColor }) {
             value={form.email}
             onChange={handleChange}
             placeholder="email@example.com"
+            style={inputStyle}
+            disabled={saving}
+          />
+        </div>
+
+        {/* ZIP / Postal Code */}
+        <div style={styles.fieldGroup}>
+          <label style={labelStyle}>ZIP / Postal Code</label>
+          <input
+            name="zipCode"
+            value={form.zipCode}
+            onChange={handleChange}
+            placeholder="e.g. 10001 or M5H 2N2"
             style={inputStyle}
             disabled={saving}
           />
