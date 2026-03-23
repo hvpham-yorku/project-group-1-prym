@@ -175,6 +175,10 @@ public class AuthController {
 		response.put("lastName", user.getLastName());
 		response.put("phoneNumber", user.getPhoneNumber());
 		response.put("profilePicture", user.getProfilePicture());
+		response.put("zipCode", user.getZipCode());
+		response.put("city", user.getCity());
+		response.put("state", user.getState());
+		response.put("country", user.getCountry());
 		return response;
 	}
 

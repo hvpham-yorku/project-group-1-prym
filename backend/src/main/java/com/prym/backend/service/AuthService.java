@@ -3,8 +3,6 @@ package com.prym.backend.service;
 import com.prym.backend.model.User;
 import com.prym.backend.repository.UserRepository;
 import com.prym.backend.util.ZipCodeUtil;
-
-import org.springframework.security.core.parameters.P;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -33,13 +31,19 @@ public class AuthService {
         }
 
         // Validate and process ZIP/postal code
-        if (zipCode != null && !zipCode.trim().isEmpty()) {
-            String trimmedZip = zipCode.trim();
-            if (!ZipCodeUtil.isValidZip(trimmedZip)) {
-                throw new RuntimeException("Invalid ZIP/postal code. Please enter a valid US ZIP code (12345) or Canadian postal code (A1A 1A1).");
-            }
-        } else {
+        if (zipCode == null || zipCode.trim().isEmpty()) {
             throw new RuntimeException("ZIP/postal code is required");
+        }
+
+        String trimmedZip = zipCode.trim();
+        if (!ZipCodeUtil.isValidZip(trimmedZip)) {
+            throw new RuntimeException("Invalid ZIP/postal code format.");
+        }
+
+        // Resolve location via Nominatim
+        ZipCodeUtil.LocationResult location = ZipCodeUtil.lookupPostalCode(trimmedZip);
+        if (location == null) {
+            throw new RuntimeException("Could not resolve ZIP/postal code. Please check and try again.");
         }
 
         // Create new user with hashed password
@@ -53,12 +57,13 @@ public class AuthService {
         user.setPhoneNumber(phoneNumber);
         user.setProfilePicture(profilePicture);
 
-        // Set location data from ZIP code
-        String trimmedZip = zipCode.trim();
-        double[] coords = ZipCodeUtil.getCoordinates(trimmedZip);
+        // Set location data from Nominatim result
         user.setZipCode(trimmedZip);
-        user.setLatitude(coords[0]);
-        user.setLongitude(coords[1]);
+        user.setLatitude(location.latitude);
+        user.setLongitude(location.longitude);
+        user.setCity(location.city);
+        user.setState(location.state);
+        user.setCountry(location.country);
 
         return userRepository.save(user);
     }
@@ -118,12 +123,18 @@ public class AuthService {
             //Only update if different from current ZIP
             if (user.getZipCode() == null || !trimmedZip.equals(user.getZipCode())) {
                 if (!ZipCodeUtil.isValidZip(trimmedZip)) {
-                    throw new RuntimeException("Invalid ZIP/postal code. Please enter a valid US ZIP code (12345) or Canadian postal code (A1A 1A1).");
+                    throw new RuntimeException("Invalid ZIP/postal code format.");
                 }
-                double[] coords = ZipCodeUtil.getCoordinates(trimmedZip);
+                ZipCodeUtil.LocationResult location = ZipCodeUtil.lookupPostalCode(trimmedZip);
+                if (location == null) {
+                    throw new RuntimeException("Could not resolve ZIP/postal code. Please check and try again.");
+                }
                 user.setZipCode(trimmedZip);
-                user.setLatitude(coords[0]);
-                user.setLongitude(coords[1]);
+                user.setLatitude(location.latitude);
+                user.setLongitude(location.longitude);
+                user.setCity(location.city);
+                user.setState(location.state);
+                user.setCountry(location.country);
             }
         }
 
