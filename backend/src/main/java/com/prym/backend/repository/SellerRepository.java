@@ -14,4 +14,7 @@ public interface SellerRepository extends JpaRepository<Seller, Long> {
 
     // Checks if a seller profile already exists for a given User. Prevents duplicates
     boolean existsByUserId(Long userId);
+
+    // Checks if a seller profile already exists for a given username of the Seller
+    Optional<Seller> findByUserUsername(String username);
 }

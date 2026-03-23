@@ -4,6 +4,7 @@ import { logout } from "../api/auth";
 import { useState, useEffect } from "react";
 import { getSellerProfile, updateSellerProfile } from "../api/seller";
 import EditAccountModal from "../components/EditAccountModal";
+import { generateRatingCode } from "../api/ratings";
 
 function SellerDashboard() {
   const { user, clearUser, saveUser } = useAuth();
@@ -21,6 +22,8 @@ function SellerDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showAccountModal, setShowAccountModal] = useState(false);
+  const [generatedCode, setGeneratedCode] = useState("");
+  const [showCodeModal, setShowCodeModal] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -104,6 +107,21 @@ function SellerDashboard() {
     setIsEditing(false);
   };
 
+  const handleGenerateCode = async () => {
+    setError("");
+    try {
+      const result = await generateRatingCode(user.id);
+      if (result.error) {
+        setError(result.error);
+      } else {
+        setGeneratedCode(result.code);
+        setShowCodeModal(true);
+      }
+    } catch (err) {
+      setError("Failed to generate rating code.");
+    }
+  };
+
   const initials =
     (user?.firstName?.charAt(0) || "") + (user?.lastName?.charAt(0) || "");
 
@@ -130,7 +148,16 @@ function SellerDashboard() {
           <div style={styles.avatarWrapper}>
             <div style={styles.avatar}>
               {user?.profilePicture ? (
-                <img src={user.profilePicture} alt="Profile" style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" }} />
+                <img
+                  src={user.profilePicture}
+                  alt="Profile"
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                  }}
+                />
               ) : (
                 initials
               )}
@@ -309,6 +336,12 @@ function SellerDashboard() {
                 Logout
               </button>
               <button
+                style={styles.secondaryButton}
+                onClick={handleGenerateCode}
+              >
+                Generate Rating Code
+              </button>
+              <button
                 style={styles.primaryButton}
                 onClick={() => setIsEditing(true)}
               >
@@ -318,6 +351,24 @@ function SellerDashboard() {
           )}
         </div>
       </div>
+      {/* Rating Code Modal */}
+      {showCodeModal && (
+        <div style={styles.modalOverlay}>
+          <div style={styles.codeModal}>
+            <h2 style={styles.modalTitle}>Rating Code</h2>
+            <p style={styles.modalSubtitle}>
+              Share this code with your buyer so they can rate your farm
+            </p>
+            <div style={styles.codeDisplay}>{generatedCode}</div>
+            <button
+              style={styles.primaryButton}
+              onClick={() => setShowCodeModal(false)}
+            >
+              Done
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -478,6 +529,51 @@ const styles = {
     alignItems: "center",
     gap: "8px",
     flexShrink: 0,
+  },
+  modalOverlay: {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 1000,
+  },
+  codeModal: {
+    backgroundColor: "white",
+    borderRadius: "12px",
+    padding: "36px",
+    width: "360px",
+    boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: "16px",
+  },
+  modalTitle: {
+    fontSize: "22px",
+    fontWeight: "700",
+    color: SELLER_COLOR,
+    margin: 0,
+  },
+  modalSubtitle: {
+    fontSize: "14px",
+    color: "#666",
+    margin: 0,
+    textAlign: "center",
+  },
+  codeDisplay: {
+    fontSize: "28px",
+    fontWeight: "700",
+    letterSpacing: "0.15em",
+    color: SELLER_COLOR,
+    backgroundColor: "#f5f5f0",
+    padding: "16px 32px",
+    borderRadius: "8px",
+    border: `2px dashed ${SELLER_COLOR}`,
   },
 };
 
