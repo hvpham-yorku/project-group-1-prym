@@ -74,12 +74,9 @@ function BuyerSignup() {
             return;
         }
 
-        // ZIP/postal code validation (US: 12345, Canada: A1A 1A1 or A1A1A1)
-        const usZipRegex = /^\d{5}$/;
-        const canadaPostalRegex = /^[A-Za-z]\d[A-Za-z]\s?\d[A-Za-z]\d$/;
-
-        if (!usZipRegex.test(formData.zipCode) && !canadaPostalRegex.test(formData.zipCode)) {
-            setError('Please enter a valid US ZIP code (12345) or Canadian postal code (A1A 1A1)');
+        // Basic postal code format check (3-10 alphanumeric chars; backend validates via Nominatim)
+        if (!formData.zipCode || formData.zipCode.trim().length < 3) {
+            setError('Please enter a valid postal/ZIP code');
             return;
         }
 
