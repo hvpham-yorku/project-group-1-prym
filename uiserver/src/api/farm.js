@@ -9,12 +9,12 @@ export async function getFarm(id) {
 }
 
 export async function getSavedFarms(){
-	const response = await fetch('/api/buyer/all');
+	const response = await fetch('/api/buyer/all', { credentials: 'include' });
 	return response.json();
 }
 
 export async function saveFarm(farm){
-	const response = await fetch(".api/buyer/all", {
+	const response = await fetch("/api/buyer/all", {
 		method: 'PATCH',
 		headers: { 'Content-Type': 'application/json' },
 		credentials: 'include',

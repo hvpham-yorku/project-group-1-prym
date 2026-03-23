@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Saved Farms Feature — Implementation Guide</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      font-size: 15px;
+      line-height: 1.7;
+      color: #222;
+      background: #fff;
+      padding: 40px 60px;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+    h1 {
+      font-size: 32px;
+      color: #2e7d32;
+      border-bottom: 3px solid #2e7d32;
+      padding-bottom: 10px;
+      margin-bottom: 6px;
+    }
+    .subtitle {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 36px;
+    }
+    h2 {
+      font-size: 22px;
+      color: #1b5e20;
+      margin-top: 40px;
+      margin-bottom: 10px;
+      border-left: 5px solid #4a7c59;
+      padding-left: 12px;
+    }
+    h3 {
+      font-size: 17px;
+      color: #2e7d32;
+      margin-top: 24px;
+      margin-bottom: 8px;
+    }
+    h4 {
+      font-size: 15px;
+      color: #333;
+      margin-top: 16px;
+      margin-bottom: 6px;
+      font-weight: 700;
+    }
+    p { margin-bottom: 12px; }
+    ul, ol { margin: 8px 0 14px 24px; }
+    li { margin-bottom: 6px; }
+    code {
+      background: #f0f4f0;
+      color: #1b5e20;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 13px;
+    }
+    pre {
+      background: #1e2a1e;
+      color: #a8d5a2;
+      padding: 18px 20px;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 12px 0 18px;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    pre .comment { color: #6a9955; }
+    pre .keyword { color: #569cd6; }
+    pre .string { color: #ce9178; }
+    pre .annotation { color: #dcdcaa; }
+    .file-label {
+      background: #4a7c59;
+      color: white;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 6px 6px 0 0;
+      display: inline-block;
+      margin-bottom: -2px;
+      font-family: 'Consolas', monospace;
+    }
+    .callout {
+      border-left: 4px solid #4a7c59;
+      background: #f0f7f0;
+      padding: 12px 16px;
+      border-radius: 0 6px 6px 0;
+      margin: 14px 0;
+    }
+    .callout.warning {
+      border-left-color: #e65100;
+      background: #fff3e0;
+    }
+    .callout.info {
+      border-left-color: #1565c0;
+      background: #e3f2fd;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 14px;
+    }
+    th {
+      background: #4a7c59;
+      color: white;
+      padding: 10px 14px;
+      text-align: left;
+    }
+    td {
+      padding: 9px 14px;
+      border-bottom: 1px solid #ddd;
+      vertical-align: top;
+    }
+    tr:nth-child(even) td { background: #f7fbf7; }
+    .step-number {
+      display: inline-block;
+      background: #2e7d32;
+      color: white;
+      font-weight: 700;
+      font-size: 13px;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 26px;
+      margin-right: 8px;
+    }
+    .toc {
+      background: #f7fbf7;
+      border: 1px solid #c8e6c9;
+      border-radius: 8px;
+      padding: 20px 28px;
+      margin: 28px 0;
+    }
+    .toc h2 { margin-top: 0; border: none; padding: 0; font-size: 18px; }
+    .toc ol { margin-top: 10px; }
+    .toc li { margin-bottom: 4px; }
+    .toc a { color: #2e7d32; text-decoration: none; }
+    .toc a:hover { text-decoration: underline; }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-left: 6px;
+    }
+    .badge.backend { background: #e8f5e9; color: #2e7d32; }
+    .badge.frontend { background: #e3f2fd; color: #1565c0; }
+    .badge.fix { background: #fff3e0; color: #e65100; }
+    .badge.new { background: #f3e5f5; color: #6a1b9a; }
+    hr { border: none; border-top: 1px solid #ddd; margin: 36px 0; }
+    @media print {
+      body { padding: 20px 30px; }
+      pre { page-break-inside: avoid; }
+      h2 { page-break-after: avoid; }
+    }
+  </style>
+</head>
+<body>
+
+<h1>Saved Farms — Implementation Guide</h1>
+<p class="subtitle">PRYM Project &nbsp;·&nbsp; Branch: <code>farm_listings</code> &nbsp;·&nbsp; Prepared for teammate handoff</p>
+
+<div class="toc">
+  <h2>Contents</h2>
+  <ol>
+    <li><a href="#overview">Overview &amp; How It Works</a></li>
+    <li><a href="#why-manytomany">Why We Changed the Database Relationship</a></li>
+    <li><a href="#files">Files Changed &amp; Files Added</a></li>
+    <li><a href="#step1">Step 1 — Buyer.java (Model)</a></li>
+    <li><a href="#step2">Step 2 — BuyerService.java (Service)</a></li>
+    <li><a href="#step3">Step 3 — BuyerController.java (Controller)</a></li>
+    <li><a href="#step4">Step 4 — farm.js (Frontend API)</a></li>
+    <li><a href="#step5">Step 5 — FarmListingsPage.jsx (Save Button)</a></li>
+    <li><a href="#step6">Step 6 — SavedFarms.jsx (Saved Farms Page)</a></li>
+    <li><a href="#flow">End-to-End Flow Diagram</a></li>
+    <li><a href="#api">API Reference</a></li>
+    <li><a href="#checklist">Final Checklist</a></li>
+  </ol>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<h2 id="overview">1. Overview &amp; How It Works</h2>
+
+<p>The Saved Farms feature lets a logged-in buyer bookmark farms they are interested in. They can add farms from the listings page and view or remove them on a dedicated Saved Farms page.</p>
+
+<h3>User Flow</h3>
+<ol>
+  <li>Buyer browses <strong>Farm Listings</strong> (<code>/buyer/farmlistings</code>).</li>
+  <li>Each farm card has a <strong>"Save Farm"</strong> button. Clicking it saves that farm to the buyer's personal list and the button changes to "Saved" (disabled).</li>
+  <li>Buyer clicks <strong>"Go To My Saved Farms"</strong> in the right sidebar.</li>
+  <li>The <strong>Saved Farms page</strong> (<code>/buyer/saved_farms</code>) loads all saved farms for the logged-in buyer.</li>
+  <li>Each saved farm has a <strong>"Remove"</strong> button that instantly removes it from the list.</li>
+</ol>
+
+<div class="callout">
+  <strong>Nothing is brand new here architecture-wise.</strong> The backend already had skeleton code for this feature — the key work is fixing broken relationships, correcting broken endpoints, and building the frontend UI.
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<h2 id="why-manytomany">2. Why We Changed the Database Relationship</h2>
+
+<p>This is the most important conceptual fix in this implementation. Understanding it will help you not repeat the same mistake elsewhere.</p>
+
+<h3>The Original (Broken) Code</h3>
+<p>The original <code>Buyer.java</code> had:</p>
+<pre>@OneToMany()
+@JoinColumn(name="buyer_id", referencedColumnName="id")
+private List&lt;Seller&gt; savedFarms;</pre>
+
+<p><code>@OneToMany</code> with <code>@JoinColumn</code> works by adding a foreign key column to the <em>other</em> table. In this case, it adds a <code>buyer_id</code> column directly to the <strong>sellers table</strong>:</p>
+
+<pre><span class="comment">-- What the old code creates:</span>
+sellers table:
+  id | shop_name | description | buyer_id   &lt;-- WRONG</pre>
+
+<p>This means each <strong>seller row can only reference one buyer</strong>. The moment a second buyer tries to save the same farm, they would overwrite the first buyer's reference or the database would reject it entirely.</p>
+
+<h3>The Correct Approach — ManyToMany</h3>
+<p>Think about the relationship from both sides:</p>
+<ul>
+  <li>One buyer can save <strong>many farms</strong></li>
+  <li>One farm can be saved by <strong>many buyers</strong></li>
+</ul>
+<p>That is a <strong>many-to-many</strong> relationship. The correct solution is a separate <strong>join table</strong> that only records which buyer saved which seller:</p>
+
+<pre><span class="comment">-- What the new code creates:</span>
+saved_farms table:
+  buyer_id | seller_id
+  ─────────────────────
+  1        | 3          &lt;-- buyer 1 saved farm 3
+  2        | 3          &lt;-- buyer 2 also saved farm 3  ✓
+  1        | 7          &lt;-- buyer 1 also saved farm 7</pre>
+
+<p>The <code>sellers</code> table stays completely clean — no foreign key pointing to buyers. Any number of buyers can independently save the same farm.</p>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<h2 id="files">3. Files Changed &amp; Files Added</h2>
+
+<table>
+  <tr>
+    <th>File</th>
+    <th>Type</th>
+    <th>What Changed</th>
+  </tr>
+  <tr>
+    <td><code>model/Buyer.java</code></td>
+    <td><span class="badge backend">Backend</span> <span class="badge fix">Fix</span></td>
+    <td>Changed <code>@OneToMany</code> → <code>@ManyToMany</code> with a join table. Added <code>unsaveFarm()</code> helper. Initialized list to <code>ArrayList</code> to avoid NullPointerException.</td>
+  </tr>
+  <tr>
+    <td><code>service/BuyerService.java</code></td>
+    <td><span class="badge backend">Backend</span> <span class="badge fix">Fix</span></td>
+    <td>Injected <code>SellerRepository</code>. Changed <code>saveFarm</code> to take a <code>sellerId</code> (Long) instead of a full Seller object. Added <code>unsaveFarm()</code> method. Added duplicate-save guard.</td>
+  </tr>
+  <tr>
+    <td><code>controller/BuyerController.java</code></td>
+    <td><span class="badge backend">Backend</span> <span class="badge fix">Fix</span> <span class="badge new">New endpoint</span></td>
+    <td>Fixed <code>saveFarm</code>: added missing <code>@RequestBody</code>, now accepts <code>{ sellerId }</code> in body. Added <code>DELETE /api/buyer/all/{sellerId}</code> endpoint for unsaving.</td>
+  </tr>
+  <tr>
+    <td><code>api/farm.js</code></td>
+    <td><span class="badge frontend">Frontend</span> <span class="badge fix">Fix</span></td>
+    <td>Fixed <code>getSavedFarms()</code> URL (was pointing to wrong endpoint). Fixed <code>saveFarm()</code> to send <code>{ sellerId }</code>. Added <code>unsaveFarm()</code> function.</td>
+  </tr>
+  <tr>
+    <td><code>pages/FarmListingsPage.jsx</code></td>
+    <td><span class="badge frontend">Frontend</span> <span class="badge new">New feature</span></td>
+    <td>Loads saved farm IDs on mount. Added "Save Farm" / "Saved" button to each farm card.</td>
+  </tr>
+  <tr>
+    <td><code>pages/SavedFarms.jsx</code></td>
+    <td><span class="badge frontend">Frontend</span> <span class="badge new">New feature</span></td>
+    <td>Was a "Coming Soon" placeholder. Now a fully working page that loads and displays saved farms with a Remove button per card.</td>
+  </tr>
+</table>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<h2 id="step1">Step 1 — Buyer.java <span class="badge backend">Backend</span></h2>
+
+<p><strong>Path:</strong> <code>backend/src/main/java/com/prym/backend/model/Buyer.java</code></p>
+
+<h3>What to change</h3>
+<ul>
+  <li>Replace the <code>@OneToMany</code> + <code>@JoinColumn</code> block with a <code>@ManyToMany</code> + <code>@JoinTable</code> block.</li>
+  <li>Initialize the list to <code>new ArrayList&lt;&gt;()</code> so it is never null.</li>
+  <li>Add an <code>unsaveFarm()</code> method.</li>
+  <li>Add <code>import java.util.ArrayList;</code> at the top.</li>
+</ul>
+
+<div class="file-label">Buyer.java — full file</div>
+<pre>package com.prym.backend.model;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Table(name = "buyers")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class Buyer {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @OneToOne
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    private User user;
+
+    private String preferredCuts;
+
+    <span class="annotation">@ManyToMany</span>
+    <span class="annotation">@JoinTable</span>(
+        name = <span class="string">"saved_farms"</span>,
+        joinColumns = <span class="annotation">@JoinColumn</span>(name = <span class="string">"buyer_id"</span>),
+        inverseJoinColumns = <span class="annotation">@JoinColumn</span>(name = <span class="string">"seller_id"</span>)
+    )
+    private List&lt;Seller&gt; savedFarms = new ArrayList&lt;&gt;();
+
+    public void saveFarm(Seller farm) {
+        savedFarms.add(farm);
+    }
+
+    public void unsaveFarm(Seller farm) {
+        savedFarms.remove(farm);
+    }
+}</pre>
+
+<div class="callout">
+  <strong>Why <code>new ArrayList&lt;&gt;()</code>?</strong> Without it, <code>savedFarms</code> is <code>null</code> for any buyer that was created before this feature was built. Calling <code>savedFarms.add()</code> on a null list throws a NullPointerException. Initializing it to an empty list is safe in all cases.
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<h2 id="step2">Step 2 — BuyerService.java <span class="badge backend">Backend</span></h2>
+
+<p><strong>Path:</strong> <code>backend/src/main/java/com/prym/backend/service/BuyerService.java</code></p>
+
+<h3>What to change</h3>
+<ul>
+  <li>Add <code>SellerRepository</code> as a dependency (inject it via the constructor).</li>
+  <li>Change <code>saveFarm</code> to accept a <code>Long sellerId</code> instead of a <code>Seller</code> object — the service is responsible for looking up the seller from the database.</li>
+  <li>Add a duplicate-save guard (don't add the same farm twice).</li>
+  <li>Add a new <code>unsaveFarm</code> method.</li>
+  <li>Add <code>@Transactional</code> to both <code>saveFarm</code> and <code>unsaveFarm</code>.</li>
+</ul>
+
+<div class="callout info">
+  <strong>Why does the service look up the Seller by ID?</strong> The controller receives raw HTTP input from the frontend. It should only extract the <code>sellerId</code> number and pass it to the service. The service is the right place to do database lookups and business logic — this keeps the controller thin and testable.
+</div>
+
+<div class="file-label">BuyerService.java — full file</div>
+<pre>package com.prym.backend.service;
+
+import com.prym.backend.model.Buyer;
+import com.prym.backend.model.Seller;
+import com.prym.backend.model.User;
+import com.prym.backend.repository.BuyerRepository;
+import com.prym.backend.repository.SellerRepository;
+import com.prym.backend.repository.UserRepository;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.stereotype.Service;
+import java.util.List;
+
+@Service
+public class BuyerService {
+
+    private final BuyerRepository buyerRepository;
+    private final UserRepository userRepository;
+    private final SellerRepository sellerRepository;
+
+    public BuyerService(BuyerRepository buyerRepository,
+                        UserRepository userRepository,
+                        SellerRepository sellerRepository) {
+        this.buyerRepository = buyerRepository;
+        this.userRepository = userRepository;
+        this.sellerRepository = sellerRepository;
+    }
+
+    public Buyer createBuyerProfile(Long userId, String preferredCuts) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException(<span class="string">"User not found"</span>));
+        if (buyerRepository.existsByUserId(userId)) {
+            throw new RuntimeException(<span class="string">"Buyer profile already exists"</span>);
+        }
+        Buyer buyer = new Buyer();
+        buyer.setUser(user);
+        buyer.setPreferredCuts(preferredCuts);
+        return buyerRepository.save(buyer);
+    }
+
+    public Buyer getBuyerProfile(Long userId) {
+        return buyerRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException(<span class="string">"Buyer profile not found"</span>));
+    }
+
+    @Transactional
+    public Buyer updateBuyerProfile(Long userId, String preferredCuts, String phoneNumber) {
+        Buyer buyer = buyerRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException(<span class="string">"Buyer profile not found"</span>));
+        buyer.setPreferredCuts(preferredCuts);
+        if (phoneNumber != null &amp;&amp; !phoneNumber.isBlank()) {
+            User user = buyer.getUser();
+            user.setPhoneNumber(phoneNumber);
+            userRepository.save(user);
+        }
+        return buyerRepository.save(buyer);
+    }
+
+    public List&lt;Seller&gt; getSavedFarms(Long userId) {
+        Buyer buyer = buyerRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException(<span class="string">"Buyer profile not found"</span>));
+        return buyer.getSavedFarms();
+    }
+
+    @Transactional
+    public Buyer saveFarm(Long userId, Long sellerId) {
+        Buyer buyer = buyerRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException(<span class="string">"Buyer profile not found"</span>));
+        Seller seller = sellerRepository.findById(sellerId)
+                .orElseThrow(() -> new RuntimeException(<span class="string">"Seller not found"</span>));
+        <span class="comment">// Guard: don't save the same farm twice</span>
+        if (!buyer.getSavedFarms().contains(seller)) {
+            buyer.saveFarm(seller);
+        }
+        return buyerRepository.save(buyer);
+    }
+
+    @Transactional
+    public Buyer unsaveFarm(Long userId, Long sellerId) {
+        Buyer buyer = buyerRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException(<span class="string">"Buyer profile not found"</span>));
+        Seller seller = sellerRepository.findById(sellerId)
+                .orElseThrow(() -> new RuntimeException(<span class="string">"Seller not found"</span>));
+        buyer.unsaveFarm(seller);
+        return buyerRepository.save(buyer);
+    }
+}</pre>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<h2 id="step3">Step 3 — BuyerController.java <span class="badge backend">Backend</span></h2>
+
+<p><strong>Path:</strong> <code>backend/src/main/java/com/prym/backend/controller/BuyerController.java</code></p>
+
+<h3>What to change</h3>
+<ul>
+  <li>Fix the <code>saveFarm</code> method: add <code>@RequestBody</code> annotation and change the parameter from a <code>Seller</code> object to a <code>Map&lt;String, Object&gt;</code> so we extract just the <code>sellerId</code>.</li>
+  <li>Add a new <code>DELETE /api/buyer/all/{sellerId}</code> endpoint that calls <code>unsaveFarm</code>.</li>
+  <li>Remove the now-unused <code>import com.prym.backend.model.Seller;</code> line from the imports.</li>
+</ul>
+
+<div class="callout warning">
+  <strong>Why was the old <code>saveFarm</code> broken?</strong> It was declared as <code>saveFarm(Seller farm)</code> with no <code>@RequestBody</code> annotation. Without <code>@RequestBody</code>, Spring does not deserialize the JSON request body into the parameter — the <code>farm</code> object would always be null/empty. Every save attempt would silently fail or throw a NullPointerException.
+</div>
+
+<div class="file-label">BuyerController.java — full file</div>
+<pre>package com.prym.backend.controller;
+
+import com.prym.backend.model.Buyer;
+import com.prym.backend.model.User;
+import com.prym.backend.model.Seller;
+import com.prym.backend.service.BuyerService;
+import com.prym.backend.repository.UserRepository;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
+
+@RestController
+@RequestMapping(<span class="string">"/api/buyer"</span>)
+public class BuyerController {
+
+    private final BuyerService buyerService;
+    private final UserRepository userRepository;
+
+    public BuyerController(BuyerService buyerService, UserRepository userRepository) {
+        this.buyerService = buyerService;
+        this.userRepository = userRepository;
+    }
+
+    private Long getLoggedInUserId() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException(<span class="string">"User not found"</span>));
+        return user.getId();
+    }
+
+    <span class="comment">// POST /api/buyer/profile — create buyer profile</span>
+    @PostMapping(<span class="string">"/profile"</span>)
+    public ResponseEntity&lt;?&gt; createProfile(@RequestBody Map&lt;String, String&gt; request) {
+        try {
+            Long userId = Long.parseLong(request.get(<span class="string">"userId"</span>));
+            if (!getLoggedInUserId().equals(userId))
+                return ResponseEntity.status(403).body(Map.of(<span class="string">"error"</span>, <span class="string">"You can only create your own profile"</span>));
+            Buyer buyer = buyerService.createBuyerProfile(userId, request.get(<span class="string">"preferredCuts"</span>));
+            return ResponseEntity.ok(buyer);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of(<span class="string">"error"</span>, e.getMessage()));
+        }
+    }
+
+    <span class="comment">// GET /api/buyer/profile/{userId} — get buyer profile</span>
+    @GetMapping(<span class="string">"/profile/{userId}"</span>)
+    public ResponseEntity&lt;?&gt; getProfile(@PathVariable Long userId) {
+        try {
+            if (!getLoggedInUserId().equals(userId))
+                return ResponseEntity.status(403).body(Map.of(<span class="string">"error"</span>, <span class="string">"You can only view your own profile"</span>));
+            return ResponseEntity.ok(buyerService.getBuyerProfile(userId));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of(<span class="string">"error"</span>, e.getMessage()));
+        }
+    }
+
+    <span class="comment">// PATCH /api/buyer/profile/{userId} — update buyer profile</span>
+    @PatchMapping(<span class="string">"/profile/{userId}"</span>)
+    public ResponseEntity&lt;?&gt; updateProfile(@PathVariable Long userId,
+                                            @RequestBody Map&lt;String, String&gt; request) {
+        try {
+            if (!getLoggedInUserId().equals(userId))
+                return ResponseEntity.status(403).body(Map.of(<span class="string">"error"</span>, <span class="string">"You can only edit your own profile"</span>));
+            Buyer buyer = buyerService.updateBuyerProfile(
+                    userId, request.get(<span class="string">"preferredCuts"</span>), request.get(<span class="string">"phoneNumber"</span>));
+            return ResponseEntity.ok(buyer);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of(<span class="string">"error"</span>, e.getMessage()));
+        }
+    }
+
+    <span class="comment">// GET /api/buyer/all — return saved farms for logged-in buyer</span>
+    @GetMapping(<span class="string">"/all"</span>)
+    public ResponseEntity&lt;?&gt; getSavedFarms() {
+        try {
+            List&lt;Seller&gt; savedFarms = buyerService.getSavedFarms(getLoggedInUserId());
+            return ResponseEntity.ok(savedFarms);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(500).body(Map.of(<span class="string">"error"</span>, e.getMessage()));
+        }
+    }
+
+    <span class="comment">// PATCH /api/buyer/all — save a farm (body: { sellerId })</span>
+    @PatchMapping(<span class="string">"/all"</span>)
+    public ResponseEntity&lt;?&gt; saveFarm(@RequestBody Map&lt;String, Object&gt; body) {
+        try {
+            Long sellerId = Long.parseLong(body.get(<span class="string">"sellerId"</span>).toString());
+            Buyer buyer = buyerService.saveFarm(getLoggedInUserId(), sellerId);
+            return ResponseEntity.ok(buyer);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(500).body(Map.of(<span class="string">"error"</span>, e.getMessage()));
+        }
+    }
+
+    <span class="comment">// DELETE /api/buyer/all/{sellerId} — remove a farm from saved list</span>
+    @DeleteMapping(<span class="string">"/all/{sellerId}"</span>)
+    public ResponseEntity&lt;?&gt; unsaveFarm(@PathVariable Long sellerId) {
+        try {
+            Buyer buyer = buyerService.unsaveFarm(getLoggedInUserId(), sellerId);
+            return ResponseEntity.ok(buyer);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(500).body(Map.of(<span class="string">"error"</span>, e.getMessage()));
+        }
+    }
+}</pre>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<h2 id="step4">Step 4 — farm.js <span class="badge frontend">Frontend</span></h2>
+
+<p><strong>Path:</strong> <code>uiserver/src/api/farm.js</code></p>
+
+<h3>What to change</h3>
+<ul>
+  <li>Fix <code>getSavedFarms()</code>: the URL was <code>/api/buyer/</code> (wrong). Change it to <code>/api/buyer/all</code> and add <code>credentials: 'include'</code> so the session cookie is sent.</li>
+  <li>Fix <code>saveFarm()</code>: change the parameter from a full <code>farm</code> object to just <code>sellerId</code>, and update the URL from the placeholder <code>"URL"</code> to <code>/api/buyer/all</code>.</li>
+  <li>Add a new <code>unsaveFarm(sellerId)</code> function that calls <code>DELETE /api/buyer/all/{sellerId}</code>.</li>
+</ul>
+
+<div class="callout info">
+  <strong>What is <code>credentials: 'include'</code>?</strong> The backend uses session-based authentication stored in a cookie. By default, <code>fetch()</code> does not send cookies on cross-origin or same-origin requests unless you explicitly tell it to. Without this, the backend receives an unauthenticated request and returns a 403 error.
+</div>
+
+<div class="file-label">farm.js — full file</div>
+<pre>export async function getAllFarms() {
+    const response = await fetch(<span class="string">'/api/seller/all'</span>);
+    return response.json();
+}
+
+export async function getFarm(id) {
+    const farms = await getAllFarms();
+    return farms.find((f) =&gt; f.id === Number(id));
+}
+
+export async function getSavedFarms() {
+    const response = await fetch(<span class="string">'/api/buyer/all'</span>, {
+        credentials: <span class="string">'include'</span>,
+    });
+    return response.json();
+}
+
+export async function saveFarm(sellerId) {
+    const response = await fetch(<span class="string">'/api/buyer/all'</span>, {
+        method: <span class="string">'PATCH'</span>,
+        headers: { <span class="string">'Content-Type'</span>: <span class="string">'application/json'</span> },
+        credentials: <span class="string">'include'</span>,
+        body: JSON.stringify({ sellerId }),
+    });
+    return response.json();
+}
+
+export async function unsaveFarm(sellerId) {
+    const response = await fetch(`/api/buyer/all/${sellerId}`, {
+        method: <span class="string">'DELETE'</span>,
+        credentials: <span class="string">'include'</span>,
+    });
+    return response.json();
+}</pre>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<h2 id="step5">Step 5 — FarmListingsPage.jsx <span class="badge frontend">Frontend</span></h2>
+
+<p><strong>Path:</strong> <code>uiserver/src/pages/FarmListingsPage.jsx</code></p>
+
+<h3>What to change</h3>
+<ul>
+  <li>Import <code>getSavedFarms</code> and <code>saveFarm</code> from <code>../api/farm</code>.</li>
+  <li>Add a <code>savedIds</code> state (a <code>Set</code> of seller IDs the buyer has already saved) — loaded on mount alongside the farm list.</li>
+  <li>Add a <code>handleSave</code> function that calls the API and updates the local state.</li>
+  <li>Add a Save button to each farm card. The button is disabled and reads "Saved" if the farm is already in <code>savedIds</code>.</li>
+  <li>Add a <code>saveBtn</code> style entry.</li>
+</ul>
+
+<div class="callout">
+  <strong>Why use a <code>Set</code> for <code>savedIds</code>?</strong> Sets have O(1) lookup time — <code>savedIds.has(farm.id)</code> is instant regardless of how many farms are saved. An array would require looping through every element each render.
+</div>
+
+<div class="callout warning">
+  <strong>Important:</strong> The Save button sits inside a <code>&lt;Link&gt;</code> tag (which navigates to the farm detail page). Clicking the Save button would normally also trigger the Link navigation. The <code>e.preventDefault()</code> call inside <code>handleSave</code> stops this from happening.
+</div>
+
+<h4>Key additions to the existing file:</h4>
+
+<div class="file-label">Import line — update this</div>
+<pre><span class="comment">// Change from:</span>
+import { getAllFarms } from <span class="string">'../api/farm'</span>;
+
+<span class="comment">// To:</span>
+import { getAllFarms, getSavedFarms, saveFarm } from <span class="string">'../api/farm'</span>;</pre>
+
+<div class="file-label">State + useEffect — add savedIds state</div>
+<pre>const [farms, setFarms] = useState([]);
+const [savedIds, setSavedIds] = useState(new Set());
+
+useEffect(() =&gt; {
+    getAllFarms().then(setFarms).catch(console.error);
+    getSavedFarms()
+        .then((saved) =&gt; setSavedIds(new Set(saved.map((f) =&gt; f.id))))
+        .catch(console.error);
+}, []);</pre>
+
+<div class="file-label">Handler — add below useEffect</div>
+<pre>async function handleSave(e, farmId) {
+    e.preventDefault(); <span class="comment">// stop the parent Link from navigating</span>
+    await saveFarm(farmId);
+    setSavedIds((prev) =&gt; new Set([...prev, farmId]));
+}</pre>
+
+<div class="file-label">Save button — add inside each farm card (inside the second colContainer)</div>
+<pre>&lt;button
+    style={{
+        ...styles.saveBtn,
+        backgroundColor: savedIds.has(farm.id) ? <span class="string">'#a5c8a5'</span> : <span class="string">'#4a7c59'</span>,
+    }}
+    onClick={(e) =&gt; handleSave(e, farm.id)}
+    disabled={savedIds.has(farm.id)}
+&gt;
+    {savedIds.has(farm.id) ? <span class="string">'Saved'</span> : <span class="string">'Save Farm'</span>}
+&lt;/button&gt;</pre>
+
+<div class="file-label">New style entry — add to the styles object</div>
+<pre>saveBtn: {
+    color: <span class="string">'white'</span>,
+    border: <span class="string">'none'</span>,
+    borderRadius: 8,
+    padding: <span class="string">'10px 20px'</span>,
+    fontSize: 20,
+    fontFamily: <span class="string">'Roboto'</span>,
+    cursor: <span class="string">'pointer'</span>,
+    marginTop: <span class="string">'auto'</span>,
+},</pre>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<h2 id="step6">Step 6 — SavedFarms.jsx <span class="badge frontend">Frontend</span></h2>
+
+<p><strong>Path:</strong> <code>uiserver/src/pages/SavedFarms.jsx</code></p>
+
+<h3>What to change</h3>
+<p>This file was a "Coming Soon" placeholder. Replace the entire file content with the implementation below.</p>
+
+<h3>What it does</h3>
+<ul>
+  <li>On mount, calls <code>getSavedFarms()</code> and stores the result in <code>savedFarms</code> state.</li>
+  <li>Renders each saved farm as a card with the shop name, description, and address.</li>
+  <li>Each card links to the farm detail page.</li>
+  <li>Each card has a red "Remove" button. Clicking it calls <code>unsaveFarm(sellerId)</code> and immediately removes the card from the list using a local state filter (no page reload needed).</li>
+  <li>If the list is empty, shows a friendly empty-state message.</li>
+  <li>Has a "Back to Farm Listings" link at the top.</li>
+</ul>
+
+<div class="file-label">SavedFarms.jsx — full file</div>
+<pre>import { useState, useEffect } from <span class="string">'react'</span>;
+import { Link, useNavigate } from <span class="string">'react-router-dom'</span>;
+import { useAuth } from <span class="string">'../context/AuthContext'</span>;
+import { getSavedFarms, unsaveFarm } from <span class="string">'../api/farm'</span>;
+
+function SavedFarms() {
+    const { user } = useAuth();
+    const navigate = useNavigate();
+
+    const initials =
+        (user?.firstName?.charAt(0) || <span class="string">''</span>) + (user?.lastName?.charAt(0) || <span class="string">''</span>);
+    const profilePath = user?.role === <span class="string">'BUYER'</span> ? <span class="string">'/buyer/profile'</span> : <span class="string">'/seller/dashboard'</span>;
+
+    const [savedFarms, setSavedFarms] = useState([]);
+
+    useEffect(() =&gt; {
+        getSavedFarms().then(setSavedFarms).catch(console.error);
+    }, []);
+
+    async function handleUnsave(sellerId) {
+        await unsaveFarm(sellerId);
+        setSavedFarms((prev) =&gt; prev.filter((f) =&gt; f.id !== sellerId));
+    }
+
+    return (
+        &lt;div style={styles.page}&gt;
+            &lt;nav style={styles.navbar}&gt;
+                &lt;button
+                    style={styles.profileBtn}
+                    onClick={() =&gt; navigate(profilePath)}
+                    title=<span class="string">"My Profile"</span>
+                &gt;
+                    &lt;div style={styles.avatar}&gt;
+                        {user?.profilePicture ? (
+                            &lt;img src={user.profilePicture} alt=<span class="string">"Profile"</span>
+                                style={{ width: <span class="string">'100%'</span>, height: <span class="string">'100%'</span>, borderRadius: <span class="string">'50%'</span>, objectFit: <span class="string">'cover'</span> }} /&gt;
+                        ) : (
+                            initials
+                        )}
+                    &lt;/div&gt;
+                    &lt;span style={styles.profileLabel}&gt;Profile&lt;/span&gt;
+                &lt;/button&gt;
+                &lt;span style={styles.brand}&gt;PRYM&lt;/span&gt;
+                &lt;div style={{ width: 90 }} /&gt;
+            &lt;/nav&gt;
+
+            &lt;h1 style={styles.header}&gt;Saved Farms&lt;/h1&gt;
+
+            &lt;div style={styles.content}&gt;
+                &lt;Link to=<span class="string">"/buyer/farmlistings"</span> style={styles.backLink}&gt;
+                    ← Back to Farm Listings
+                &lt;/Link&gt;
+
+                {savedFarms.length === 0 ? (
+                    &lt;p style={styles.empty}&gt;You haven't saved any farms yet.&lt;/p&gt;
+                ) : (
+                    &lt;ul style={styles.list}&gt;
+                        {savedFarms.map((farm) =&gt; (
+                            &lt;li key={farm.id}&gt;
+                                &lt;div style={styles.card}&gt;
+                                    &lt;Link to={`/buyer/farmlistings/${farm.id}`} style={styles.cardLink}&gt;
+                                        &lt;div style={styles.cardInfo}&gt;
+                                            &lt;p style={styles.shopName}&gt;{farm.shopName}&lt;/p&gt;
+                                            &lt;p style={styles.detail}&gt;{farm.description}&lt;/p&gt;
+                                            &lt;p style={styles.detail}&gt;{farm.shopAddress}&lt;/p&gt;
+                                        &lt;/div&gt;
+                                    &lt;/Link&gt;
+                                    &lt;button
+                                        style={styles.removeBtn}
+                                        onClick={() =&gt; handleUnsave(farm.id)}
+                                    &gt;
+                                        Remove
+                                    &lt;/button&gt;
+                                &lt;/div&gt;
+                            &lt;/li&gt;
+                        ))}
+                    &lt;/ul&gt;
+                )}
+            &lt;/div&gt;
+        &lt;/div&gt;
+    );
+}
+
+const styles = {
+    page: { minHeight: <span class="string">'100vh'</span>, backgroundColor: <span class="string">'#faf8f4'</span> },
+    navbar: {
+        display: <span class="string">'flex'</span>, alignItems: <span class="string">'center'</span>, justifyContent: <span class="string">'space-between'</span>,
+        backgroundColor: <span class="string">'#4a7c59'</span>, padding: <span class="string">'10px 20px'</span>,
+    },
+    profileBtn: {
+        display: <span class="string">'flex'</span>, alignItems: <span class="string">'center'</span>, gap: <span class="string">'10px'</span>,
+        background: <span class="string">'none'</span>, border: <span class="string">'none'</span>, cursor: <span class="string">'pointer'</span>, padding: <span class="string">'4px 8px'</span>, borderRadius: <span class="string">'8px'</span>,
+    },
+    avatar: {
+        width: <span class="string">'38px'</span>, height: <span class="string">'38px'</span>, borderRadius: <span class="string">'50%'</span>,
+        backgroundColor: <span class="string">'rgba(255,255,255,0.25)'</span>, border: <span class="string">'2px solid rgba(255,255,255,0.6)'</span>,
+        color: <span class="string">'white'</span>, display: <span class="string">'flex'</span>, alignItems: <span class="string">'center'</span>, justifyContent: <span class="string">'center'</span>,
+        fontSize: <span class="string">'15px'</span>, fontWeight: <span class="string">'700'</span>, flexShrink: 0,
+    },
+    profileLabel: { color: <span class="string">'white'</span>, fontSize: <span class="string">'14px'</span>, fontWeight: <span class="string">'600'</span>, fontFamily: <span class="string">'Roboto, sans-serif'</span> },
+    brand: {
+        color: <span class="string">'white'</span>, fontSize: <span class="string">'22px'</span>, fontWeight: <span class="string">'800'</span>, letterSpacing: <span class="string">'3px'</span>,
+        fontFamily: <span class="string">'Roboto, sans-serif'</span>, position: <span class="string">'absolute'</span>, left: <span class="string">'50%'</span>, transform: <span class="string">'translateX(-50%)'</span>,
+    },
+    header: {
+        fontFamily: <span class="string">'Roboto'</span>, textAlign: <span class="string">'center'</span>, color: <span class="string">'#4a7c59'</span>, fontSize: 60, marginBottom: 0,
+    },
+    content: { maxWidth: 900, margin: <span class="string">'0 auto'</span>, padding: <span class="string">'20px 30px'</span> },
+    backLink: {
+        display: <span class="string">'inline-block'</span>, marginBottom: 20, color: <span class="string">'#4a7c59'</span>,
+        fontFamily: <span class="string">'Roboto, sans-serif'</span>, fontSize: 16, textDecoration: <span class="string">'none'</span>, fontWeight: <span class="string">'600'</span>,
+    },
+    empty: { fontFamily: <span class="string">'Roboto, sans-serif'</span>, fontSize: 20, color: <span class="string">'#888'</span>, textAlign: <span class="string">'center'</span>, marginTop: 60 },
+    list: { listStyle: <span class="string">'none'</span>, padding: 0, margin: 0 },
+    card: {
+        display: <span class="string">'flex'</span>, flexDirection: <span class="string">'row'</span>, alignItems: <span class="string">'center'</span>, justifyContent: <span class="string">'space-between'</span>,
+        backgroundColor: <span class="string">'white'</span>, border: <span class="string">'1px solid #ddd'</span>, borderLeft: <span class="string">'8px solid #2e7d32'</span>,
+        borderRadius: 10, padding: <span class="string">'16px 20px'</span>, marginBottom: 12,
+    },
+    cardLink: { textDecoration: <span class="string">'none'</span>, color: <span class="string">'inherit'</span>, flex: 1 },
+    cardInfo: { display: <span class="string">'flex'</span>, flexDirection: <span class="string">'column'</span>, gap: 4 },
+    shopName: { fontFamily: <span class="string">'Roboto, sans-serif'</span>, fontSize: 22, fontWeight: <span class="string">'700'</span>, color: <span class="string">'#2e7d32'</span>, margin: 0 },
+    detail: { fontFamily: <span class="string">'Roboto, sans-serif'</span>, fontSize: 15, color: <span class="string">'#555'</span>, margin: 0 },
+    removeBtn: {
+        backgroundColor: <span class="string">'#c0392b'</span>, color: <span class="string">'white'</span>, border: <span class="string">'none'</span>, borderRadius: 8,
+        padding: <span class="string">'10px 20px'</span>, fontSize: 16, fontFamily: <span class="string">'Roboto, sans-serif'</span>,
+        cursor: <span class="string">'pointer'</span>, flexShrink: 0, marginLeft: 20,
+    },
+};
+
+export default SavedFarms;</pre>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<h2 id="flow">7. End-to-End Flow Diagram</h2>
+
+<h3>Saving a Farm</h3>
+<pre>Buyer clicks "Save Farm" on a farm card
+  │
+  ├─ handleSave(e, farmId) called
+  │    └─ e.preventDefault() stops Link navigation
+  │
+  ├─ saveFarm(farmId)
+  │    └─ PATCH /api/buyer/all
+  │         body: { sellerId: farmId }
+  │
+  ├─ BuyerController.saveFarm()
+  │    └─ reads sellerId from body
+  │    └─ calls BuyerService.saveFarm(loggedInUserId, sellerId)
+  │
+  ├─ BuyerService.saveFarm()
+  │    └─ look up Buyer by userId
+  │    └─ look up Seller by sellerId
+  │    └─ check not already saved
+  │    └─ buyer.saveFarm(seller) → savedFarms.add(seller)
+  │    └─ buyerRepository.save(buyer)
+  │         └─ inserts row into saved_farms table: (buyer_id, seller_id)
+  │
+  └─ setSavedIds(prev => new Set([...prev, farmId]))
+       └─ button instantly shows "Saved" (disabled)</pre>
+
+<h3>Viewing Saved Farms</h3>
+<pre>Buyer navigates to /buyer/saved_farms
+  │
+  ├─ SavedFarms component mounts
+  │
+  ├─ getSavedFarms()
+  │    └─ GET /api/buyer/all  (with credentials: 'include')
+  │
+  ├─ BuyerController.getSavedFarms()
+  │    └─ calls BuyerService.getSavedFarms(loggedInUserId)
+  │
+  ├─ BuyerService.getSavedFarms()
+  │    └─ look up Buyer by userId
+  │    └─ return buyer.getSavedFarms()
+  │         └─ JPA loads all Sellers from saved_farms join table for this buyer
+  │
+  └─ setSavedFarms(data)
+       └─ renders farm cards</pre>
+
+<h3>Removing a Saved Farm</h3>
+<pre>Buyer clicks "Remove" on a saved farm card
+  │
+  ├─ handleUnsave(farm.id) called
+  │
+  ├─ unsaveFarm(sellerId)
+  │    └─ DELETE /api/buyer/all/{sellerId}
+  │
+  ├─ BuyerController.unsaveFarm()
+  │    └─ calls BuyerService.unsaveFarm(loggedInUserId, sellerId)
+  │
+  ├─ BuyerService.unsaveFarm()
+  │    └─ look up Buyer by userId
+  │    └─ look up Seller by sellerId
+  │    └─ buyer.unsaveFarm(seller) → savedFarms.remove(seller)
+  │    └─ buyerRepository.save(buyer)
+  │         └─ deletes row from saved_farms table
+  │
+  └─ setSavedFarms(prev => prev.filter(f => f.id !== sellerId))
+       └─ card disappears instantly from UI</pre>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<h2 id="api">8. API Reference</h2>
+
+<table>
+  <tr>
+    <th>Method</th>
+    <th>URL</th>
+    <th>Auth Required</th>
+    <th>Body</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>GET</code></td>
+    <td><code>/api/buyer/all</code></td>
+    <td>BUYER session</td>
+    <td>—</td>
+    <td>Returns list of saved farms for the logged-in buyer</td>
+  </tr>
+  <tr>
+    <td><code>PATCH</code></td>
+    <td><code>/api/buyer/all</code></td>
+    <td>BUYER session</td>
+    <td><code>{ "sellerId": 5 }</code></td>
+    <td>Adds a farm to the buyer's saved list</td>
+  </tr>
+  <tr>
+    <td><code>DELETE</code></td>
+    <td><code>/api/buyer/all/{sellerId}</code></td>
+    <td>BUYER session</td>
+    <td>—</td>
+    <td>Removes a farm from the buyer's saved list</td>
+  </tr>
+</table>
+
+<p>All three endpoints are already covered by the existing security rule in <code>SecurityConfig.java</code>: <code>/api/buyer/**</code> requires the BUYER role. No security config changes are needed.</p>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<h2 id="checklist">9. Final Checklist</h2>
+
+<p>Before testing, verify each item:</p>
+
+<table>
+  <tr>
+    <th>#</th>
+    <th>Item</th>
+    <th>File</th>
+  </tr>
+  <tr>
+    <td><span class="step-number">1</span></td>
+    <td><code>@OneToMany</code> replaced with <code>@ManyToMany</code> + <code>@JoinTable</code></td>
+    <td><code>Buyer.java</code></td>
+  </tr>
+  <tr>
+    <td><span class="step-number">2</span></td>
+    <td><code>savedFarms</code> initialized to <code>new ArrayList&lt;&gt;()</code></td>
+    <td><code>Buyer.java</code></td>
+  </tr>
+  <tr>
+    <td><span class="step-number">3</span></td>
+    <td><code>unsaveFarm()</code> method added to Buyer model</td>
+    <td><code>Buyer.java</code></td>
+  </tr>
+  <tr>
+    <td><span class="step-number">4</span></td>
+    <td><code>SellerRepository</code> injected into BuyerService constructor</td>
+    <td><code>BuyerService.java</code></td>
+  </tr>
+  <tr>
+    <td><span class="step-number">5</span></td>
+    <td><code>saveFarm</code> takes <code>Long sellerId</code>, not a <code>Seller</code> object</td>
+    <td><code>BuyerService.java</code></td>
+  </tr>
+  <tr>
+    <td><span class="step-number">6</span></td>
+    <td><code>unsaveFarm()</code> method added to BuyerService</td>
+    <td><code>BuyerService.java</code></td>
+  </tr>
+  <tr>
+    <td><span class="step-number">7</span></td>
+    <td><code>@RequestBody</code> added to controller's <code>saveFarm</code> method</td>
+    <td><code>BuyerController.java</code></td>
+  </tr>
+  <tr>
+    <td><span class="step-number">8</span></td>
+    <td><code>DELETE /api/buyer/all/{sellerId}</code> endpoint added</td>
+    <td><code>BuyerController.java</code></td>
+  </tr>
+  <tr>
+    <td><span class="step-number">9</span></td>
+    <td><code>getSavedFarms()</code> URL fixed to <code>/api/buyer/all</code></td>
+    <td><code>farm.js</code></td>
+  </tr>
+  <tr>
+    <td><span class="step-number">10</span></td>
+    <td><code>saveFarm(sellerId)</code> sends <code>{ sellerId }</code> in body</td>
+    <td><code>farm.js</code></td>
+  </tr>
+  <tr>
+    <td><span class="step-number">11</span></td>
+    <td><code>unsaveFarm(sellerId)</code> function added</td>
+    <td><code>farm.js</code></td>
+  </tr>
+  <tr>
+    <td><span class="step-number">12</span></td>
+    <td>Save button added to each farm card, shows "Saved" if already saved</td>
+    <td><code>FarmListingsPage.jsx</code></td>
+  </tr>
+  <tr>
+    <td><span class="step-number">13</span></td>
+    <td>SavedFarms page loads farm list from API on mount</td>
+    <td><code>SavedFarms.jsx</code></td>
+  </tr>
+  <tr>
+    <td><span class="step-number">14</span></td>
+    <td>Remove button calls unsave and removes card immediately from UI</td>
+    <td><code>SavedFarms.jsx</code></td>
+  </tr>
+</table>
+
+<hr/>
+<p style="text-align:center; color:#999; font-size:13px;">PRYM Project &nbsp;·&nbsp; Saved Farms Implementation Guide &nbsp;·&nbsp; 2026</p>
+
+</body>
+</html>
