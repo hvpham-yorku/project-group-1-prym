@@ -304,6 +304,16 @@ function BuyerDashboard() {
                 )}
               </div>
 
+              {/* Location */}
+              <div style={styles.fieldCard}>
+                <p style={styles.fieldLabel}>Location</p>
+                <p style={user?.zipCode ? styles.fieldValue : styles.fieldValueEmpty}>
+                  {user?.zipCode
+                    ? [user.state, user.country, user.zipCode].filter(Boolean).join(", ")
+                    : "Not set"}
+                </p>
+              </div>
+
               {/* Preferred Cuts — cow diagram, full width */}
               <div
                 style={{
