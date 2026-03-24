@@ -38,7 +38,7 @@ function FarmListing(){
 			</div>
 			
 			<div style={styles.bottomButtonContainer}>
-				<button style={styles.button} OnClick={saveFarm(farm)}>Save Farm</button>
+				<button style={styles.button} onClick={() => saveFarm(farm)}>Save Farm</button>
 				<button style={styles.button}>Rate Farm</button>
 				<Link to={`/buyer/farmlistings`}><button style={{...styles.button, width: 200}}>Return To Farm Listings</button></Link>
 			</div>
