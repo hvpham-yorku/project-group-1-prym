@@ -12,7 +12,8 @@ function BuyerSignup() {
         firstName: '',
         lastName: '',
         phoneNumber: '',
-        profilePicture: ''
+        profilePicture: '',
+        zipCode: ''
     });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -73,6 +74,12 @@ function BuyerSignup() {
             return;
         }
 
+        // Basic postal code format check (3-10 alphanumeric chars; backend validates via Nominatim)
+        if (!formData.zipCode || formData.zipCode.trim().length < 3) {
+            setError('Please enter a valid postal/ZIP code');
+            return;
+        }
+
         setLoading(true);
 
         try {
@@ -83,7 +90,8 @@ function BuyerSignup() {
                 firstName: formData.firstName,
                 lastName: formData.lastName,
                 phoneNumber: formData.phoneNumber,
-                profilePicture: formData.profilePicture || null
+                profilePicture: formData.profilePicture || null,
+                zipCode: formData.zipCode
             });
             saveUser(user);
             navigate('/buyer/profile-setup'); // redirect to profile setup instead of dashboard
@@ -184,6 +192,23 @@ function BuyerSignup() {
                             style={styles.input}
                             required
                         />
+                    </div>
+
+                    <div style={styles.inputGroup}>
+                        <label style={styles.label}>ZIP / Postal Code</label>
+                        <input
+                            type="text"
+                            name="zipCode"
+                            value={formData.zipCode}
+                            onChange={handleChange}
+                            placeholder="e.g., 10001 or M5H 2N2"
+                            style={styles.input}
+                            maxLength="7"
+                            required
+                        />
+                        <span style={styles.hint}>
+                            Used to show you nearby farms (US or Canada)
+                        </span>
                     </div>
 
                     <div style={styles.inputGroup}>
@@ -348,6 +373,11 @@ const styles = {
     },
     fileInput: {
         display: 'none'
+    },
+    hint: {
+        fontSize: '12px',
+        color: '#666',
+        marginTop: '4px'
     }
 };
 

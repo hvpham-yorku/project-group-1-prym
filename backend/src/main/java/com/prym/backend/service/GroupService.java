@@ -2,6 +2,7 @@ package com.prym.backend.service;
 
 import com.prym.backend.model.*;
 import com.prym.backend.repository.*;
+import com.prym.backend.util.DistanceUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +24,7 @@ public class GroupService {
     private final BuyerGroupMemberRepository memberRepository;
     private final BuyerRepository buyerRepository;
     private final SellerRepository sellerRepository;
+    private final UserRepository userRepository;
 
     private static final int MAX_QTY_PER_CUT = 2;
     private static final String CODE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -40,11 +42,13 @@ public class GroupService {
             BuyerGroupRepository groupRepository,
             BuyerGroupMemberRepository memberRepository,
             BuyerRepository buyerRepository,
-            SellerRepository sellerRepository) {
+            SellerRepository sellerRepository,
+            UserRepository userRepository) {
         this.groupRepository = groupRepository;
         this.memberRepository = memberRepository;
         this.buyerRepository = buyerRepository;
         this.sellerRepository = sellerRepository;
+        this.userRepository = userRepository;
     }
 
     // "Chuck, Rib x2, Short Loin"  →  { "Chuck": 1, "Rib": 2, "Short Loin": 1 }
@@ -265,11 +269,17 @@ public class GroupService {
         return buildGroupDTO(group, buyerUserId);
     }
 
-    // Returns perfect and partial farm matches based on the group's certifications.
+    // Returns perfect and partial farm matches based on the group's certifications and distance.
     @Transactional(readOnly = true)
     public Map<String, Object> getMatchingFarms(Long buyerUserId, Long groupId) {
         BuyerGroup group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new RuntimeException("Group not found"));
+
+        // Get buyer's location for distance calculation
+        User buyerUser = userRepository.findById(buyerUserId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        Double buyerLat = buyerUser.getLatitude();
+        Double buyerLon = buyerUser.getLongitude();
 
         // Parse group's required certifications into a set of uppercase strings
         Set<String> required = new HashSet<>();
@@ -303,6 +313,15 @@ public class GroupService {
             // Skip sellers with no overlap when group has certifications
             if (totalRequired > 0 && matchCount == 0) continue;
 
+            // Calculate distance between buyer and seller
+            Double sellerLat = seller.getUser().getLatitude();
+            Double sellerLon = seller.getUser().getLongitude();
+            Double distance = null;
+
+            if (buyerLat != null && buyerLon != null && sellerLat != null && sellerLon != null) {
+                distance = DistanceUtil.calculateDistance(buyerLat, buyerLon, sellerLat, sellerLon);
+            }
+
             Map<String, Object> farmDTO = new LinkedHashMap<>();
             farmDTO.put("sellerId", seller.getId());
             farmDTO.put("shopName", seller.getShopName());
@@ -312,6 +331,8 @@ public class GroupService {
             farmDTO.put("certifications", new ArrayList<>(sellerCerts));
             farmDTO.put("matchCount", matchCount);
             farmDTO.put("totalRequired", totalRequired);
+            farmDTO.put("distance", distance);  // null if coordinates missing
+            farmDTO.put("distanceFormatted", distance != null ? DistanceUtil.formatDistance(distance) : "N/A");
 
             if (totalRequired == 0 || matchCount == totalRequired) {
                 perfectMatches.add(farmDTO);
@@ -320,8 +341,28 @@ public class GroupService {
             }
         }
 
-        // Sort partial matches by matchCount descending
-        partialMatches.sort((a, b) -> Integer.compare((int) b.get("matchCount"), (int) a.get("matchCount")));
+        //Sort perfect matches by distance (ascending, nulls last)
+        perfectMatches.sort((a, b) -> {
+            Double distA = (Double) a.get("distance");
+            Double distB = (Double) b.get("distance");
+            if (distA == null && distB == null) return 0;
+            if (distA == null) return 1;
+            if (distB == null) return -1;
+            return Double.compare(distA, distB);
+        });
+
+        //Sort partial matches by matchCount DESC,then distance ASC
+        partialMatches.sort((a, b) -> {
+            int cmp = Integer.compare((int) b.get("matchCount"), (int) a.get("matchCount"));
+            if (cmp != 0) return cmp;
+
+            Double distA = (Double) a.get("distance");
+            Double distB = (Double) b.get("distance");
+            if (distA == null && distB == null) return 0;
+            if (distA == null) return 1;
+            if (distB == null) return -1;
+            return Double.compare(distA, distB);
+        });
 
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("perfectMatches", perfectMatches);

@@ -60,6 +60,12 @@ function GroupDetailPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
+  // Helper function to filter farms by distance
+  const filterFarmsByDistance = (farmList) => {
+    if (!distanceFilterEnabled) return farmList;
+    return farmList.filter(f => !f.distance || f.distance <= maxDistance);
+  };
+
   const [group, setGroup] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -73,6 +79,10 @@ function GroupDetailPage() {
   const [regenLoading, setRegenLoading] = useState(false);
   const [codeCopied, setCodeCopied] = useState(false);
   const [farms, setFarms] = useState(null);
+
+  // Distance filter state
+  const [maxDistance, setMaxDistance] = useState(100); // miles
+  const [distanceFilterEnabled, setDistanceFilterEnabled] = useState(false);
 
   // Chat state
   const [messages, setMessages] = useState([]);
@@ -611,17 +621,47 @@ function GroupDetailPage() {
               <div style={styles.membersCard}>
                 <h2 style={styles.sectionTitle}>Matching Farms</h2>
 
+                {/* Distance Filter */}
+                <div style={styles.distanceFilter}>
+                  <label style={styles.filterLabel}>
+                    <input
+                      type="checkbox"
+                      checked={distanceFilterEnabled}
+                      onChange={(e) => setDistanceFilterEnabled(e.target.checked)}
+                      style={styles.checkbox}
+                    />
+                    <span>Filter by distance</span>
+                  </label>
+
+                  {distanceFilterEnabled && (
+                    <div style={styles.sliderContainer}>
+                      <label style={styles.sliderLabel}>
+                        Show farms within {maxDistance} miles
+                      </label>
+                      <input
+                        type="range"
+                        min="10"
+                        max="500"
+                        step="10"
+                        value={maxDistance}
+                        onChange={(e) => setMaxDistance(Number(e.target.value))}
+                        style={styles.slider}
+                      />
+                    </div>
+                  )}
+                </div>
+
                 <div style={styles.farmsSubheading}>
                   <span style={styles.perfectBadge}>Perfect Match</span>
                   <span style={styles.farmsSub}>
-                    {farms.perfectMatches.length === 0
-                      ? "No farms match all certifications."
-                      : `${farms.perfectMatches.length} farm${farms.perfectMatches.length > 1 ? "s" : ""} meet${farms.perfectMatches.length === 1 ? "s" : ""} all requirements`}
+                    {filterFarmsByDistance(farms.perfectMatches).length === 0
+                      ? distanceFilterEnabled && farms.perfectMatches.length > 0 ? "No farms within selected distance." : "No farms match all certifications."
+                      : `${filterFarmsByDistance(farms.perfectMatches).length} farm${filterFarmsByDistance(farms.perfectMatches).length > 1 ? "s" : ""} meet${filterFarmsByDistance(farms.perfectMatches).length === 1 ? "s" : ""} all requirements`}
                   </span>
                 </div>
-                {farms.perfectMatches.length > 0 && (
+                {filterFarmsByDistance(farms.perfectMatches).length > 0 && (
                   <div style={styles.farmList}>
-                    {farms.perfectMatches.map((f) => (
+                    {filterFarmsByDistance(farms.perfectMatches).map((f) => (
                       <div
                         key={f.sellerId}
                         style={{
@@ -629,9 +669,16 @@ function GroupDetailPage() {
                           borderLeft: "4px solid #2e7d32",
                         }}
                       >
-                        <p style={styles.farmShop}>
-                          {f.shopName || "Unnamed Farm"}
-                        </p>
+                        <div style={styles.farmHeader}>
+                          <p style={styles.farmShop}>
+                            {f.shopName || "Unnamed Farm"}
+                          </p>
+                          {f.distanceFormatted && (
+                            <span style={styles.distanceBadge}>
+                              📍 {f.distanceFormatted}
+                            </span>
+                          )}
+                        </div>
                         <p style={styles.farmName}>{f.sellerName}</p>
                         <p style={styles.farmContact}>{f.email}</p>
                         {f.phoneNumber && (
@@ -661,20 +708,20 @@ function GroupDetailPage() {
                   </div>
                 )}
 
-                {farms.partialMatches.length > 0 && (
+                {filterFarmsByDistance(farms.partialMatches).length > 0 && (
                   <>
                     <div
                       style={{ ...styles.farmsSubheading, marginTop: "16px" }}
                     >
                       <span style={styles.partialBadge}>Partial Match</span>
                       <span style={styles.farmsSub}>
-                        {farms.partialMatches.length} farm
-                        {farms.partialMatches.length > 1 ? "s" : ""} with some
+                        {filterFarmsByDistance(farms.partialMatches).length} farm
+                        {filterFarmsByDistance(farms.partialMatches).length > 1 ? "s" : ""} with some
                         matching certifications
                       </span>
                     </div>
                     <div style={styles.farmList}>
-                      {farms.partialMatches.map((f) => (
+                      {filterFarmsByDistance(farms.partialMatches).map((f) => (
                         <div
                           key={f.sellerId}
                           style={{
@@ -682,9 +729,16 @@ function GroupDetailPage() {
                             borderLeft: "4px solid #f9a825",
                           }}
                         >
-                          <p style={styles.farmShop}>
-                            {f.shopName || "Unnamed Farm"}
-                          </p>
+                          <div style={styles.farmHeader}>
+                            <p style={styles.farmShop}>
+                              {f.shopName || "Unnamed Farm"}
+                            </p>
+                            {f.distanceFormatted && (
+                              <span style={styles.distanceBadge}>
+                                📍 {f.distanceFormatted}
+                              </span>
+                            )}
+                          </div>
                           <p style={styles.farmName}>{f.sellerName}</p>
                           <p style={styles.farmContact}>{f.email}</p>
                           {f.phoneNumber && (
@@ -1293,6 +1347,36 @@ const styles = {
     fontSize: "15px",
     fontWeight: "600",
     cursor: "pointer",
+  },
+  distanceFilter: {
+    backgroundColor: "#f9f9f9", padding: "12px 16px", borderRadius: "6px",
+    marginBottom: "16px", border: "1px solid #e0e0e0",
+  },
+  filterLabel: {
+    display: "flex", alignItems: "center", gap: "8px", fontSize: "14px",
+    fontWeight: "600", color: "#333", cursor: "pointer",
+  },
+  checkbox: {
+    cursor: "pointer", width: "16px", height: "16px",
+  },
+  sliderContainer: {
+    marginTop: "12px", display: "flex", flexDirection: "column", gap: "8px",
+  },
+  sliderLabel: {
+    fontSize: "13px", fontWeight: "500", color: "#555",
+  },
+  slider: {
+    width: "100%", height: "6px", borderRadius: "3px",
+    background: `linear-gradient(to right, ${BUYER_COLOR}, ${BUYER_COLOR})`,
+    outline: "none", cursor: "pointer",
+  },
+  farmHeader: {
+    display: "flex", justifyContent: "space-between", alignItems: "center",
+    marginBottom: "4px",
+  },
+  distanceBadge: {
+    fontSize: "12px", color: "#666", backgroundColor: "#f0f0f0",
+    padding: "3px 8px", borderRadius: "10px", fontWeight: "600",
   },
 };
 

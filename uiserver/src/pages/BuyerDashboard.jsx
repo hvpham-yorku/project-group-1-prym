@@ -257,6 +257,25 @@ function BuyerDashboard() {
       <div style={styles.content}>
         {error && <div style={styles.error}>{error}</div>}
 
+        {/* Location Prompt Banner */}
+        {user && !user.zipCode && (
+          <div style={styles.locationPrompt}>
+            <div style={styles.promptIcon}>📍</div>
+            <div style={styles.promptText}>
+              <strong>Add your location to see nearby farms</strong>
+              <p style={{ margin: '4px 0 0 0', fontSize: '13px' }}>
+                We've added location features! Enter your ZIP code to discover local farms.
+              </p>
+            </div>
+            <button
+              onClick={() => setShowAccountModal(true)}
+              style={styles.promptButton}
+            >
+              Add ZIP Code
+            </button>
+          </div>
+        )}
+
         {/* Two-column layout: profile on left, groups on right */}
         <div style={styles.mainLayout}>
 
@@ -283,6 +302,16 @@ function BuyerDashboard() {
                     {user?.phoneNumber || "Not set"}
                   </p>
                 )}
+              </div>
+
+              {/* Location */}
+              <div style={styles.fieldCard}>
+                <p style={styles.fieldLabel}>Location</p>
+                <p style={user?.zipCode ? styles.fieldValue : styles.fieldValueEmpty}>
+                  {user?.zipCode
+                    ? [user.state, user.country, user.zipCode].filter(Boolean).join(", ")
+                    : "Not set"}
+                </p>
               </div>
 
               {/* Preferred Cuts — cow diagram, full width */}
@@ -924,6 +953,32 @@ const styles = {
     alignItems: "center",
     gap: "8px",
     flexShrink: 0,
+  },
+  locationPrompt: {
+    display: "flex",
+    alignItems: "center",
+    gap: "15px",
+    padding: "15px 20px",
+    backgroundColor: "#fff3cd",
+    border: "1px solid #ffc107",
+    borderRadius: "8px",
+    marginBottom: "20px",
+  },
+  promptIcon: {
+    fontSize: "32px",
+  },
+  promptText: {
+    flex: 1,
+  },
+  promptButton: {
+    padding: "8px 16px",
+    backgroundColor: "#28a745",
+    color: "white",
+    border: "none",
+    borderRadius: "5px",
+    cursor: "pointer",
+    fontWeight: "600",
+    fontSize: "14px",
   },
 };
 

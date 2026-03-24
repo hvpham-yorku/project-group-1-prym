@@ -51,7 +51,7 @@ public class AuthServiceTest {
 
         User result = authService.register(
                 "new@example.com", "password123", User.Role.BUYER,
-                "newuser", "Jane", "Doe", "416-555-1111", null);
+                "newuser", "Jane", "Doe", "416-555-1111", null, "10001");
 
         assertNotNull(result);
         assertEquals("new@example.com", result.getEmail());
@@ -68,7 +68,7 @@ public class AuthServiceTest {
 
         RuntimeException ex = assertThrows(RuntimeException.class,
                 () -> authService.register("test@example.com", "pass", User.Role.BUYER,
-                        "newuser", "A", "B", "416-000-0000", null));
+                        "newuser", "A", "B", "416-000-0000", null, "10001"));
 
         assertEquals("Email already registered", ex.getMessage());
         verify(userRepository, never()).save(any());
@@ -82,7 +82,7 @@ public class AuthServiceTest {
 
         RuntimeException ex = assertThrows(RuntimeException.class,
                 () -> authService.register("other@example.com", "pass", User.Role.BUYER,
-                        "testuser", "A", "B", "416-000-0000", null));
+                        "testuser", "A", "B", "416-000-0000", null, "10001"));
 
         assertEquals("Username already taken", ex.getMessage());
         verify(userRepository, never()).save(any()); // must NOT save
@@ -127,7 +127,7 @@ public class AuthServiceTest {
         when(userRepository.existsByUsername("newusername")).thenReturn(false);
         when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
 
-        User result = authService.updateUserInfo(1L, "Jane", "Doe", "new@example.com", "newusername", null);
+        User result = authService.updateUserInfo(1L, "Jane", "Doe", "new@example.com", "newusername", null, null);
 
         assertEquals("Jane", result.getFirstName());
         assertEquals("Doe", result.getLastName());
@@ -142,7 +142,7 @@ public class AuthServiceTest {
         when(userRepository.findById(99L)).thenReturn(Optional.empty());
 
         RuntimeException ex = assertThrows(RuntimeException.class,
-                () -> authService.updateUserInfo(99L, "Jane", "Doe", "new@example.com", "newusername", null));
+                () -> authService.updateUserInfo(99L, "Jane", "Doe", "new@example.com", "newusername", null, null));
 
         assertEquals("User not found", ex.getMessage());
         verify(userRepository, never()).save(any());
@@ -155,7 +155,7 @@ public class AuthServiceTest {
         when(userRepository.existsByEmail("taken@example.com")).thenReturn(true);
 
         RuntimeException ex = assertThrows(RuntimeException.class,
-                () -> authService.updateUserInfo(1L, "Test", "User", "taken@example.com", "testuser", null));
+                () -> authService.updateUserInfo(1L, "Test", "User", "taken@example.com", "testuser", null, null));
 
         assertEquals("Email already in use", ex.getMessage());
         verify(userRepository, never()).save(any());
@@ -168,7 +168,7 @@ public class AuthServiceTest {
         when(userRepository.existsByUsername("takenuser")).thenReturn(true);
 
         RuntimeException ex = assertThrows(RuntimeException.class,
-                () -> authService.updateUserInfo(1L, "Test", "User", "test@example.com", "takenuser", null));
+                () -> authService.updateUserInfo(1L, "Test", "User", "test@example.com", "takenuser", null, null));
 
         assertEquals("Username already taken", ex.getMessage());
         verify(userRepository, never()).save(any());
@@ -179,7 +179,7 @@ public class AuthServiceTest {
     public void updateUserInfo_IgnoresBlankFields() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
         when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
-        User result = authService.updateUserInfo(1L, "  ", "  ", "test@example.com", "testuser", null);
+        User result = authService.updateUserInfo(1L, "  ", "  ", "test@example.com", "testuser", null, null);
 
         assertEquals("Test", result.getFirstName());
         assertEquals("User", result.getLastName());

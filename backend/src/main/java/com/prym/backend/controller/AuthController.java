@@ -53,8 +53,9 @@ public class AuthController {
 			String lastName = request.get("lastName");
 			String phoneNumber = request.get("phoneNumber");
 			String profilePicture = request.get("profilePicture");
+			String zipCode = request.get("zipCode");
 			User user = authService.register(email, password, User.Role.BUYER, username, firstName, lastName,
-					phoneNumber, profilePicture);// AuthService checks if email exists, hashes the password, saves new
+					phoneNumber, profilePicture, zipCode);// AuthService checks if email exists, hashes the password, saves new
 			// user to the database, returns the created User object
 			Session session = sessionService.createSession(user);// generate a new session for this user which generates
 			// a random Id (UUID) , save session to database, and
@@ -84,9 +85,10 @@ public class AuthController {
 			String phoneNumber = request.get("phoneNumber");
 			String profilePicture = request.get("profilePicture");
 			String shopName = request.get("shopName");
+			String zipCode = request.get("zipCode");
 
 			User user = authService.register(email, password, User.Role.SELLER, username, firstName, lastName,
-					phoneNumber, profilePicture);
+					phoneNumber, profilePicture, zipCode);
 
 			// ADD THIS: Create empty seller profile
 			sellerService.createSellerProfile(user.getId(), shopName, "", "");
@@ -173,6 +175,10 @@ public class AuthController {
 		response.put("lastName", user.getLastName());
 		response.put("phoneNumber", user.getPhoneNumber());
 		response.put("profilePicture", user.getProfilePicture());
+		response.put("zipCode", user.getZipCode());
+		response.put("city", user.getCity());
+		response.put("state", user.getState());
+		response.put("country", user.getCountry());
 		return response;
 	}
 
@@ -191,11 +197,12 @@ public class AuthController {
 			User user = userOptional.get();
 			User updatedUser = authService.updateUserInfo(
 				user.getId(),
-				request.get("firstName"), 
+				request.get("firstName"),
 				request.get("lastName"),
 				request.get("email"),
 				request.get("username"),
-				request.get("profilePicture")
+				request.get("profilePicture"),
+				request.get("zipCode")
 			);
 			return ResponseEntity.ok(buildUserResponse(updatedUser));
 		} catch (RuntimeException e){

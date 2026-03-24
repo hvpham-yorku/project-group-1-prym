@@ -52,7 +52,7 @@ class RegisterTest {
         mockSession.setSessionId("fake-session-id");
 
         when(authService.register("buyer@example.com", "password123", User.Role.BUYER, // when register() is called with these values...
-                "buyeruser", "Zelda", "Link", "555-1234", null))
+                "buyeruser", "Zelda", "Link", "555-1234", null, "10001"))
                 .thenReturn(mockUser); // ...return our fake user
         when(sessionService.createSession(any(User.class))).thenReturn(mockSession); // return fake session for any user
 
@@ -60,7 +60,7 @@ class RegisterTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"email\": \"buyer@example.com\", \"password\": \"password123\", "
                                 + "\"username\": \"buyeruser\", \"firstName\": \"Zelda\", "
-                                + "\"lastName\": \"Link\", \"phoneNumber\": \"555-1234\"}"))
+                                + "\"lastName\": \"Link\", \"phoneNumber\": \"555-1234\", \"zipCode\": \"10001\"}"))
                 .andExpect(status().isOk()) // expect 200
                 .andExpect(jsonPath("$.email").value("buyer@example.com")) // verify email
                 .andExpect(jsonPath("$.role").value("BUYER")) // verify role
@@ -86,7 +86,7 @@ class RegisterTest {
         mockSession.setSessionId("fake-session-id");
 
         when(authService.register("seller@example.com", "password123", User.Role.SELLER,
-                "selleruser", "Ganondorf", "Ganon", "555-5678", null))
+                "selleruser", "Ganondorf", "Ganon", "555-5678", null, "10001"))
                 .thenReturn(mockUser);
         when(sessionService.createSession(any(User.class))).thenReturn(mockSession);
 
@@ -94,7 +94,7 @@ class RegisterTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"email\": \"seller@example.com\", \"password\": \"password123\", "
                                 + "\"username\": \"selleruser\", \"firstName\": \"Ganondorf\", "
-                                + "\"lastName\": \"Ganon\", \"phoneNumber\": \"555-5678\"}"))
+                                + "\"lastName\": \"Ganon\", \"phoneNumber\": \"555-5678\", \"zipCode\": \"10001\"}"))
                 .andExpect(status().isOk()) // expect 200
                 .andExpect(jsonPath("$.email").value("seller@example.com"))
                 .andExpect(jsonPath("$.role").value("SELLER"))
@@ -107,14 +107,14 @@ class RegisterTest {
     @Test
     void registerWithExistingEmail_returns400() throws Exception {
         when(authService.register(eq("taken@example.com"), eq("password123"), eq(User.Role.BUYER), // when called with this email...
-                any(), any(), any(), any(), any()))
+                any(), any(), any(), any(), any(), any()))
                 .thenThrow(new RuntimeException("Email already registered")); // ...throw duplicate email error
 
         mockMvc.perform(post("/api/auth/register/buyer")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"email\": \"taken@example.com\", \"password\": \"password123\", "
                                 + "\"username\": \"someone\", \"firstName\": \"A\", "
-                                + "\"lastName\": \"B\", \"phoneNumber\": \"555-0000\"}"))
+                                + "\"lastName\": \"B\", \"phoneNumber\": \"555-0000\", \"zipCode\": \"10001\"}"))
                 .andExpect(status().isBadRequest()) // expect 400
                 .andExpect(jsonPath("$.error").value("Email already registered")); // verify error message in JSON
     }
@@ -123,14 +123,14 @@ class RegisterTest {
     @Test
     void registerWithExistingUsername_returns400() throws Exception {
         // Service throws when the username is a duplicate
-        when(authService.register(any(), any(), eq(User.Role.BUYER), eq("takenuser"), any(), any(), any(), any()))
+        when(authService.register(any(), any(), eq(User.Role.BUYER), eq("takenuser"), any(), any(), any(), any(), any()))
                 .thenThrow(new RuntimeException("Username already taken"));
 
         mockMvc.perform(post("/api/auth/register/buyer")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"email\": \"new@example.com\", \"password\": \"password123\", "
                                 + "\"username\": \"takenuser\", \"firstName\": \"A\", "
-                                + "\"lastName\": \"B\", \"phoneNumber\": \"555-0000\"}"))
+                                + "\"lastName\": \"B\", \"phoneNumber\": \"555-0000\", \"zipCode\": \"10001\"}"))
                 .andExpect(status().isBadRequest()) // expect 400
                 .andExpect(jsonPath("$.error").value("Username already taken"));
     }
@@ -150,7 +150,7 @@ class RegisterTest {
         Session mockSession = new Session();
         mockSession.setSessionId("fake-session-id");
 
-        when(authService.register(any(), any(), eq(User.Role.SELLER), any(), any(), any(), any(), any()))
+        when(authService.register(any(), any(), eq(User.Role.SELLER), any(), any(), any(), any(), any(), any()))
                 .thenReturn(mockUser);
         when(sessionService.createSession(any(User.class))).thenReturn(mockSession);
 
@@ -159,7 +159,7 @@ class RegisterTest {
                         .content("{\"email\": \"seller2@example.com\", \"password\": \"password123\", "
                                 + "\"username\": \"seller2\", \"firstName\": \"Link\", "
                                 + "\"lastName\": \"Hero\", \"phoneNumber\": \"555-9999\", "
-                                + "\"shopName\": \"Hero's Meats\"}"))
+                                + "\"shopName\": \"Hero's Meats\", \"zipCode\": \"10001\"}"))
                 .andExpect(status().isOk());
 
         // Verify that a seller profile was created with the shop name from the request

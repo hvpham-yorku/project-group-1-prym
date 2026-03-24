@@ -91,12 +91,12 @@ export async function getCurrentUser() {
     return data;
 }
 
-export async function updateUserInfo({firstName, lastName, email, username, profilePicture}){
+export async function updateUserInfo({firstName, lastName, email, username, profilePicture, zipCode}){
     const response = await fetch(`${API_URL}/user`,{
         method: 'PATCH',
         headers: {'Content-Type': 'application/json'},
         credentials: 'include',
-        body: JSON.stringify({firstName, lastName, email, username, profilePicture})
+        body: JSON.stringify({firstName, lastName, email, username, profilePicture, zipCode})
     });
     
     const data = await response.json();

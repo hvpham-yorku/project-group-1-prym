@@ -29,7 +29,7 @@ public class GroupServiceIntegrationTest {
     private User registerBuyer(String email, String username) {
         User user = authService.register(
                 email, "pass123", User.Role.BUYER,
-                username, "Test", "Buyer", "416-555-0000", null
+                username, "Test", "Buyer", "416-555-0000", null, "10001"
         );
         buyerService.createBuyerProfile(user.getId(), "Chuck");
         return user;
