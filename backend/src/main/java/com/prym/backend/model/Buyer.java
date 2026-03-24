@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
+import java.util.List;
 // Represents buyer-specific data (meat preferences). Personal info like name and phone are stored in User.
 @Entity
 @Table(name = "buyers")
@@ -23,4 +23,16 @@ public class Buyer {
     private User user;
 
     private String preferredCuts;
+    
+    @ManyToMany()
+    @JoinTable(name="buyer_id")
+    private List<Seller> savedFarms;
+    
+    public void saveFarm(Seller farm) {
+    	savedFarms.add(farm);
+    }
+    
+    public void removeSavedFarm(Seller farm) {
+    	savedFarms.remove(farm);
+    }
 }

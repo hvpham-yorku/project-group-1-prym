@@ -6,6 +6,8 @@ import com.prym.backend.repository.BuyerRepository;
 import com.prym.backend.repository.UserRepository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
+import java.util.List;
+import com.prym.backend.model.Seller;
 
 // Handles all buyer profile business logic (creating, retrieving, and updating profiles)
 // This layer enforces rules before anything touches the database
@@ -69,4 +71,18 @@ public class BuyerService {
         return buyerRepository.save(buyer);
     }
     
+    public List<Seller> getSavedFarms(Long userId){
+    	Buyer buyer = buyerRepository.findByUserId(userId)
+    			.orElseThrow(() -> new RuntimeException("Buyer profile not found"));
+    	
+    	return buyer.getSavedFarms();
+    }
+    
+    @Transactional
+    public Buyer saveFarm(Long userId, Seller farm){
+    	Buyer buyer = buyerRepository.findByUserId(userId)
+    			.orElseThrow(() -> new RuntimeException("Buyer profile not found"));
+    	buyer.saveFarm(farm);
+    	return buyerRepository.save(buyer);
+    }
 }

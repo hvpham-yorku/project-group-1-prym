@@ -19,13 +19,25 @@ function FarmListingsPage() {
 		getAllFarms().then(setFarms).catch(console.error);
 	}, []);
 	
-	const listItems = farms.map(farm =>
-		<li key={farm.id}>
-			<Link to={`/farmlistings/${farm.id}`}>
-				<button style={styles.button}>{farm.shopName}</button>
+	const listItems = farms.map(farm => {
+		let certs = (farm.certifications || []).map(c => <li key={c.id} style={styles.cert}>{c.name}</li>);
+		return (<li key={farm.id}>
+			<Link to={`/buyer/farmlistings/${farm.id}`}>
+				<button style={{...styles.button, borderLeft: '10px solid #2e7d32'}}>
+					<div style={{...styles.colContainer, width: "40%"}}>
+						<div style={styles.farmImage}>FARM IMAGE</div>
+						<div style={styles.farmName}>{farm.shopName}</div>
+					</div>
+					<div style={{...styles.colContainer, width: "60%"}}>
+						<div style={styles.description}>{farm.description}</div>
+						<div style={styles.location}>{farm.shopAddress}</div>
+						<div style={styles.certifications}>{certs}</div>
+						<div style={styles.rating}>RATING</div>
+					</div>
+				</button>
 			</Link>
-		</li>
-	);
+		</li> );
+	});
 
 	return (
 		<div style={styles.page}>
@@ -57,13 +69,13 @@ function FarmListingsPage() {
 
 			<div style={styles.containerMain}>
 				{/* where all the farm listings are shown */}
-				<div style={styles.listingContainer}>
+				<div style={{...styles.containerSide, width: '80%'}}>
 					<ul>{listItems}</ul>
 				</div>
-				<div style={styles.containerSide}>
+				<div style={{...styles.containerSide, width: '20%'}}>
 					{/* recently viewed farms and a button to navigate to saved farms */}
-					<p style={styles.recentlyViewedContainer}>Coming Soon...</p>
-					<button style={styles.savedButton}>Coming Soon...</button>
+					<Link to={`/buyer/saved_farms`}><button style={styles.savedButton}>Go To My Saved Farms</button></Link>
+					{/*<p style={styles.recentlyViewedContainer}>Coming Soon...</p>*/}
 				</div>
 			</div>
 		</div>
@@ -133,16 +145,6 @@ const styles = {
 		display: 'flex',
 		flexDirection: 'column',
 		alignItems: 'center',
-		width: '50%',
-		margin: 30,
-	},
-	listingContainer: {
-		display: 'flex',
-		flexDirection: 'column',
-		alignItems: 'center',
-		backgroundColor: '#f5f5f0',
-		width: '50%',
-		border: 'solid',
 		margin: 30,
 	},
 	recentlyViewedContainer: {
@@ -156,19 +158,33 @@ const styles = {
 		borderColor: 'black',
 	},
 	savedButton: {
-		width: '90%',
+		width: 300,
 		height: 100,
-		border: 'solid',
-		borderColor: 'black',
+		border: 'none',
+		borderRadius: 10,
 		margin: 30,
+		backgroundColor: '#4a7c59',
+		color: 'white',
+		fontSize: 40,
+		fontFamily: 'Roboto',
 	},
 	button: {
+		display: 'flex',
+		flexDirection: 'row',
 		backgroundColor: 'white',
-		color: '#4a7c59',
 		fontSize: 50,
 		fontFamily: 'Roboto',
-		width: 800,
-		height: 200,
+		width: 1100,
+		height: 300,
+		border: '1px solid',
+		borderRadius: 10,
+		margin: 5,
+	},
+	colContainer: {
+		display: 'flex',
+		flexDirection:'column',
+		border: 'none',
+		margin: 5,
 	},
 	header: {
 		fontFamily: 'Roboto',
@@ -177,6 +193,55 @@ const styles = {
 		justifyContent: 'center',
 		color: '#4a7c59',
 		fontSize: 100,
+	},
+	farmImage: {
+		height: '60%',
+		border: 'solid',
+		margin: 5,
+		color: 'grey',
+	},
+	farmName: {
+		backgroundColor: '#4a7c59',
+		borderRadius: 10,
+		color: 'white',
+		padding: "5px 5px",
+		margin: 5,
+		fontSize: 30,
+	},
+	rating: {
+		color: 'yellow',
+		margin: 5,
+		fontSize: 20,
+	},
+	description: {
+		height: '40%',
+		border: 'solid',
+		borderColor: 'grey',
+		borderRadius: 8,
+		margin: 10,
+		fontSize: 20,
+	},
+	location: {
+		color: '#4a7c59',
+		fontSize: 30,
+	},
+	certifications: {
+		display: 'flex',
+		flex: 'column',
+		flexWrap: "wrap",
+		margin: 5,
+		fontSize: 50,
+	},
+	cert: {
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+		height: 25,
+		backgroundColor: 'green',
+		borderRadius: 5,
+		fontSize: 20,
+		margin: 5,
+		padding: '4px 8px',
 	},
 };
 

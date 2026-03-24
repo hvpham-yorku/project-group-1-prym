@@ -12,6 +12,7 @@ import SellerProfileSetup from './pages/SellerProfileSetup';
 import GroupDetailPage from './pages/GroupDetailPage';
 import CreateGroupPage from './pages/CreateGroupPage';
 import BrowseGroupsPage from './pages/BrowseGroupsPage';
+import SavedFarms from './pages/SavedFarms';
 
 function ProtectedRoute({ children, allowedRole }) {
     const { user } = useAuth();
@@ -34,22 +35,28 @@ function AppRoutes() {
         <Routes>
             {/* Auth */}
             <Route path="/login" element={
-                user ? <Navigate to={user.role === 'BUYER' ? '/farmlistings' : '/seller/dashboard'} /> : <Login />
+                user ? <Navigate to={user.role === 'BUYER' ? '/buyer/farmlistings' : '/seller/dashboard'} /> : <Login />
             } />
             <Route path="/register/buyer"  element={user ? <Navigate to="/buyer/profile-setup" /> : <BuyerSignup />} />
             <Route path="/register/seller" element={user ? <Navigate to="/seller/profile-setup" /> : <SellerSignup />} />
 
-            {/* Farm listings — accessible to any logged-in user */}
-            <Route path="/farmlistings" element={
-                <ProtectedRoute>
+            {/* Farm listings — accessible buyers */}
+            <Route path="/buyer/farmlistings" element={
+                <ProtectedRoute allowedRole="BUYER">
                     <FarmListingsPage />
                 </ProtectedRoute>
             } />
-            <Route path="/farmlistings/:farmname" element={
-                <ProtectedRoute>
+            <Route path="/buyer/farmlistings/:farmname" element={
+                <ProtectedRoute allowedRole="BUYER">
                     <FarmListing />
                 </ProtectedRoute>
             } />
+			
+			<Route path="/buyer/saved_farms" element={
+				<ProtectedRoute allowedRole="BUYER">
+					<SavedFarms />
+				</ProtectedRoute>
+			} />
 
             {/* Buyer */}
             <Route path="/buyer/profile" element={
@@ -93,8 +100,8 @@ function AppRoutes() {
 
             {/* Legacy redirects — keep old URLs working */}
             <Route path="/buyer/dashboard"        element={<Navigate to="/buyer/profile"  replace />} />
-            <Route path="/farmlistingspage"        element={<Navigate to="/farmlistings"   replace />} />
-            <Route path="/farmlistingspage/:farmname" element={<Navigate to="/farmlistings/:farmname" replace />} />
+            <Route path="/farmlistingspage"        element={<Navigate to="/buyer/farmlistings"   replace />} />
+            <Route path="/farmlistingspage/:farmname" element={<Navigate to="/buyer/farmlistings/:farmname" replace />} />
 
             {/* Fallback */}
             <Route path="/" element={<Navigate to="/login" />} />
