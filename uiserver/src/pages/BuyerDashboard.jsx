@@ -244,11 +244,23 @@ function BuyerDashboard() {
           </div>
 
           <div>
-            <h1 style={styles.bannerName}>
-              {user?.firstName} {user?.lastName}
-            </h1>
-            <p style={styles.bannerEmail}>{user?.email}</p>
-            <span style={styles.roleBadge}>BUYER</span>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+              <h1 style={styles.bannerName}>
+                {user?.firstName} {user?.lastName}
+              </h1>
+              <span style={styles.roleBadge}>BUYER</span>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "4px", marginTop: "4px" }}>
+              <p style={styles.bannerEmail}>{user?.email}</p>
+              <p style={styles.bannerEmail}>
+                {user?.phoneNumber || "—"}
+              </p>
+              {(user?.zipCode) && (
+                <p style={styles.bannerEmail}>
+                  📍 {[user.city, user.state, user.country].filter(Boolean).join(", ") || user.zipCode}
+                </p>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -604,7 +616,35 @@ const styles = {
   bannerEmail: {
     fontSize: "14px",
     color: "rgba(255,255,255,0.75)",
-    margin: "0 0 10px 0",
+    margin: 0,
+  },
+  bannerPhoneInput: {
+    background: "rgba(255,255,255,0.15)",
+    border: "1px solid rgba(255,255,255,0.5)",
+    borderRadius: "4px",
+    color: "white",
+    fontSize: "14px",
+    padding: "2px 8px",
+    outline: "none",
+    width: "160px",
+  },
+  bannerPhoneSaveBtn: {
+    background: "rgba(255,255,255,0.2)",
+    border: "1px solid rgba(255,255,255,0.5)",
+    borderRadius: "4px",
+    color: "white",
+    cursor: "pointer",
+    fontSize: "13px",
+    padding: "2px 6px",
+  },
+  bannerPhoneCancelBtn: {
+    background: "none",
+    border: "1px solid rgba(255,255,255,0.3)",
+    borderRadius: "4px",
+    color: "rgba(255,255,255,0.7)",
+    cursor: "pointer",
+    fontSize: "13px",
+    padding: "2px 6px",
   },
   roleBadge: {
     display: "inline-block",
