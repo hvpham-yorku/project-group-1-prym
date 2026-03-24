@@ -134,11 +134,6 @@ function BuyerDashboard() {
     }
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
   // Toggle a cut on/off in edit mode
   const handleCutToggle = (id) => {
     setFormData((prev) => {
@@ -294,38 +289,6 @@ function BuyerDashboard() {
           {/* Left panel: profile fields + buttons */}
           <div style={styles.leftPanel}>
             <div style={styles.grid}>
-              {/* Phone */}
-              <div style={styles.fieldCard}>
-                <p style={styles.fieldLabel}>Phone Number</p>
-                {isEditing ? (
-                  <input
-                    name="phoneNumber"
-                    value={formData.phoneNumber}
-                    onChange={handleChange}
-                    placeholder="e.g. +1 416 555 0000"
-                    style={styles.fieldInput}
-                  />
-                ) : (
-                  <p
-                    style={
-                      user?.phoneNumber ? styles.fieldValue : styles.fieldValueEmpty
-                    }
-                  >
-                    {user?.phoneNumber || "Not set"}
-                  </p>
-                )}
-              </div>
-
-              {/* Location */}
-              <div style={styles.fieldCard}>
-                <p style={styles.fieldLabel}>Location</p>
-                <p style={user?.zipCode ? styles.fieldValue : styles.fieldValueEmpty}>
-                  {user?.zipCode
-                    ? [user.state, user.country, user.zipCode].filter(Boolean).join(", ")
-                    : "Not set"}
-                </p>
-              </div>
-
               {/* Preferred Cuts — cow diagram, full width */}
               <div
                 style={{
