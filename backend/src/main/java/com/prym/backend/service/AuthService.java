@@ -21,16 +21,16 @@ public class AuthService {
 
     public User register(String email, String password, User.Role role, String username, String firstName,
             String lastName, String phoneNumber, String profilePicture, String zipCode) {
-        // Check if email already exists
+        //Check if email already exists
         if (userRepository.existsByEmail(email)) {
             throw new RuntimeException("Email already registered");
         }
-        // Check if username already exists
+        //Check if username already exists
         if (userRepository.existsByUsername(username)) {
             throw new RuntimeException("Username already taken");
         }
 
-        // Validate and process ZIP/postal code
+        //Validate and process ZIP/postal code
         if (zipCode == null || zipCode.trim().isEmpty()) {
             throw new RuntimeException("ZIP/postal code is required");
         }
@@ -40,13 +40,13 @@ public class AuthService {
             throw new RuntimeException("Invalid ZIP/postal code format.");
         }
 
-        // Resolve location via Nominatim
+        //Resolve location via Nominatim
         ZipCodeUtil.LocationResult location = ZipCodeUtil.lookupPostalCode(trimmedZip);
         if (location == null) {
             throw new RuntimeException("Could not resolve ZIP/postal code. Please check and try again.");
         }
 
-        // Create new user with hashed password
+        //Create new user with hashed password
         User user = new User();
         user.setEmail(email);
         user.setPasswordHash(passwordEncoder.encode(password));
@@ -57,7 +57,7 @@ public class AuthService {
         user.setPhoneNumber(phoneNumber);
         user.setProfilePicture(profilePicture);
 
-        // Set location data from Nominatim result
+        //Set location data from Nominatim result
         user.setZipCode(trimmedZip);
         user.setLatitude(location.latitude);
         user.setLongitude(location.longitude);
@@ -73,7 +73,7 @@ public class AuthService {
 
         if (userOptional.isPresent()) {
             User user = userOptional.get();
-            // Check if password matches
+            //Check if password matches
             if (passwordEncoder.matches(password, user.getPasswordHash())) {
                 return Optional.of(user);
             }
@@ -84,7 +84,7 @@ public class AuthService {
 
     public User updateUserInfo(Long userId, String firstName, String lastName, String email, String username,
             String profilePicture, String zipCode) {
-        // find the user
+        //find the user
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
 
         if (firstName != null && !firstName.isBlank()) {
