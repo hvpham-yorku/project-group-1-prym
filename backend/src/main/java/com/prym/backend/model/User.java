@@ -43,17 +43,17 @@ public class User {
     @Column(nullable = false)
     private String phoneNumber;
 
-    // Geographic location fields for farm-to-buyer matching
+    //Geographic location fields for farm-to-buyer matching
     private String zipCode;        // 5-digit US ZIP code (e.g., "10001")
     private Double latitude;       // Decimal degrees (e.g., 40.7589)
     private Double longitude;      // Decimal degrees (e.g., -73.9851)
 
-    private String city;           // Resolved from ZIP via Nominatim (e.g., "New York")
-    private String state;          // Resolved from ZIP via Nominatim (e.g., "New York")
-    private String country;        // Resolved from ZIP via Nominatim (e.g., "United States")
+    private String city;           //Resolved from ZIP via Nominatim (e.g., "New York")
+    private String state;          //Resolved from ZIP via Nominatim (e.g., "New York")
+    private String country;        //Resolved from ZIP via Nominatim (e.g., "United States")
 
     @Column(columnDefinition = "TEXT")
-    private String profilePicture;  // Store as Base64 string
+    private String profilePicture;  //Store as Base64 string
 
     private LocalDateTime createdAt;
 
