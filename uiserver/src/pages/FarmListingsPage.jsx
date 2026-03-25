@@ -21,6 +21,7 @@ function FarmListingsPage() {
 	
 	const listItems = farms.map(farm => {
 		let certs = (farm.certifications || []).map(c => <li key={c.id} style={styles.cert}>{c.name}</li>);
+		//let farmImage = user.getProfilePicture();
 		return (<li key={farm.id}>
 			<Link to={`/buyer/farmlistings/${farm.id}`}>
 				<button style={{...styles.button, borderLeft: '10px solid #2e7d32'}}>

@@ -85,4 +85,12 @@ public class BuyerService {
     	buyer.saveFarm(farm);
     	return buyerRepository.save(buyer);
     }
+    
+    @Transactional
+    public Buyer removeSavedFarm(Long userId, Seller farm){
+    	Buyer buyer = buyerRepository.findByUserId(userId)
+    			.orElseThrow(() -> new RuntimeException("Buyer profile not found"));
+    	buyer.removeSavedFarm(farm);
+    	return buyerRepository.save(buyer);
+    }
 }

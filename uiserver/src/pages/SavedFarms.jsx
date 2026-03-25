@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getSavedFarms } from '../api/farm';
+import { getSavedFarms, removeSavedFarm } from '../api/farm';
 import { useState, useEffect } from 'react';
 
 function savedFarms(){
@@ -18,6 +18,12 @@ function savedFarms(){
 		getSavedFarms().then(setFarms).catch(console.error);
 	}, []);
 	
+	async function handleUnsave(farm){
+		await removeSavedFarm(farm);
+		setFarms((prev) => prev.filter((f) => f != farm));
+	}
+	
+	{/*making the list of farms to display */}
 	const listItems = farms.map(farm => {
 			let certs = (farm.certifications || []).map(c => <li key={c.id} style={styles.cert}>{c.name}</li>);
 			return (<li key={farm.id}>
@@ -35,6 +41,7 @@ function savedFarms(){
 						</div>
 					</button>
 				</Link>
+				<button style={styles.removeButton} onClick={() => handleUnsave(farm)}>Remove</button>
 			</li> );
 		});
 		
@@ -132,6 +139,20 @@ const styles = {
 		border: '1px solid',
 		borderRadius: 10,
 		margin: 10,
+	},
+	removeButton: {
+		display: 'flex',
+		margin: 10,
+		padding: "12px 10px",
+		justifyContent: 'center',
+		alignItems: 'center',
+		backgroundColor: "red",
+		color: "white",
+		border: "none",
+		borderRadius: "6px",
+		fontSize: "15px",
+		fontWeight: "600",
+		width: 100,
 	},
 	colContainer: {
 		display: 'flex',

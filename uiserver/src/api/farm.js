@@ -22,3 +22,11 @@ export async function saveFarm(farm){
 	});
 	return response.json();
 }
+
+export async function removeSavedFarm(farm){
+	const response = await fetch("/api/buyer/all", {
+		method: 'DELETE',
+		credentials: 'include'
+	});
+	return response.json();
+}

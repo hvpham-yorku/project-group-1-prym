@@ -1,10 +1,12 @@
 package com.prym.backend.model;
 
 import jakarta.persistence.*;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.util.List;
+import java.util.ArrayList;
 // Represents buyer-specific data (meat preferences). Personal info like name and phone are stored in User.
 @Entity
 @Table(name = "buyers")
@@ -25,8 +27,8 @@ public class Buyer {
     private String preferredCuts;
     
     @ManyToMany()
-    @JoinTable(name="buyer_id")
-    private List<Seller> savedFarms;
+    @JoinTable(name="saved_farms", joinColumns = @JoinColumn(name = "buyer_id"), inverseJoinColumns = @JoinColumn(name = "seller_id"))
+    private List<Seller> savedFarms = new ArrayList<>();
     
     public void saveFarm(Seller farm) {
     	savedFarms.add(farm);
