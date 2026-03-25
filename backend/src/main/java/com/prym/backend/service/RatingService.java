@@ -80,6 +80,12 @@ public class RatingService {
         rating.setScore(score);
         ratingRepository.save(rating);
 
+        List<Rating> allRatings = ratingRepository.findBySeller(seller);
+        double newAverage = allRatings.stream().mapToInt(Rating::getScore).average().orElse(0.0);
+        seller.setAverageRating(newAverage);
+        seller.setTotalRatings(allRatings.size());
+        sellerRepository.save(seller);
+
         return Map.of("message", "Rating submitted successfully!");
     }
 
@@ -107,5 +113,3 @@ public class RatingService {
         );
     }
 }
-//star ratings on the UI, 
-//findByUserName method does not exist

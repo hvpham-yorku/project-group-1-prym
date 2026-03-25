@@ -30,6 +30,8 @@ public class Seller {
     private String shopAddress;    // Address of the farm
     private String description;    // Description of the farm and its practices
     private String category;       // Category of meat (e.g. Beef, Poultry, Lamb)
+    private double averageRating;   // running average of all ratings
+    private int totalRatings;       // total number of ratings received
 
     // A seller can hold multiple certifications (e.g. Organic + Halal at the same time)
     @OneToMany(mappedBy = "seller", cascade = CascadeType.ALL, orphanRemoval = true)
