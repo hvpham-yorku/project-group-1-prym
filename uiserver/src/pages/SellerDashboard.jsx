@@ -2,9 +2,19 @@ import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { logout } from "../api/auth";
 import { useState, useEffect } from "react";
-import { getSellerProfile, updateSellerProfile } from "../api/seller";
+import { getSellerProfile, updateSellerProfile, getCertifications, setCertifications } from "../api/seller";
 import EditAccountModal from "../components/EditAccountModal";
 import { generateRatingCode } from "../api/ratings";
+
+const ALL_CERTS = [
+  { value: "ORGANIC", label: "Organic" },
+  { value: "HALAL", label: "Halal" },
+  { value: "KOSHER", label: "Kosher" },
+  { value: "GRASS_FED", label: "Grass Fed" },
+  { value: "NON_GMO", label: "Non-GMO" },
+  { value: "ANIMAL_WELFARE_APPROVED", label: "Animal Welfare Approved" },
+  { value: "CONVENTIONAL", label: "Conventional" },
+];
 
 function SellerDashboard() {
   const { user, clearUser, saveUser } = useAuth();
@@ -15,10 +25,11 @@ function SellerDashboard() {
     shopName: "",
     phoneNumber: "",
     shopAddress: "",
-    category: "",
     description: "",
   });
   const [profile, setProfile] = useState(null);
+  const [certList, setCertList] = useState([]);
+  const [selectedCerts, setSelectedCerts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showAccountModal, setShowAccountModal] = useState(false);
@@ -30,13 +41,17 @@ function SellerDashboard() {
       if (!user?.id) return;
       try {
         setLoading(true);
-        const data = await getSellerProfile(user.id);
+        const [data, certs] = await Promise.all([
+          getSellerProfile(user.id),
+          getCertifications(user.id),
+        ]);
         setProfile(data);
+        setCertList(certs);
+        setSelectedCerts(certs.map((c) => c.name));
         setFormData({
           shopName: data.shopName || "",
           phoneNumber: data.phoneNumber || "",
           shopAddress: data.shopAddress || "",
-          category: data.category || "",
           description: data.description || "",
         });
       } catch (err) {
@@ -71,16 +86,19 @@ function SellerDashboard() {
           return;
         }
       }
-      await updateSellerProfile(user.id, { ...formData });
+      await Promise.all([
+        updateSellerProfile(user.id, { ...formData }),
+        setCertifications(user.id, selectedCerts),
+      ]);
       const savedPhone = formData.phoneNumber || profile?.phoneNumber;
       setProfile((prev) => ({
         ...prev,
         shopName: formData.shopName,
         phoneNumber: savedPhone,
         shopAddress: formData.shopAddress,
-        category: formData.category,
         description: formData.description,
       }));
+      setCertList(selectedCerts.map((name) => ({ name })));
       setFormData((prev) => ({ ...prev, phoneNumber: savedPhone }));
       saveUser({ ...user, phoneNumber: savedPhone });
       setIsEditing(false);
@@ -100,11 +118,17 @@ function SellerDashboard() {
       shopName: profile?.shopName || "",
       phoneNumber: profile?.phoneNumber || "",
       shopAddress: profile?.shopAddress || "",
-      category: profile?.category || "",
       description: profile?.description || "",
     });
+    setSelectedCerts(certList.map((c) => c.name));
     setError("");
     setIsEditing(false);
+  };
+
+  const toggleCert = (value) => {
+    setSelectedCerts((prev) =>
+      prev.includes(value) ? prev.filter((c) => c !== value) : [...prev, value]
+    );
   };
 
   const handleGenerateCode = async () => {
@@ -266,30 +290,33 @@ function SellerDashboard() {
             )}
           </div>
 
-          {/* Category */}
-          <div style={styles.fieldCard}>
-            <p style={styles.fieldLabel}>Category</p>
+          {/* Certifications — full width */}
+          <div style={{ ...styles.fieldCard, gridColumn: "1 / -1" }}>
+            <p style={styles.fieldLabel}>Certifications</p>
             {isEditing ? (
-              <select
-                name="category"
-                value={formData.category}
-                onChange={handleChange}
-                style={styles.fieldInput}
-              >
-                <option value="">Select category</option>
-                <option value="HALAL">Halal</option>
-                <option value="KOSHER">Kosher</option>
-                <option value="ORGANIC">Organic</option>
-                <option value="CONVENTIONAL">Conventional</option>
-              </select>
+              <div style={styles.certGrid}>
+                {ALL_CERTS.map((cert) => (
+                  <label key={cert.value} style={styles.certOption}>
+                    <input
+                      type="checkbox"
+                      checked={selectedCerts.includes(cert.value)}
+                      onChange={() => toggleCert(cert.value)}
+                      style={styles.checkbox}
+                    />
+                    {cert.label}
+                  </label>
+                ))}
+              </div>
+            ) : certList.length > 0 ? (
+              <div style={styles.certTagRow}>
+                {certList.map((c) => (
+                  <span key={c.name} style={styles.certTag}>
+                    {ALL_CERTS.find((x) => x.value === c.name)?.label || c.name}
+                  </span>
+                ))}
+              </div>
             ) : (
-              <p
-                style={
-                  profile?.category ? styles.fieldValue : styles.fieldValueEmpty
-                }
-              >
-                {profile?.category || "Not set"}
-              </p>
+              <p style={styles.fieldValueEmpty}>Not set</p>
             )}
           </div>
 
@@ -529,6 +556,41 @@ const styles = {
     alignItems: "center",
     gap: "8px",
     flexShrink: 0,
+  },
+  certGrid: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr 1fr",
+    gap: "10px",
+    marginTop: "4px",
+  },
+  certOption: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    fontSize: "14px",
+    color: "#333",
+    cursor: "pointer",
+  },
+  checkbox: {
+    accentColor: GREEN,
+    width: "15px",
+    height: "15px",
+    cursor: "pointer",
+  },
+  certTagRow: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "8px",
+    marginTop: "4px",
+  },
+  certTag: {
+    backgroundColor: "#eaf3ee",
+    color: GREEN,
+    border: `1px solid ${GREEN}`,
+    borderRadius: "99px",
+    padding: "3px 12px",
+    fontSize: "13px",
+    fontWeight: "600",
   },
   modalOverlay: {
     position: "fixed",
