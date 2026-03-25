@@ -177,6 +177,10 @@ function SellerDashboard() {
             <p style={styles.bannerEmail}>{user?.email}</p>
             <span style={styles.roleBadge}>SELLER</span>
           </div>
+
+          <button style={styles.logoutBtn} onClick={handleLogout}>
+            Logout
+          </button>
         </div>
       </div>
 
@@ -332,9 +336,6 @@ function SellerDashboard() {
             </>
           ) : (
             <>
-              <button style={styles.secondaryButton} onClick={handleLogout}>
-                Logout
-              </button>
               <button
                 style={styles.secondaryButton}
                 onClick={handleGenerateCode}
@@ -427,6 +428,17 @@ const styles = {
     fontSize: "11px",
     fontWeight: "700",
     letterSpacing: "0.08em",
+  },
+  logoutBtn: {
+    marginLeft: "auto",
+    background: "none",
+    border: "2px solid rgba(255,255,255,0.6)",
+    borderRadius: "6px",
+    color: "white",
+    fontSize: "14px",
+    fontWeight: "600",
+    padding: "6px 16px",
+    cursor: "pointer",
   },
   content: {
     maxWidth: "900px",
