@@ -1,38 +1,37 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { updateSellerProfile, getSellerProfile } from "../api/seller";
+import { updateSellerProfile, getSellerProfile, getCertifications, setCertifications } from "../api/seller";
+
+const ALL_CERTS = [
+  { value: "ORGANIC", label: "Organic" },
+  { value: "HALAL", label: "Halal" },
+  { value: "KOSHER", label: "Kosher" },
+  { value: "GRASS_FED", label: "Grass Fed" },
+  { value: "NON_GMO", label: "Non-GMO" },
+  { value: "ANIMAL_WELFARE_APPROVED", label: "Animal Welfare Approved" },
+  { value: "CONVENTIONAL", label: "Conventional" },
+];
 
 function SellerProfileSetup() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const [formData, setFormData] = useState({
-    shopName: "",
-    shopAddress: "",
-    category: "",
-    description: "",
-  });
-
+  const [description, setDescription] = useState("");
+  const [selectedCerts, setSelectedCerts] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         setLoading(true);
-        const data = await getSellerProfile(user.id);
-        setFormData({
-          shopName: data.shopName || "",
-          shopAddress: data.shopAddress || "",
-          category: data.category || "",
-          description: data.description || "",
-        });
+        const [profile, certs] = await Promise.all([
+          getSellerProfile(user.id),
+          getCertifications(user.id),
+        ]);
+        setDescription(profile.description || "");
+        setSelectedCerts(certs.map((c) => c.name));
       } catch (err) {
         setError("Failed to load profile.");
         console.error(err);
@@ -43,17 +42,25 @@ function SellerProfileSetup() {
     fetchProfile();
   }, [user?.id]);
 
+  const toggleCert = (value) => {
+    setSelectedCerts((prev) =>
+      prev.includes(value) ? prev.filter((c) => c !== value) : [...prev, value]
+    );
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
-
     try {
-      await updateSellerProfile(user?.id, formData);
+      await Promise.all([
+        updateSellerProfile(user.id, { description }),
+        setCertifications(user.id, selectedCerts),
+      ]);
       navigate("/seller/dashboard");
     } catch (err) {
       console.error("Setup Error:", err);
-      setError("Failed to create profile. Check if the server is running.");
+      setError("Failed to save profile. Check if the server is running.");
     } finally {
       setLoading(false);
     }
@@ -61,75 +68,51 @@ function SellerProfileSetup() {
 
   return (
     <div style={styles.container}>
-        <div style={styles.card}>
-            <h1 style={styles.title}>Complete Your Profile</h1>
-            <p style={styles.subtitle}>Tell buyers about your farm</p>
+      <div style={styles.card}>
+        <h1 style={styles.title}>Complete Your Profile</h1>
+        <p style={styles.subtitle}>Tell buyers about your farm</p>
 
-            {error && <div style={styles.error}>{error}</div>}
+        {error && <div style={styles.error}>{error}</div>}
 
-            <form onSubmit={handleSubmit} style={styles.form}>
+        <form onSubmit={handleSubmit} style={styles.form}>
+          <div style={styles.inputGroup}>
+            <label style={styles.label}>Certifications</label>
+            <p style={styles.hint}>Select all that apply to your farm</p>
+            <div style={styles.certGrid}>
+              {ALL_CERTS.map((cert) => (
+                <label key={cert.value} style={styles.certOption}>
+                  <input
+                    type="checkbox"
+                    checked={selectedCerts.includes(cert.value)}
+                    onChange={() => toggleCert(cert.value)}
+                    disabled={loading}
+                    style={styles.checkbox}
+                  />
+                  {cert.label}
+                </label>
+              ))}
+            </div>
+          </div>
 
-                <div style={styles.inputGroup}>
-                    <label style={styles.label}>Shop Name</label>
-                    <input
-                        type="text"
-                        name="shopName"
-                        value={formData.shopName}
-                        style={styles.readOnly}
-                        readOnly
-                    />
-                </div>
+          <div style={styles.inputGroup}>
+            <label style={styles.label}>Farm Description</label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Tell buyers about your farm, cattle, and practices..."
+              style={styles.textarea}
+              rows={4}
+              disabled={loading}
+            />
+          </div>
 
-                <div style={styles.inputGroup}>
-                    <label style={styles.label}>Shop Address</label>
-                    <input
-                        type="text"
-                        name="shopAddress"
-                        value={formData.shopAddress}
-                        onChange={handleChange}
-                        placeholder="e.g., 123 Farm Road, Ontario"
-                        style={styles.input}
-                        required
-                    />
-                </div>
-
-                <div style={styles.inputGroup}>
-                    <label style={styles.label}>Category</label>
-                    <select
-                        name="category"
-                        value={formData.category}
-                        onChange={handleChange}
-                        style={styles.input}
-                        required
-                    >
-                        <option value="">Select a category</option>
-                        <option value="HALAL">Halal</option>
-                        <option value="KOSHER">Kosher</option>
-                        <option value="ORGANIC">Organic</option>
-                        <option value="CONVENTIONAL">Conventional</option>
-                    </select>
-                </div>
-
-                <div style={styles.inputGroup}>
-                    <label style={styles.label}>Farm Description</label>
-                    <textarea
-                        name="description"
-                        value={formData.description}
-                        onChange={handleChange}
-                        placeholder="Tell buyers about your farm, cattle, and practices..."
-                        style={styles.textarea}
-                        rows={4}
-                    />
-                </div>
-
-                <button type="submit" style={styles.button} disabled={loading}>
-                    {loading ? "Saving..." : "Complete Profile"}
-                </button>
-
-            </form>
-        </div>
+          <button type="submit" style={styles.button} disabled={loading}>
+            {loading ? "Saving..." : "Complete Profile"}
+          </button>
+        </form>
+      </div>
     </div>
-);
+  );
 }
 
 const styles = {
@@ -147,7 +130,7 @@ const styles = {
     borderRadius: "8px",
     boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
     width: "100%",
-    maxWidth: "400px",
+    maxWidth: "480px",
     border: "2px solid #5c4033",
   },
   title: {
@@ -159,28 +142,56 @@ const styles = {
   subtitle: {
     color: "#4a7c59",
     textAlign: "center",
-    marginBottom: "24px",
+    marginBottom: "28px",
     fontWeight: "500",
   },
   form: {
     display: "flex",
     flexDirection: "column",
-    gap: "16px",
+    gap: "24px",
   },
   inputGroup: {
     display: "flex",
     flexDirection: "column",
-    gap: "4px",
+    gap: "8px",
   },
   label: {
     color: "#333",
-    fontWeight: "500",
+    fontWeight: "600",
+    fontSize: "15px",
   },
-  input: {
+  hint: {
+    color: "#888",
+    fontSize: "13px",
+    margin: 0,
+  },
+  certGrid: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: "10px",
+    marginTop: "4px",
+  },
+  certOption: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    fontSize: "14px",
+    color: "#333",
+    cursor: "pointer",
+  },
+  checkbox: {
+    accentColor: "#4a7c59",
+    width: "16px",
+    height: "16px",
+    cursor: "pointer",
+  },
+  textarea: {
     padding: "12px",
     borderRadius: "4px",
     border: "1px solid #ccc",
-    fontSize: "16px",
+    fontSize: "15px",
+    resize: "vertical",
+    fontFamily: "inherit",
   },
   button: {
     padding: "12px",
@@ -190,31 +201,15 @@ const styles = {
     borderRadius: "4px",
     fontSize: "16px",
     cursor: "pointer",
-    marginTop: "8px",
+    marginTop: "4px",
   },
   error: {
     backgroundColor: "#fee",
     color: "#c00",
     padding: "12px",
     borderRadius: "4px",
-    marginBottom: "16px",
+    marginBottom: "8px",
     textAlign: "center",
-  },
-  textarea: {
-    padding: "12px",
-    borderRadius: "4px",
-    border: "1px solid #ccc",
-    fontSize: "16px",
-    resize: "vertical",
-    fontFamily: "inherit",
-  },
-  readOnly: {
-    padding: "12px",
-    borderRadius: "4px",
-    border: "1px solid #ccc",
-    fontSize: "16px",
-    backgroundColor: "#f0f0f0",
-    color: "#888",
   },
 };
 

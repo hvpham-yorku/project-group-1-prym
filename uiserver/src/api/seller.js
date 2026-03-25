@@ -39,6 +39,32 @@ export async function getSellerProfile(userId) {
     return data;
 }
 
+// Fetches certifications for a seller
+// Calls GET /api/seller/certifications/{userId}
+export async function getCertifications(userId) {
+    const response = await fetch(`${API_URL}/certifications/${userId}`, {
+        method: 'GET',
+        credentials: 'include'
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Failed to get certifications');
+    return data;
+}
+
+// Replaces all certifications for a seller with the given list
+// Calls PUT /api/seller/certifications/{userId}
+export async function setCertifications(userId, certNames) {
+    const response = await fetch(`${API_URL}/certifications/${userId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(certNames)
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Failed to set certifications');
+    return data;
+}
+
 // Updates an existing seller profile
 // Calls PATCH /api/seller/profile/{userId}
 export async function updateSellerProfile(userId, profileData) {

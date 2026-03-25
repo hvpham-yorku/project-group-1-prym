@@ -65,6 +65,25 @@ public class CertificationController {
         }
     }
 
+    @PutMapping("/{userId}")
+    public ResponseEntity<?> setCertifications(
+            @PathVariable Long userId,
+            @RequestBody List<String> certNames,
+            @CookieValue(name = "SESSION_ID", required = false) String sessionId) {
+
+        Optional<User> sessionUser = sessionService.validateSession(sessionId);
+        if (sessionUser.isEmpty() || !sessionUser.get().getId().equals(userId)) {
+            return ResponseEntity.status(403).body(Map.of("error", "Access denied"));
+        }
+
+        try {
+            certificationService.setCertifications(userId, certNames);
+            return ResponseEntity.ok(Map.of("message", "Certifications updated"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
     @DeleteMapping("/{userId}/{certId}")
     public ResponseEntity<?> deleteCertification(
             @PathVariable Long userId,
