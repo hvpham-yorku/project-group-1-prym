@@ -62,10 +62,10 @@ public class SellerService {
         Seller seller = sellerRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Seller profile not found"));
 
-        seller.setShopName(shopName);
-        seller.setShopAddress(shopAddress);
-        seller.setDescription(description);
-        seller.setCategory(category);
+        if (shopName != null) seller.setShopName(shopName);
+        if (shopAddress != null) seller.setShopAddress(shopAddress);
+        if (description != null) seller.setDescription(description);
+        if (category != null) seller.setCategory(category);
 
         if (phoneNumber != null && !phoneNumber.isBlank()) {
             User user = seller.getUser();
