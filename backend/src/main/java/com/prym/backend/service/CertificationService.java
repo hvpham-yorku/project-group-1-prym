@@ -7,7 +7,9 @@ import com.prym.backend.repository.SellerRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,7 +55,14 @@ public class CertificationService {
         for (String name : certNames) {
             Certification cert = new Certification();
             cert.setSeller(seller);
-            cert.setName(Certification.CertificationType.valueOf(name));
+            try {
+                cert.setName(Certification.CertificationType.valueOf(name));
+            } catch (IllegalArgumentException e) {
+                String valid = Arrays.stream(Certification.CertificationType.values())
+                        .map(Enum::name)
+                        .collect(Collectors.joining(", "));
+                throw new RuntimeException("Invalid certification: " + name + ". Valid options: " + valid);
+            }
             certificationRepository.save(cert);
         }
     }
