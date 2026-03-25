@@ -185,6 +185,10 @@ function SellerDashboard() {
               )}
             </div>
           </div>
+
+          <button style={styles.logoutBtn} onClick={handleLogout}>
+            Logout
+          </button>
         </div>
       </div>
 
@@ -302,9 +306,6 @@ function SellerDashboard() {
                 </>
               ) : (
                 <>
-                  <button style={styles.secondaryButton} onClick={handleLogout}>
-                    Logout
-                  </button>
                   <button style={styles.primaryButton} onClick={() => setIsEditing(true)}>
                     Edit Profile
                   </button>
@@ -540,6 +541,17 @@ const styles = {
     color: "#666",
     margin: "0 0 16px 0",
     lineHeight: 1.5,
+  },
+  logoutBtn: {
+    marginLeft: "auto",
+    background: "none",
+    border: "2px solid rgba(255,255,255,0.6)",
+    borderRadius: "6px",
+    color: "white",
+    fontSize: "14px",
+    fontWeight: "600",
+    padding: "6px 16px",
+    cursor: "pointer",
   },
   buttonRow: {
     display: "flex",
