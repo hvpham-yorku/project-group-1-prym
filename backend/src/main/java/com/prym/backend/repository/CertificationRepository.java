@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface CertificationRepository extends JpaRepository<Certification, Long> {
     List<Certification> findBySellerId(Long sellerId);
+    void deleteBySellerId(Long sellerId);
 }

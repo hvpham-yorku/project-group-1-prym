@@ -7,7 +7,11 @@ import com.prym.backend.repository.SellerRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CertificationService {
@@ -41,5 +45,25 @@ public class CertificationService {
 
     public void deleteCertification(Long certId) {
         certificationRepository.deleteById(certId);
+    }
+
+    @Transactional
+    public void setCertifications(Long userId, List<String> certNames) {
+        Seller seller = sellerRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("Seller not found"));
+        certificationRepository.deleteBySellerId(seller.getId());
+        for (String name : certNames) {
+            Certification cert = new Certification();
+            cert.setSeller(seller);
+            try {
+                cert.setName(Certification.CertificationType.valueOf(name));
+            } catch (IllegalArgumentException e) {
+                String valid = Arrays.stream(Certification.CertificationType.values())
+                        .map(Enum::name)
+                        .collect(Collectors.joining(", "));
+                throw new RuntimeException("Invalid certification: " + name + ". Valid options: " + valid);
+            }
+            certificationRepository.save(cert);
+        }
     }
 }
