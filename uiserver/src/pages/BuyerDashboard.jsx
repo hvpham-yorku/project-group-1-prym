@@ -258,9 +258,21 @@ function BuyerDashboard() {
             </div>
           </div>
 
-          <button style={styles.logoutBtn} onClick={handleLogout}>
-            Logout
-          </button>
+          <div style={{ marginLeft: "auto", display: "flex", gap: "10px" }}>
+            <button
+              style={{
+                ...styles.bannerBtn,
+                ...(isEditing ? styles.joinButtonDisabled : {}),
+              }}
+              onClick={() => setIsEditing(true)}
+              disabled={isEditing}
+            >
+              Edit Profile
+            </button>
+            <button style={styles.bannerBtn} onClick={handleLogout}>
+              Logout
+            </button>
+          </div>
         </div>
       </div>
 
@@ -354,15 +366,7 @@ function BuyerDashboard() {
                   </button>
                 </>
               ) : (
-                <>
-                  <Link to={`/buyer/farmlistings`}><button style={styles.primaryButton}>View Farm Listings</button></Link>
-                  <button
-                    style={styles.primaryButton}
-                    onClick={() => setIsEditing(true)}
-                  >
-                    Edit Profile
-                  </button>
-                </>
+                <Link to={`/buyer/farmlistings`}><button style={styles.primaryButton}>View Farm Listings</button></Link>
               )}
             </div>
           </div>
@@ -557,8 +561,7 @@ const styles = {
     marginRight: "8px",
     flexShrink: 0,
   },
-  logoutBtn: {
-    marginLeft: "auto",
+  bannerBtn: {
     background: "none",
     border: "2px solid rgba(255,255,255,0.6)",
     borderRadius: "6px",
