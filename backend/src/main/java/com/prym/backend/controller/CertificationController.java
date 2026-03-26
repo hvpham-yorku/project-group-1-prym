@@ -35,6 +35,10 @@ public class CertificationController {
             return ResponseEntity.status(403).body(Map.of("error", "Access denied"));
         }
 
+        if (sessionUser.get().getRole() != User.Role.SELLER) {
+            return ResponseEntity.status(403).body(Map.of("error", "Only sellers can update certifications"));
+        }
+
         try {
             String name = request.get("name");
             String issuingBody = request.get("issuingBody");
@@ -76,6 +80,10 @@ public class CertificationController {
             return ResponseEntity.status(403).body(Map.of("error", "Access denied"));
         }
 
+        if(sessionUser.get().getRole() != User.Role.SELLER){
+            return ResponseEntity.status(403).body(Map.of("error", "Only sellers can update certifications"));
+        }
+
         try {
             certificationService.setCertifications(userId, certNames);
             return ResponseEntity.ok(Map.of("message", "Certifications updated"));
@@ -95,8 +103,12 @@ public class CertificationController {
             return ResponseEntity.status(403).body(Map.of("error", "Access denied"));
         }
 
+        if (sessionUser.get().getRole() != User.Role.SELLER) {
+            return ResponseEntity.status(403).body(Map.of("error", "Only sellers can update certifications"));
+        }
+
         try {
-            certificationService.deleteCertification(certId);
+            certificationService.deleteCertification(userId, certId);
             return ResponseEntity.ok(Map.of("message", "Certification deleted"));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));

@@ -5,16 +5,7 @@ import { useState, useEffect } from "react";
 import { getSellerProfile, updateSellerProfile, getCertifications, setCertifications } from "../api/seller";
 import EditAccountModal from "../components/EditAccountModal";
 import { generateRatingCode } from "../api/ratings";
-
-const ALL_CERTS = [
-  { value: "ORGANIC", label: "Organic" },
-  { value: "HALAL", label: "Halal" },
-  { value: "KOSHER", label: "Kosher" },
-  { value: "GRASS_FED", label: "Grass Fed" },
-  { value: "NON_GMO", label: "Non-GMO" },
-  { value: "ANIMAL_WELFARE_APPROVED", label: "Animal Welfare Approved" },
-  { value: "CONVENTIONAL", label: "Conventional" },
-];
+import { ALL_CERTS } from "../constants/certifications";
 
 function SellerDashboard() {
   const { user, clearUser, saveUser } = useAuth();
@@ -80,12 +71,29 @@ function SellerDashboard() {
         updateSellerProfile(user.id, { ...formData }),
         setCertifications(user.id, selectedCerts),
       ]);
-      setProfile((prev) => ({ ...prev, ...formData }));
-      setCertList(selectedCerts.map((name) => ({ name })));
+      setProfile((prev) => ({...prev, ...formData}));
+      setCertList(selectedCerts.map((name)=> ({name})));
       setIsEditing(false);
     } catch (err) {
       console.error("Save error:", err);
       setError("Failed to save profile.");
+      //re-fetch to restore UI to actual server state
+      try{
+        const[data, certs] = await Promise.all([
+          getSellerProfile(user.id),
+          getCertifications(user.id),
+        ]);
+        setProfile(data);
+        setCertList(certs);
+        setSelectedCerts(certs.map((c) => c.name));
+        setFormData({
+          shopName: data.shopName || "",
+          shopAddress: data.shopAddress || "",
+          description: data.description || "",
+        });
+      } catch {
+        //ignore the re-fetch failure
+      }
     }
   };
 
@@ -361,7 +369,7 @@ const styles = {
     padding: "40px 0",
   },
   bannerInner: {
-    maxWidth: "1600px",
+    maxWidth: "1200px",
     margin: "0 auto",
     padding: "0 48px",
     display: "flex",
@@ -425,7 +433,7 @@ const styles = {
     letterSpacing: "0.08em",
   },
   content: {
-    maxWidth: "1600px",
+    maxWidth: "1200px",
     margin: "0 auto",
     padding: "40px 48px",
   },

@@ -164,6 +164,7 @@ public class GroupServiceTest {
     public void leaveGroup_DeletesGroupWhenEmpty() {
         BuyerGroupMember membership = makeMember(testGroup, testBuyer, null);
         when(buyerRepository.findByUserId(1L)).thenReturn(Optional.of(testBuyer));
+        when(groupRepository.findById(100L)).thenReturn(Optional.of(testGroup));
         when(memberRepository.findByGroupIdAndBuyerId(100L, 10L)).thenReturn(Optional.of(membership));
         when(memberRepository.findByGroupId(100L)).thenReturn(Collections.emptyList()); // no members left
 
@@ -186,6 +187,7 @@ public class GroupServiceTest {
 
         BuyerGroupMember membership = makeMember(testGroup, testBuyer, null);
         when(buyerRepository.findByUserId(1L)).thenReturn(Optional.of(testBuyer));
+        when(groupRepository.findById(100L)).thenReturn(Optional.of(testGroup));
         when(memberRepository.findByGroupIdAndBuyerId(100L, 10L)).thenReturn(Optional.of(membership));
         when(memberRepository.findByGroupId(100L)).thenReturn(List.of(otherMember)); // one member still remains
 
@@ -199,6 +201,7 @@ public class GroupServiceTest {
     @Test
     public void leaveGroup_NotMember() {
         when(buyerRepository.findByUserId(1L)).thenReturn(Optional.of(testBuyer));
+        when(groupRepository.findById(100L)).thenReturn(Optional.of(testGroup));
         when(memberRepository.findByGroupIdAndBuyerId(100L, 10L)).thenReturn(Optional.empty());
 
         assertThrows(RuntimeException.class,

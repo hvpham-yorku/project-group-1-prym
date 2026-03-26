@@ -43,7 +43,14 @@ public class CertificationService {
         return certificationRepository.findBySellerId(seller.getId());
     }
 
-    public void deleteCertification(Long certId) {
+    public void deleteCertification(Long userId, Long certId) {
+        Seller seller = sellerRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("Seller not found"));
+        Certification cert = certificationRepository.findById(certId)
+                .orElseThrow(() -> new RuntimeException("Certification not found"));
+        if (!cert.getSeller().getId().equals(seller.getId())) {
+            throw new RuntimeException("Certification does not belong to this seller");
+        }
         certificationRepository.deleteById(certId);
     }
 
