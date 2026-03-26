@@ -80,10 +80,10 @@ public class RatingService {
         rating.setScore(score);
         ratingRepository.save(rating);
 
-        List<Rating> allRatings = ratingRepository.findBySeller(seller);
-        double newAverage = allRatings.stream().mapToInt(Rating::getScore).average().orElse(0.0);
+        int newTotal = seller.getTotalRatings() + 1;
+        double newAverage = ((seller.getAverageRating() * seller.getTotalRatings()) + score) / newTotal;
         seller.setAverageRating(newAverage);
-        seller.setTotalRatings(allRatings.size());
+        seller.setTotalRatings(newTotal);
         sellerRepository.save(seller);
 
         return Map.of("message", "Rating submitted successfully!");
