@@ -76,6 +76,10 @@ public class CertificationController {
             return ResponseEntity.status(403).body(Map.of("error", "Access denied"));
         }
 
+        if(sessionUser.get().getRole() != User.Role.SELLER){
+            return ResponseEntity.status(403).body(Map.of("error", "Only sellers can update certifications"));
+        }
+
         try {
             certificationService.setCertifications(userId, certNames);
             return ResponseEntity.ok(Map.of("message", "Certifications updated"));
@@ -93,6 +97,10 @@ public class CertificationController {
         Optional<User> sessionUser = sessionService.validateSession(sessionId);
         if (sessionUser.isEmpty() || !sessionUser.get().getId().equals(userId)) {
             return ResponseEntity.status(403).body(Map.of("error", "Access denied"));
+        }
+
+        if(sessionUser.get().getRole() != User.Role.SELLER){
+            return ResponseEntity.status(403).body(Map.of("error", "Only sellers can update certifications"));
         }
 
         try {
