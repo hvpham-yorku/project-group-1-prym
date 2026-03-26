@@ -260,8 +260,12 @@ function BuyerDashboard() {
 
           <div style={{ marginLeft: "auto", display: "flex", gap: "10px" }}>
             <button
-              style={styles.editProfileBannerBtn}
+              style={{
+                ...styles.logoutBtn,
+                ...(isEditing ? { opacity: 0.4, cursor: "not-allowed" } : {}),
+              }}
               onClick={() => setIsEditing(true)}
+              disabled={isEditing}
             >
               Edit Profile
             </button>
@@ -946,16 +950,6 @@ const styles = {
   joinButtonDisabled: {
     opacity: 0.6,
     cursor: "not-allowed",
-  },
-  editProfileBannerBtn: {
-    background: "none",
-    border: "2px solid rgba(255,255,255,0.6)",
-    borderRadius: "6px",
-    color: "white",
-    fontSize: "14px",
-    fontWeight: "600",
-    padding: "6px 16px",
-    cursor: "pointer",
   },
   editAccountBtn: {
     background: "rgba(255,255,255,0.15)",
