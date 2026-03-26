@@ -141,8 +141,33 @@ public class CertificationServiceTest {
     // Test 8: deleteCertification_Success
     @Test
     public void deleteCertification_Success() {
-        certificationService.deleteCertification(5L);
+        Certification cert = new Certification();
+        cert.setId(5L);
+        cert.setSeller(testSeller);
+
+        when(sellerRepository.findByUserId(1L)).thenReturn(Optional.of(testSeller));
+        when(certificationRepository.findById(5L)).thenReturn(Optional.of(cert));
+
+        certificationService.deleteCertification(1L, 5L);
 
         verify(certificationRepository).deleteById(5L);
+    }
+
+    // Test 9: deleteCertification_WrongSeller_Throws
+    @Test
+    public void deleteCertification_WrongSeller_Throws() {
+        Seller otherSeller = new Seller();
+        otherSeller.setId(99L);
+
+        Certification cert = new Certification();
+        cert.setId(5L);
+        cert.setSeller(otherSeller);
+
+        when(sellerRepository.findByUserId(1L)).thenReturn(Optional.of(testSeller));
+        when(certificationRepository.findById(5L)).thenReturn(Optional.of(cert));
+
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> certificationService.deleteCertification(1L, 5L));
+        assertEquals("Certification does not belong to this seller", ex.getMessage());
     }
 }

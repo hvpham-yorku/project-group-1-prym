@@ -69,7 +69,11 @@ public class RatingService {
         RatingCode ratingCode = ratingCodeRepository.findByCode(normalizedCode)
                 .orElseThrow(() -> new RuntimeException("Code not found after claim."));
 
-        Seller seller = ratingCode.getSeller();
+        // Re-fetch seller with a pessimistic write lock so concurrent submissions
+        // can't produce a lost-update on averageRating / totalRatings.
+        Seller seller = sellerRepository.findByIdForUpdate(ratingCode.getSeller().getId())
+                .orElseThrow(() -> new RuntimeException("Seller not found"));
+
         if(ratingRepository.existsBySellerAndBuyer(seller, buyer)){
             throw new RuntimeException("You have already rated this seller.");
         }
@@ -95,20 +99,16 @@ public class RatingService {
         Seller seller = sellerRepository.findByUserUsername(sellerUsername)
                 .orElseThrow(() -> new RuntimeException("Seller not found"));
         List<Rating> ratings = ratingRepository.findBySeller(seller);
-        double average = ratings.stream().mapToInt(Rating::getScore)
-            .average()
-            .orElse(0.0);
-        
-        List<Map<String, Object>> ratingDTOs = ratings.stream().map(r ->{
+        List<Map<String, Object>> ratingDTOs = ratings.stream().map(r -> {
             Map<String, Object> dto = new LinkedHashMap<>();
             dto.put("score", r.getScore());
             dto.put("createdAt", r.getCreatedAt().toString());
             return dto;
         }).toList();
-    return Map.of(
+        return Map.of(
             "shopName", seller.getShopName(),
-            "averageRating", average,
-            "totalRatings", ratings.size(),
+            "averageRating", seller.getAverageRating(),
+            "totalRatings", seller.getTotalRatings(),
             "ratings", ratingDTOs
         );
     }

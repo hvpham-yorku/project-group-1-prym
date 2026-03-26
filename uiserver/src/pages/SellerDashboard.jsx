@@ -67,8 +67,10 @@ function SellerDashboard() {
   const handleSave = async () => {
     setError("");
     try {
-      await updateSellerProfile(user.id, {...formData});
-      await setCertifications(user.id, selectedCerts);
+      await Promise.all([
+        updateSellerProfile(user.id, { ...formData }),
+        setCertifications(user.id, selectedCerts),
+      ]);
       setProfile((prev) => ({...prev, ...formData}));
       setCertList(selectedCerts.map((name)=> ({name})));
       setIsEditing(false);

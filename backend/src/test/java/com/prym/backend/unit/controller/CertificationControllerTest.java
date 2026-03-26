@@ -144,7 +144,7 @@ class CertificationControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Certification deleted"));
 
-        verify(certificationService).deleteCertification(5L);
+        verify(certificationService).deleteCertification(1L, 5L);
     }
 
     // Test 8: deleteCertification_InvalidSession — no session returns 403
