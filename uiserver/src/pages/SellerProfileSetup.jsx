@@ -44,10 +44,8 @@ function SellerProfileSetup() {
     setError("");
     setLoading(true);
     try {
-      await Promise.all([
-        updateSellerProfile(user.id, { description }),
-        setCertifications(user.id, selectedCerts),
-      ]);
+      await updateSellerProfile(user.id, { description });
+      await setCertifications(user.id, selectedCerts);
       navigate("/seller/dashboard");
     } catch (err) {
       console.error("Setup Error:", err);
