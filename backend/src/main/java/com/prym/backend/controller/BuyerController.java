@@ -121,7 +121,7 @@ public class BuyerController {
 		}
 	}
 	
-	@DeleteMapping("/all/{farm}")
+	@DeleteMapping("/all")
 	public ResponseEntity<?> removeSavedFarm(@RequestBody Seller farm){
 		try {
 			Long userId = getLoggedInUserId();

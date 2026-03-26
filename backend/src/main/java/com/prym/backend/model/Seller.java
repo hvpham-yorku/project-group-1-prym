@@ -30,9 +30,6 @@ public class Seller {
     private String shopAddress;    // Address of the farm
     private String description;    // Description of the farm and its practices
     private String category;       // Category of meat (e.g. Beef, Poultry, Lamb)
-    private double averageRating = 0.0;   // running average of all ratings
-    private int totalRatings = 0;       // total number of ratings received
-
     @Column(nullable = false)
     private double averageRating = 0.0;
 

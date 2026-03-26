@@ -26,7 +26,10 @@ export async function saveFarm(farm){
 export async function removeSavedFarm(farm){
 	const response = await fetch("/api/buyer/all", {
 		method: 'DELETE',
-		credentials: 'include'
+		headers: { 'Content-Type': 'application/json' },
+		credentials: 'include',
+		body: JSON.stringify(farm)
 	});
+	if (!response.ok) throw new Error(`Failed to remove farm: ${response.status}`);
 	return response.json();
 }
