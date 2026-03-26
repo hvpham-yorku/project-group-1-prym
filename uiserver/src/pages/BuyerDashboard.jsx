@@ -258,9 +258,17 @@ function BuyerDashboard() {
             </div>
           </div>
 
-          <button style={styles.logoutBtn} onClick={handleLogout}>
-            Logout
-          </button>
+          <div style={{ marginLeft: "auto", display: "flex", gap: "10px" }}>
+            <button
+              style={styles.editProfileBannerBtn}
+              onClick={() => setIsEditing(true)}
+            >
+              Edit Profile
+            </button>
+            <button style={styles.logoutBtn} onClick={handleLogout}>
+              Logout
+            </button>
+          </div>
         </div>
       </div>
 
@@ -354,15 +362,7 @@ function BuyerDashboard() {
                   </button>
                 </>
               ) : (
-                <>
-                  <Link to={`/buyer/farmlistings`}><button style={styles.primaryButton}>View Farm Listings</button></Link>
-                  <button
-                    style={styles.primaryButton}
-                    onClick={() => setIsEditing(true)}
-                  >
-                    Edit Profile
-                  </button>
-                </>
+                <Link to={`/buyer/farmlistings`}><button style={styles.primaryButton}>View Farm Listings</button></Link>
               )}
             </div>
           </div>
@@ -558,7 +558,6 @@ const styles = {
     flexShrink: 0,
   },
   logoutBtn: {
-    marginLeft: "auto",
     background: "none",
     border: "2px solid rgba(255,255,255,0.6)",
     borderRadius: "6px",
@@ -947,6 +946,16 @@ const styles = {
   joinButtonDisabled: {
     opacity: 0.6,
     cursor: "not-allowed",
+  },
+  editProfileBannerBtn: {
+    background: "none",
+    border: "2px solid rgba(255,255,255,0.6)",
+    borderRadius: "6px",
+    color: "white",
+    fontSize: "14px",
+    fontWeight: "600",
+    padding: "6px 16px",
+    cursor: "pointer",
   },
   editAccountBtn: {
     background: "rgba(255,255,255,0.15)",
