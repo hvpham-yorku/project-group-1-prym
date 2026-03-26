@@ -60,6 +60,10 @@ function FarmListing(){
 			<div style={{width: '100%', height: '300'}} alt="farm image"/>
 
 			<h1 style={styles.header}>{farm.shopName}</h1>
+			<div style={styles.ratingRow}>
+				<span style={styles.stars}>{'★'.repeat(Math.round(farm.averageRating))}{'☆'.repeat(5 - Math.round(farm.averageRating))}</span>
+				<span style={styles.ratingText}>{farm.averageRating.toFixed(1)} ({farm.totalRatings} ratings)</span>
+			</div>
 
 			<div style={styles.container}>
 				<p style={styles.descBox}>{farm.description}</p>
@@ -150,6 +154,21 @@ const styles = {
 		alignItems: 'center',
 		color: 'black',
 		fontSize: 50,
+	},
+	ratingRow: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: 10,
+		padding: '4px 20px 12px 20px',
+	},
+	stars: {
+		color: '#f5a623',
+		fontSize: 28,
+	},
+	ratingText: {
+		color: '#555',
+		fontSize: 18,
+		fontFamily: 'Roboto',
 	},
 	container: {
 		display: 'flex',

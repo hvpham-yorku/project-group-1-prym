@@ -56,6 +56,16 @@ public class SellerService {
         return sellerRepository.findAll();
     }
 
+    // Sets the average rating and total ratings directly (used by data initializer for dummy data)
+    @Transactional
+    public Seller setRating(Long userId, double averageRating, int totalRatings) {
+        Seller seller = sellerRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("Seller profile not found"));
+        seller.setAverageRating(averageRating);
+        seller.setTotalRatings(totalRatings);
+        return sellerRepository.save(seller);
+    }
+
     // Updates an existing seller's shop info
     @Transactional
 	public Seller updateSellerProfile(Long userId, String shopName, String phoneNumber, String shopAddress, String description, String category) {

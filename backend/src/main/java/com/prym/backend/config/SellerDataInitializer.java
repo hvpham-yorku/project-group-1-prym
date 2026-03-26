@@ -44,6 +44,7 @@ public class SellerDataInitializer implements CommandLineRunner {
                     "green_valley", "Green", "Valley", "4165550001", null, "M5V 3A8"); // Toronto
             sellerService.createSellerProfile(u.getId(), "Green Valley Farm", "100 Farm Rd, Toronto", "Locally raised, certified organic beef.");
             addCerts(u.getId(), "ORGANIC", "GRASS_FED");
+            sellerService.setRating(u.getId(), 4.8, 42);
         }
 
         if (!userRepository.existsByEmail("halal_haven@prym.com")) {
@@ -51,6 +52,7 @@ public class SellerDataInitializer implements CommandLineRunner {
                     "halal_haven", "Halal", "Haven", "2125550002", null, "10001"); // New York
             sellerService.createSellerProfile(u.getId(), "Halal Haven Ranch", "200 Ranch Ave, New York", "Premium halal-certified beef and lamb.");
             addCerts(u.getId(), "HALAL", "ORGANIC");
+            sellerService.setRating(u.getId(), 4.6, 87);
         }
 
         if (!userRepository.existsByEmail("prairie_pure@prym.com")) {
@@ -58,6 +60,7 @@ public class SellerDataInitializer implements CommandLineRunner {
                     "prairie_pure", "Prairie", "Pure", "3125550003", null, "60601"); // Chicago
             sellerService.createSellerProfile(u.getId(), "Prairie Pure Meats", "300 Prairie St, Chicago", "Kosher certified, non-GMO meats.");
             addCerts(u.getId(), "KOSHER", "NON_GMO");
+            sellerService.setRating(u.getId(), 4.2, 31);
         }
 
         if (!userRepository.existsByEmail("pacific_coast@prym.com")) {
@@ -65,6 +68,7 @@ public class SellerDataInitializer implements CommandLineRunner {
                     "pacific_coast", "Pacific", "Coast", "3105550004", null, "90001"); // Los Angeles
             sellerService.createSellerProfile(u.getId(), "Pacific Coast Butcher", "400 Coast Blvd, Los Angeles", "Animal welfare approved, organic, non-GMO.");
             addCerts(u.getId(), "ORGANIC", "ANIMAL_WELFARE_APPROVED", "NON_GMO");
+            sellerService.setRating(u.getId(), 4.9, 156);
         }
 
         if (!userRepository.existsByEmail("lone_star@prym.com")) {
@@ -72,6 +76,7 @@ public class SellerDataInitializer implements CommandLineRunner {
                     "lone_star", "Lone", "Star", "2145550005", null, "75201"); // Dallas
             sellerService.createSellerProfile(u.getId(), "Lone Star Ranch", "500 Star Rd, Dallas", "Halal and grass-fed beef from Texas.");
             addCerts(u.getId(), "HALAL", "GRASS_FED");
+            sellerService.setRating(u.getId(), 4.4, 63);
         }
 
         if (!userRepository.existsByEmail("cascade_farms@prym.com")) {
@@ -79,6 +84,7 @@ public class SellerDataInitializer implements CommandLineRunner {
                     "cascade_farms", "Cascade", "Farms", "2065550006", null, "98101"); // Seattle
             sellerService.createSellerProfile(u.getId(), "Cascade Farms", "600 Cascade Way, Seattle", "Certified organic, grass-fed, animal welfare approved.");
             addCerts(u.getId(), "ORGANIC", "GRASS_FED", "ANIMAL_WELFARE_APPROVED");
+            sellerService.setRating(u.getId(), 4.7, 94);
         }
 
         if (!userRepository.existsByEmail("liberty_meats@prym.com")) {
@@ -86,6 +92,7 @@ public class SellerDataInitializer implements CommandLineRunner {
                     "liberty_meats", "Liberty", "Meats", "6175550007", null, "02101"); // Boston
             sellerService.createSellerProfile(u.getId(), "Liberty Meats", "700 Liberty St, Boston", "Kosher, halal, and organic certified.");
             addCerts(u.getId(), "KOSHER", "HALAL", "ORGANIC");
+            sellerService.setRating(u.getId(), 4.5, 78);
         }
 
         if (!userRepository.existsByEmail("rocky_ridge@prym.com")) {
@@ -93,6 +100,7 @@ public class SellerDataInitializer implements CommandLineRunner {
                     "rocky_ridge", "Rocky", "Ridge", "7205550008", null, "80201"); // Denver
             sellerService.createSellerProfile(u.getId(), "Rocky Ridge Ranch", "800 Ridge Rd, Denver", "Grass-fed and non-GMO certified beef.");
             addCerts(u.getId(), "GRASS_FED", "NON_GMO");
+            sellerService.setRating(u.getId(), 4.3, 45);
         }
 
         if (!userRepository.existsByEmail("magnolia_meats@prym.com")) {
@@ -100,6 +108,7 @@ public class SellerDataInitializer implements CommandLineRunner {
                     "magnolia_meats", "Magnolia", "Meats", "4045550009", null, "30301"); // Atlanta
             sellerService.createSellerProfile(u.getId(), "Magnolia Meats", "900 Magnolia Ln, Atlanta", "Halal, organic, and grass-fed certified.");
             addCerts(u.getId(), "HALAL", "ORGANIC", "GRASS_FED");
+            sellerService.setRating(u.getId(), 4.8, 112);
         }
 
         if (!userRepository.existsByEmail("sunrise_butcher@prym.com")) {
@@ -107,6 +116,7 @@ public class SellerDataInitializer implements CommandLineRunner {
                     "sunrise_butcher", "Sunrise", "Butcher", "2105550010", null, "78201"); // San Antonio
             sellerService.createSellerProfile(u.getId(), "Sunrise Butcher Co.", "1000 Sunrise Blvd, San Antonio", "Kosher and non-GMO meats.");
             addCerts(u.getId(), "KOSHER", "NON_GMO");
+            sellerService.setRating(u.getId(), 4.1, 27);
         }
 
         System.out.println("Seller seed data complete.");
