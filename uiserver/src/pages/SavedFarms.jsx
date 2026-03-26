@@ -50,18 +50,10 @@ function savedFarms(){
 				{/* ── Top navbar ── */}
 				<nav style={styles.navbar}>
 					<button
-						style={styles.profileBtn}
-						onClick={() => navigate(profilePath)}
-						title="My Profile"
+						style={styles.backBtn}
+						onClick={() => navigate(-1)}
 					>
-						<div style={styles.avatar}>
-							{user?.profilePicture ? (
-								<img src={user.profilePicture} alt="Profile" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
-							) : (
-								initials
-							)}
-						</div>
-						<span style={styles.profileLabel}>Profile</span>
+						← Back
 					</button>
 					<span style={styles.brand}>PRYM</span>
 					{/* spacer so brand stays centred */}
@@ -88,15 +80,16 @@ const styles = {
 		backgroundColor: '#4a7c59',
 		padding: '10px 20px',
 	},
-	profileBtn: {
-		display: 'flex',
-		alignItems: 'center',
-		gap: '10px',
+	backBtn: {
 		background: 'none',
-		border: 'none',
+		border: '2px solid rgba(255,255,255,0.6)',
+		borderRadius: '6px',
+		color: 'white',
+		fontSize: '14px',
+		fontWeight: '600',
+		padding: '6px 14px',
 		cursor: 'pointer',
-		padding: '4px 8px',
-		borderRadius: '8px',
+		flexShrink: 0,
 	},
 	avatar: {
 		width: '38px',

@@ -28,7 +28,7 @@ export async function removeSavedFarm(farm){
 		method: 'DELETE',
 		headers: { 'Content-Type': 'application/json' },
 		credentials: 'include',
-		body: JSON.stringify(farm)
+		body: JSON.stringify({ sellerId: farm.id })
 	});
 	if (!response.ok) throw new Error(`Failed to remove farm: ${response.status}`);
 	return response.json();

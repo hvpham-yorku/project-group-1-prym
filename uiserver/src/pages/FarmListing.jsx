@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import farmImage from '../assets/rural-farm-landscape-stockcake.webp';
-import { getFarm, saveFarm, getSavedFarms } from '../api/farm';
+import { getFarm, saveFarm, getSavedFarms, removeSavedFarm } from '../api/farm';
 
 function FarmListing(){
 	
@@ -23,13 +23,19 @@ function FarmListing(){
 	
 	useEffect(() => {
 		getFarm(farmname).then(setFarm).catch(console.error);
-		getSavedFarms().then((saved) => setSavedIds(new Set(saved.map((f) => f)))).catch(console.error);
+		getSavedFarms().then((saved) => setSavedIds(new Set(saved.map((f) => f.id)))).catch(console.error);
 	}, [farmname]);
 	
 	async function handleSave(e, farm){
-		e.preventDefault(); // stop parent link from navigating
+		e.preventDefault();
 		await saveFarm(farm);
-		setSavedIds((prev) => new Set([...prev, farm]));
+		setSavedIds((prev) => new Set([...prev, farm.id]));
+	}
+
+	async function handleUnsave(e, farm){
+		e.preventDefault();
+		await removeSavedFarm(farm);
+		setSavedIds((prev) => { const next = new Set(prev); next.delete(farm.id); return next; });
 	}
 	
 	if (!farm) return <div>Loading...</div>;
@@ -41,18 +47,10 @@ function FarmListing(){
 			{/* top navbar */}
 			<nav style={styles.navbar}>
 					<button
-						style={styles.profileBtn}
-						onClick={() => navigate(profilePath)}
-						title="My Profile"
+						style={styles.backBtn}
+						onClick={() => navigate(-1)}
 					>
-					<div style={styles.avatar}>
-						{user?.profilePicture ? (
-							<img src={user.profilePicture} alt="Profile" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
-								) : (
-								initials
-								)}
-							</div>
-							<span style={styles.profileLabel}>Profile</span>
+						← Back
 					</button>
 					<span style={styles.brand}>PRYM</span>
 					{/* spacer so brand stays centred */}
@@ -76,9 +74,15 @@ function FarmListing(){
 			</div>
 			
 			<div style={styles.bottomButtonContainer}>
-				<button style={{...styles.button, backgroundColor: savedIds.has(farm) ? '#a5c8a5' : '#4a7c59'}} onClick={(e) => handleSave(e, farm)} disabled={savedIds.has(farm)}>
-					{savedIds.has(farm) ? 'Saved' : 'Save Farm'}
-				</button>
+				{savedIds.has(farm.id) ? (
+					<button style={{...styles.button, backgroundColor: '#c0392b', width: 160}} onClick={(e) => handleUnsave(e, farm)}>
+						Remove from Saved
+					</button>
+				) : (
+					<button style={styles.button} onClick={(e) => handleSave(e, farm)}>
+						Save Farm
+					</button>
+				)}
 				<button style={styles.button}>Rate Farm</button>
 				<Link to={`/buyer/farmlistings`}><button style={{...styles.button, width: 200}}>Return To Farm Listings</button></Link>
 			</div>
@@ -98,15 +102,16 @@ const styles = {
 			backgroundColor: '#4a7c59',
 			padding: '10px 20px',
 		},
-		profileBtn: {
-			display: 'flex',
-			alignItems: 'center',
-			gap: '10px',
+		backBtn: {
 			background: 'none',
-			border: 'none',
+			border: '2px solid rgba(255,255,255,0.6)',
+			borderRadius: '6px',
+			color: 'white',
+			fontSize: '14px',
+			fontWeight: '600',
+			padding: '6px 14px',
 			cursor: 'pointer',
-			padding: '4px 8px',
-			borderRadius: '8px',
+			flexShrink: 0,
 		},
 		avatar: {
 			width: '38px',

@@ -122,13 +122,11 @@ public class BuyerController {
 	}
 	
 	@DeleteMapping("/all")
-	public ResponseEntity<?> removeSavedFarm(@RequestBody Seller farm){
+	public ResponseEntity<?> removeSavedFarm(@RequestBody Map<String, Long> body){
 		try {
 			Long userId = getLoggedInUserId();
-			Buyer buyer = buyerService.getBuyerProfile(userId);
-			if(buyer.getSavedFarms().contains(farm)) {
-				buyer = buyerService.removeSavedFarm(userId, farm);
-			}
+			Long sellerId = body.get("sellerId");
+			Buyer buyer = buyerService.removeSavedFarm(userId, sellerId);
 			return ResponseEntity.ok(buyer);
 		} catch (RuntimeException e) {
 			return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
