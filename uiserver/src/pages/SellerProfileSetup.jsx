@@ -2,16 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { updateSellerProfile, getSellerProfile, getCertifications, setCertifications } from "../api/seller";
-
-const ALL_CERTS = [
-  { value: "ORGANIC", label: "Organic" },
-  { value: "HALAL", label: "Halal" },
-  { value: "KOSHER", label: "Kosher" },
-  { value: "GRASS_FED", label: "Grass Fed" },
-  { value: "NON_GMO", label: "Non-GMO" },
-  { value: "ANIMAL_WELFARE_APPROVED", label: "Animal Welfare Approved" },
-  { value: "CONVENTIONAL", label: "Conventional" },
-];
+import { ALL_CERTS } from "../constants/certifications";
 
 function SellerProfileSetup() {
   const navigate = useNavigate();
@@ -53,10 +44,8 @@ function SellerProfileSetup() {
     setError("");
     setLoading(true);
     try {
-      await Promise.all([
-        updateSellerProfile(user.id, { description }),
-        setCertifications(user.id, selectedCerts),
-      ]);
+      await updateSellerProfile(user.id, { description });
+      await setCertifications(user.id, selectedCerts);
       navigate("/seller/dashboard");
     } catch (err) {
       console.error("Setup Error:", err);
