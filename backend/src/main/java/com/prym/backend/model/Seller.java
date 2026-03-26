@@ -31,6 +31,12 @@ public class Seller {
     private String description;    // Description of the farm and its practices
     private String category;       // Category of meat (e.g. Beef, Poultry, Lamb)
 
+    @Column(nullable = false)
+    private double averageRating = 0.0;
+
+    @Column(nullable = false)
+    private int totalRatings = 0;
+
     // A seller can hold multiple certifications (e.g. Organic + Halal at the same time)
     @OneToMany(mappedBy = "seller", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude

@@ -59,7 +59,7 @@ function FarmListing(){
 					<div style={{ width: 90 }} />
 			</nav>
 			
-			<div style={{width='100%', height='300'}} alt="farm image"/>
+			<div style={{width: '100%', height: '300'}} alt="farm image"/>
 
 			<h1 style={styles.header}>{farm.shopName}</h1>
 
