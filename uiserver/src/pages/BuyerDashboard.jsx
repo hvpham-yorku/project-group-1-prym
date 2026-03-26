@@ -134,11 +134,6 @@ function BuyerDashboard() {
     }
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
   // Toggle a cut on/off in edit mode
   const handleCutToggle = (id) => {
     setFormData((prev) => {
@@ -244,11 +239,39 @@ function BuyerDashboard() {
           </div>
 
           <div>
-            <h1 style={styles.bannerName}>
-              {user?.firstName} {user?.lastName}
-            </h1>
-            <p style={styles.bannerEmail}>{user?.email}</p>
-            <span style={styles.roleBadge}>BUYER</span>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+              <h1 style={styles.bannerName}>
+                {user?.firstName} {user?.lastName}
+              </h1>
+              <span style={styles.roleBadge}>BUYER</span>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "4px", marginTop: "4px" }}>
+              <p style={styles.bannerEmail}>{user?.email}</p>
+              <p style={styles.bannerEmail}>
+                {user?.phoneNumber || "—"}
+              </p>
+              {(user?.zipCode) && (
+                <p style={styles.bannerEmail}>
+                  📍 {[user.city, user.state, user.country].filter(Boolean).join(", ") || user.zipCode}
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div style={{ marginLeft: "auto", display: "flex", gap: "10px" }}>
+            <button
+              style={{
+                ...styles.bannerBtn,
+                ...(isEditing ? styles.joinButtonDisabled : {}),
+              }}
+              onClick={() => setIsEditing(true)}
+              disabled={isEditing}
+            >
+              Edit Profile
+            </button>
+            <button style={styles.bannerBtn} onClick={handleLogout}>
+              Logout
+            </button>
           </div>
         </div>
       </div>
@@ -282,38 +305,6 @@ function BuyerDashboard() {
           {/* Left panel: profile fields + buttons */}
           <div style={styles.leftPanel}>
             <div style={styles.grid}>
-              {/* Phone */}
-              <div style={styles.fieldCard}>
-                <p style={styles.fieldLabel}>Phone Number</p>
-                {isEditing ? (
-                  <input
-                    name="phoneNumber"
-                    value={formData.phoneNumber}
-                    onChange={handleChange}
-                    placeholder="e.g. +1 416 555 0000"
-                    style={styles.fieldInput}
-                  />
-                ) : (
-                  <p
-                    style={
-                      user?.phoneNumber ? styles.fieldValue : styles.fieldValueEmpty
-                    }
-                  >
-                    {user?.phoneNumber || "Not set"}
-                  </p>
-                )}
-              </div>
-
-              {/* Location */}
-              <div style={styles.fieldCard}>
-                <p style={styles.fieldLabel}>Location</p>
-                <p style={user?.zipCode ? styles.fieldValue : styles.fieldValueEmpty}>
-                  {user?.zipCode
-                    ? [user.state, user.country, user.zipCode].filter(Boolean).join(", ")
-                    : "Not set"}
-                </p>
-              </div>
-
               {/* Preferred Cuts — cow diagram, full width */}
               <div
                 style={{
@@ -375,18 +366,7 @@ function BuyerDashboard() {
                   </button>
                 </>
               ) : (
-                <>
-                  <Link to={`/buyer/farmlistings`}><button style={styles.primaryButton}>View Farm Listings</button></Link>
-                  <button style={styles.secondaryButton} onClick={handleLogout}>
-                    Logout
-                  </button>
-                  <button
-                    style={styles.primaryButton}
-                    onClick={() => setIsEditing(true)}
-                  >
-                    Edit Profile
-                  </button>
-                </>
+                <Link to={`/buyer/farmlistings`}><button style={styles.primaryButton}>View Farm Listings</button></Link>
               )}
             </div>
           </div>
@@ -581,6 +561,16 @@ const styles = {
     marginRight: "8px",
     flexShrink: 0,
   },
+  bannerBtn: {
+    background: "none",
+    border: "2px solid rgba(255,255,255,0.6)",
+    borderRadius: "6px",
+    color: "white",
+    fontSize: "14px",
+    fontWeight: "600",
+    padding: "6px 16px",
+    cursor: "pointer",
+  },
   avatar: {
     width: "80px",
     height: "80px",
@@ -604,7 +594,35 @@ const styles = {
   bannerEmail: {
     fontSize: "14px",
     color: "rgba(255,255,255,0.75)",
-    margin: "0 0 10px 0",
+    margin: 0,
+  },
+  bannerPhoneInput: {
+    background: "rgba(255,255,255,0.15)",
+    border: "1px solid rgba(255,255,255,0.5)",
+    borderRadius: "4px",
+    color: "white",
+    fontSize: "14px",
+    padding: "2px 8px",
+    outline: "none",
+    width: "160px",
+  },
+  bannerPhoneSaveBtn: {
+    background: "rgba(255,255,255,0.2)",
+    border: "1px solid rgba(255,255,255,0.5)",
+    borderRadius: "4px",
+    color: "white",
+    cursor: "pointer",
+    fontSize: "13px",
+    padding: "2px 6px",
+  },
+  bannerPhoneCancelBtn: {
+    background: "none",
+    border: "1px solid rgba(255,255,255,0.3)",
+    borderRadius: "4px",
+    color: "rgba(255,255,255,0.7)",
+    cursor: "pointer",
+    fontSize: "13px",
+    padding: "2px 6px",
   },
   roleBadge: {
     display: "inline-block",

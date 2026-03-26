@@ -2,9 +2,10 @@ import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { logout } from "../api/auth";
 import { useState, useEffect } from "react";
-import { getSellerProfile, updateSellerProfile } from "../api/seller";
+import { getSellerProfile, updateSellerProfile, getCertifications, setCertifications } from "../api/seller";
 import EditAccountModal from "../components/EditAccountModal";
 import { generateRatingCode } from "../api/ratings";
+import { ALL_CERTS } from "../constants/certifications";
 
 function SellerDashboard() {
   const { user, clearUser, saveUser } = useAuth();
@@ -13,12 +14,12 @@ function SellerDashboard() {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     shopName: "",
-    phoneNumber: "",
     shopAddress: "",
-    category: "",
     description: "",
   });
   const [profile, setProfile] = useState(null);
+  const [certList, setCertList] = useState([]);
+  const [selectedCerts, setSelectedCerts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showAccountModal, setShowAccountModal] = useState(false);
@@ -30,13 +31,16 @@ function SellerDashboard() {
       if (!user?.id) return;
       try {
         setLoading(true);
-        const data = await getSellerProfile(user.id);
+        const [data, certs] = await Promise.all([
+          getSellerProfile(user.id),
+          getCertifications(user.id),
+        ]);
         setProfile(data);
+        setCertList(certs);
+        setSelectedCerts(certs.map((c) => c.name));
         setFormData({
           shopName: data.shopName || "",
-          phoneNumber: data.phoneNumber || "",
           shopAddress: data.shopAddress || "",
-          category: data.category || "",
           description: data.description || "",
         });
       } catch (err) {
@@ -63,30 +67,33 @@ function SellerDashboard() {
   const handleSave = async () => {
     setError("");
     try {
-      if (formData.phoneNumber) {
-        const phoneRegex =
-          /^(\+?1[\s.\-]?)?(\(?\d{3}\)?[\s.\-]?)\d{3}[\s.\-]?\d{4}$/;
-        if (!phoneRegex.test(formData.phoneNumber)) {
-          setError("Please enter a valid phone number.");
-          return;
-        }
-      }
-      await updateSellerProfile(user.id, { ...formData });
-      const savedPhone = formData.phoneNumber || profile?.phoneNumber;
-      setProfile((prev) => ({
-        ...prev,
-        shopName: formData.shopName,
-        phoneNumber: savedPhone,
-        shopAddress: formData.shopAddress,
-        category: formData.category,
-        description: formData.description,
-      }));
-      setFormData((prev) => ({ ...prev, phoneNumber: savedPhone }));
-      saveUser({ ...user, phoneNumber: savedPhone });
+      await Promise.all([
+        updateSellerProfile(user.id, { ...formData }),
+        setCertifications(user.id, selectedCerts),
+      ]);
+      setProfile((prev) => ({...prev, ...formData}));
+      setCertList(selectedCerts.map((name)=> ({name})));
       setIsEditing(false);
     } catch (err) {
       console.error("Save error:", err);
       setError("Failed to save profile.");
+      //re-fetch to restore UI to actual server state
+      try{
+        const[data, certs] = await Promise.all([
+          getSellerProfile(user.id),
+          getCertifications(user.id),
+        ]);
+        setProfile(data);
+        setCertList(certs);
+        setSelectedCerts(certs.map((c) => c.name));
+        setFormData({
+          shopName: data.shopName || "",
+          shopAddress: data.shopAddress || "",
+          description: data.description || "",
+        });
+      } catch {
+        //ignore the re-fetch failure
+      }
     }
   };
 
@@ -98,13 +105,18 @@ function SellerDashboard() {
   const handleDiscard = () => {
     setFormData({
       shopName: profile?.shopName || "",
-      phoneNumber: profile?.phoneNumber || "",
       shopAddress: profile?.shopAddress || "",
-      category: profile?.category || "",
       description: profile?.description || "",
     });
+    setSelectedCerts(certList.map((c) => c.name));
     setError("");
     setIsEditing(false);
+  };
+
+  const toggleCert = (value) => {
+    setSelectedCerts((prev) =>
+      prev.includes(value) ? prev.filter((c) => c !== value) : [...prev, value]
+    );
   };
 
   const handleGenerateCode = async () => {
@@ -151,12 +163,7 @@ function SellerDashboard() {
                 <img
                   src={user.profilePicture}
                   alt="Profile"
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    borderRadius: "50%",
-                    objectFit: "cover",
-                  }}
+                  style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" }}
                 />
               ) : (
                 initials
@@ -170,13 +177,26 @@ function SellerDashboard() {
               ✎
             </button>
           </div>
+
           <div>
-            <h1 style={styles.bannerName}>
-              {user?.firstName} {user?.lastName}
-            </h1>
-            <p style={styles.bannerEmail}>{user?.email}</p>
-            <span style={styles.roleBadge}>SELLER</span>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+              <h1 style={styles.bannerName}>{user?.firstName} {user?.lastName}</h1>
+              <span style={styles.roleBadge}>SELLER</span>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "4px", marginTop: "4px" }}>
+              <p style={styles.bannerEmail}>{user?.email}</p>
+              <p style={styles.bannerEmail}>{user?.phoneNumber || "—"}</p>
+              {user?.zipCode && (
+                <p style={styles.bannerEmail}>
+                  📍 {[user.city, user.state, user.country].filter(Boolean).join(", ") || user.zipCode}
+                </p>
+              )}
+            </div>
           </div>
+
+          <button style={styles.logoutBtn} onClick={handleLogout}>
+            Logout
+          </button>
         </div>
       </div>
 
@@ -184,173 +204,139 @@ function SellerDashboard() {
       <div style={styles.content}>
         {error && <div style={styles.error}>{error}</div>}
 
-        {/* Fields Grid */}
-        <div style={styles.grid}>
-          {/* Phone */}
-          <div style={styles.fieldCard}>
-            <p style={styles.fieldLabel}>Phone Number</p>
-            {isEditing ? (
-              <input
-                name="phoneNumber"
-                value={formData.phoneNumber}
-                onChange={handleChange}
-                placeholder="e.g. +1 416 555 0000"
-                style={styles.fieldInput}
-              />
-            ) : (
-              <p
-                style={
-                  profile?.phoneNumber
-                    ? styles.fieldValue
-                    : styles.fieldValueEmpty
-                }
-              >
-                {profile?.phoneNumber || "Not set"}
+        <div style={styles.mainLayout}>
+          {/* Left panel: farm fields + buttons */}
+          <div style={styles.leftPanel}>
+            <div style={styles.grid}>
+
+              {/* Shop Name */}
+              <div style={styles.fieldCard}>
+                <p style={styles.fieldLabel}>Shop Name</p>
+                {isEditing ? (
+                  <input
+                    name="shopName"
+                    value={formData.shopName}
+                    onChange={handleChange}
+                    placeholder="Your shop name"
+                    style={styles.fieldInput}
+                  />
+                ) : (
+                  <p style={profile?.shopName ? styles.fieldValue : styles.fieldValueEmpty}>
+                    {profile?.shopName || "Not set"}
+                  </p>
+                )}
+              </div>
+
+              {/* Address */}
+              <div style={styles.fieldCard}>
+                <p style={styles.fieldLabel}>Address</p>
+                {isEditing ? (
+                  <input
+                    name="shopAddress"
+                    value={formData.shopAddress}
+                    onChange={handleChange}
+                    placeholder="e.g. 100 Farm Rd, Toronto"
+                    style={styles.fieldInput}
+                  />
+                ) : (
+                  <p style={profile?.shopAddress ? styles.fieldValue : styles.fieldValueEmpty}>
+                    {profile?.shopAddress || "Not set"}
+                  </p>
+                )}
+              </div>
+
+              {/* Certifications — full width */}
+              <div style={{ ...styles.fieldCard, gridColumn: "1 / -1" }}>
+                <p style={styles.fieldLabel}>
+                  Certifications
+                  {isEditing && (
+                    <span style={styles.editHint}>— select all that apply</span>
+                  )}
+                </p>
+                {isEditing ? (
+                  <div style={styles.certGrid}>
+                    {ALL_CERTS.map((cert) => (
+                      <label key={cert.value} style={styles.certOption}>
+                        <input
+                          type="checkbox"
+                          checked={selectedCerts.includes(cert.value)}
+                          onChange={() => toggleCert(cert.value)}
+                          style={styles.checkbox}
+                        />
+                        {cert.label}
+                      </label>
+                    ))}
+                  </div>
+                ) : certList.length > 0 ? (
+                  <div style={styles.certTagRow}>
+                    {certList.map((c) => (
+                      <span key={c.name} style={styles.certTag}>
+                        {ALL_CERTS.find((x) => x.value === c.name)?.label || c.name}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <p style={styles.fieldValueEmpty}>Not set</p>
+                )}
+              </div>
+
+              {/* Description — full width */}
+              <div style={{ ...styles.fieldCard, gridColumn: "1 / -1" }}>
+                <p style={styles.fieldLabel}>Description</p>
+                {isEditing ? (
+                  <textarea
+                    name="description"
+                    value={formData.description}
+                    onChange={handleChange}
+                    placeholder="Tell buyers about your farm, cattle, and practices"
+                    rows={4}
+                    style={{ ...styles.fieldInput, resize: "vertical" }}
+                  />
+                ) : (
+                  <p style={profile?.description ? styles.fieldValue : styles.fieldValueEmpty}>
+                    {profile?.description || "Not set"}
+                  </p>
+                )}
+              </div>
+
+            </div>
+
+            {/* Buttons */}
+            <div style={styles.buttonRow}>
+              {isEditing ? (
+                <>
+                  <button style={styles.secondaryButton} onClick={handleDiscard}>
+                    Discard
+                  </button>
+                  <button style={styles.primaryButton} onClick={handleSave}>
+                    Save Changes
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button style={styles.primaryButton} onClick={() => setIsEditing(true)}>
+                    Edit Profile
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Right panel: rating code */}
+          <div style={styles.rightPanel}>
+            <div style={styles.fieldCard}>
+              <p style={styles.fieldLabel}>Buyer Ratings</p>
+              <p style={styles.ratingHint}>
+                Generate a one-time code to share with a buyer so they can rate your farm.
               </p>
-            )}
-          </div>
-
-          {/* Location */}
-          <div style={styles.fieldCard}>
-            <p style={styles.fieldLabel}>Location</p>
-            <p style={user?.zipCode ? styles.fieldValue : styles.fieldValueEmpty}>
-              {user?.zipCode
-                ? [user.state, user.country, user.zipCode].filter(Boolean).join(", ")
-                : "Not set"}
-            </p>
-          </div>
-
-          {/* Shop Name */}
-          <div style={styles.fieldCard}>
-            <p style={styles.fieldLabel}>Shop Name</p>
-            {isEditing ? (
-              <input
-                name="shopName"
-                value={formData.shopName}
-                onChange={handleChange}
-                placeholder="Your shop name"
-                style={styles.fieldInput}
-              />
-            ) : (
-              <p
-                style={
-                  profile?.shopName ? styles.fieldValue : styles.fieldValueEmpty
-                }
-              >
-                {profile?.shopName || "Not set"}
-              </p>
-            )}
-          </div>
-
-          {/* Address */}
-          <div style={styles.fieldCard}>
-            <p style={styles.fieldLabel}>Address</p>
-            {isEditing ? (
-              <input
-                name="shopAddress"
-                value={formData.shopAddress}
-                onChange={handleChange}
-                placeholder="Your shop address"
-                style={styles.fieldInput}
-              />
-            ) : (
-              <p
-                style={
-                  profile?.shopAddress
-                    ? styles.fieldValue
-                    : styles.fieldValueEmpty
-                }
-              >
-                {profile?.shopAddress || "Not set"}
-              </p>
-            )}
-          </div>
-
-          {/* Category */}
-          <div style={styles.fieldCard}>
-            <p style={styles.fieldLabel}>Category</p>
-            {isEditing ? (
-              <select
-                name="category"
-                value={formData.category}
-                onChange={handleChange}
-                style={styles.fieldInput}
-              >
-                <option value="">Select category</option>
-                <option value="HALAL">Halal</option>
-                <option value="KOSHER">Kosher</option>
-                <option value="ORGANIC">Organic</option>
-                <option value="CONVENTIONAL">Conventional</option>
-              </select>
-            ) : (
-              <p
-                style={
-                  profile?.category ? styles.fieldValue : styles.fieldValueEmpty
-                }
-              >
-                {profile?.category || "Not set"}
-              </p>
-            )}
-          </div>
-
-          {/* Description — full width */}
-          <div style={{ ...styles.fieldCard, gridColumn: "1 / -1" }}>
-            <p style={styles.fieldLabel}>Description</p>
-            {isEditing ? (
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                placeholder="Tell buyers about your shop"
-                rows={4}
-                style={{ ...styles.fieldInput, resize: "vertical" }}
-              />
-            ) : (
-              <p
-                style={
-                  profile?.description
-                    ? styles.fieldValue
-                    : styles.fieldValueEmpty
-                }
-              >
-                {profile?.description || "Not set"}
-              </p>
-            )}
-          </div>
-        </div>
-
-        {/* Buttons */}
-        <div style={styles.buttonRow}>
-          {isEditing ? (
-            <>
-              <button style={styles.secondaryButton} onClick={handleDiscard}>
-                Discard
-              </button>
-              <button style={styles.primaryButton} onClick={handleSave}>
-                Save Changes
-              </button>
-            </>
-          ) : (
-            <>
-              <button style={styles.secondaryButton} onClick={handleLogout}>
-                Logout
-              </button>
-              <button
-                style={styles.secondaryButton}
-                onClick={handleGenerateCode}
-              >
+              <button style={styles.primaryButton} onClick={handleGenerateCode}>
                 Generate Rating Code
               </button>
-              <button
-                style={styles.primaryButton}
-                onClick={() => setIsEditing(true)}
-              >
-                Edit Profile
-              </button>
-            </>
-          )}
+            </div>
+          </div>
         </div>
       </div>
+
       {/* Rating Code Modal */}
       {showCodeModal && (
         <div style={styles.modalOverlay}>
@@ -360,10 +346,7 @@ function SellerDashboard() {
               Share this code with your buyer so they can rate your farm
             </p>
             <div style={styles.codeDisplay}>{generatedCode}</div>
-            <button
-              style={styles.primaryButton}
-              onClick={() => setShowCodeModal(false)}
-            >
+            <button style={styles.primaryButton} onClick={() => setShowCodeModal(false)}>
               Done
             </button>
           </div>
@@ -386,7 +369,7 @@ const styles = {
     padding: "40px 0",
   },
   bannerInner: {
-    maxWidth: "900px",
+    maxWidth: "1200px",
     margin: "0 auto",
     padding: "0 48px",
     display: "flex",
@@ -407,6 +390,27 @@ const styles = {
     fontWeight: "bold",
     flexShrink: 0,
   },
+  avatarWrapper: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: "8px",
+    flexShrink: 0,
+  },
+  editAccountBtn: {
+    background: "rgba(255,255,255,0.15)",
+    border: "2px solid rgba(255,255,255,0.5)",
+    borderRadius: "50%",
+    color: "white",
+    fontSize: "14px",
+    width: "28px",
+    height: "28px",
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 0,
+  },
   bannerName: {
     fontSize: "26px",
     fontWeight: "700",
@@ -416,7 +420,7 @@ const styles = {
   bannerEmail: {
     fontSize: "14px",
     color: "rgba(255,255,255,0.75)",
-    margin: "0 0 10px 0",
+    margin: 0,
   },
   roleBadge: {
     display: "inline-block",
@@ -429,7 +433,7 @@ const styles = {
     letterSpacing: "0.08em",
   },
   content: {
-    maxWidth: "900px",
+    maxWidth: "1200px",
     margin: "0 auto",
     padding: "40px 48px",
   },
@@ -441,11 +445,24 @@ const styles = {
     marginBottom: "24px",
     fontSize: "14px",
   },
+  mainLayout: {
+    display: "flex",
+    gap: "32px",
+    alignItems: "flex-start",
+  },
+  leftPanel: {
+    flex: "3 1 0",
+    minWidth: 0,
+  },
+  rightPanel: {
+    flex: "1 1 0",
+    minWidth: "220px",
+  },
   grid: {
     display: "grid",
     gridTemplateColumns: "1fr 1fr",
     gap: "16px",
-    marginBottom: "32px",
+    marginBottom: "0",
   },
   fieldCard: {
     backgroundColor: "white",
@@ -461,6 +478,14 @@ const styles = {
     textTransform: "uppercase",
     color: SELLER_COLOR,
     margin: "0 0 8px 0",
+  },
+  editHint: {
+    fontSize: "10px",
+    fontWeight: "500",
+    letterSpacing: "0.02em",
+    textTransform: "none",
+    color: "#999",
+    marginLeft: "4px",
   },
   fieldValue: {
     fontSize: "16px",
@@ -484,10 +509,63 @@ const styles = {
     outline: "none",
     boxSizing: "border-box",
   },
+  certGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(4, 1fr)",
+    gap: "10px",
+    marginTop: "4px",
+  },
+  certOption: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    fontSize: "14px",
+    color: "#333",
+    cursor: "pointer",
+  },
+  checkbox: {
+    accentColor: GREEN,
+    width: "15px",
+    height: "15px",
+    cursor: "pointer",
+  },
+  certTagRow: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "8px",
+    marginTop: "4px",
+  },
+  certTag: {
+    backgroundColor: "#eaf3ee",
+    color: GREEN,
+    border: `1px solid ${GREEN}`,
+    borderRadius: "99px",
+    padding: "3px 12px",
+    fontSize: "13px",
+    fontWeight: "600",
+  },
+  ratingHint: {
+    fontSize: "13px",
+    color: "#666",
+    margin: "0 0 16px 0",
+    lineHeight: 1.5,
+  },
+  logoutBtn: {
+    marginLeft: "auto",
+    background: "none",
+    border: "2px solid rgba(255,255,255,0.6)",
+    borderRadius: "6px",
+    color: "white",
+    fontSize: "14px",
+    fontWeight: "600",
+    padding: "6px 16px",
+    cursor: "pointer",
+  },
   buttonRow: {
     display: "flex",
     justifyContent: "flex-end",
     gap: "12px",
+    marginTop: "16px",
   },
   primaryButton: {
     padding: "12px 28px",
@@ -509,33 +587,9 @@ const styles = {
     fontWeight: "600",
     cursor: "pointer",
   },
-  editAccountBtn: {
-    background: "rgba(255,255,255,0.15)",
-    border: "2px solid rgba(255,255,255,0.5)",
-    borderRadius: "50%",
-    color: "white",
-    fontSize: "14px",
-    width: "28px",
-    height: "28px",
-    cursor: "pointer",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 0,
-  },
-  avatarWrapper: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    gap: "8px",
-    flexShrink: 0,
-  },
   modalOverlay: {
     position: "fixed",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+    top: 0, left: 0, right: 0, bottom: 0,
     backgroundColor: "rgba(0,0,0,0.5)",
     display: "flex",
     alignItems: "center",

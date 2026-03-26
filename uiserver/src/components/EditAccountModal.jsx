@@ -11,6 +11,7 @@ function EditAccountModal({ onClose, accentColor }) {
     firstName: user?.firstName || "",
     lastName: user?.lastName || "",
     email: user?.email || "",
+    phoneNumber: user?.phoneNumber || "",
     profilePicture: user?.profilePicture || "",
     zipCode: user?.zipCode || "",
   });
@@ -57,6 +58,11 @@ function EditAccountModal({ onClose, accentColor }) {
       setError("Please enter a valid email address.");
       return;
     }
+    const phoneRegex = /^(\+?1[\s.-]?)?(\(?\d{3}\)?[\s.-]?)\d{3}[\s.-]?\d{4}$/;
+    if (form.phoneNumber.trim() && !phoneRegex.test(form.phoneNumber.trim())) {
+      setError("Please enter a valid phone number.");
+      return;
+    }
 
     setSaving(true);
     try {
@@ -64,6 +70,7 @@ function EditAccountModal({ onClose, accentColor }) {
         firstName: form.firstName.trim(),
         lastName: form.lastName.trim(),
         email: form.email.trim(),
+        phoneNumber: form.phoneNumber.trim() || undefined,
         profilePicture: form.profilePicture,
         zipCode: form.zipCode.trim() || undefined,
       });
@@ -190,18 +197,32 @@ function EditAccountModal({ onClose, accentColor }) {
           </div>
         </div>
 
-        {/* Email */}
-        <div style={styles.fieldGroup}>
-          <label style={labelStyle}>Email</label>
-          <input
-            name="email"
-            type="email"
-            value={form.email}
-            onChange={handleChange}
-            placeholder="email@example.com"
-            style={inputStyle}
-            disabled={saving}
-          />
+        {/* Email + Phone row */}
+        <div style={{ display: "flex", gap: "20px", marginBottom: "24px" }}>
+          <div style={{ flex: 1 }}>
+            <label style={labelStyle}>Email</label>
+            <input
+              name="email"
+              type="email"
+              value={form.email}
+              onChange={handleChange}
+              placeholder="email@example.com"
+              style={inputStyle}
+              disabled={saving}
+            />
+          </div>
+          <div style={{ flex: 1 }}>
+            <label style={labelStyle}>Phone Number</label>
+            <input
+              name="phoneNumber"
+              type="tel"
+              value={form.phoneNumber}
+              onChange={handleChange}
+              placeholder="e.g. +1 416 555 0000"
+              style={inputStyle}
+              disabled={saving}
+            />
+          </div>
         </div>
 
         {/* ZIP / Postal Code */}
