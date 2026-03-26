@@ -65,6 +65,43 @@ export async function setCertifications(userId, certNames) {
     return data;
 }
 
+// Fetches cow types for a seller (for the dashboard)
+// Calls GET /api/seller/cow-types/{userId}
+export async function getSellerCowTypes(userId) {
+    const response = await fetch(`${API_URL}/cow-types/${userId}`, {
+        credentials: 'include'
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Failed to get cow types');
+    return data;
+}
+
+// Adds a new cow type to the seller's farm
+// Calls POST /api/seller/cow-types/{userId}
+export async function addCowType(userId, cowTypeData) {
+    const response = await fetch(`${API_URL}/cow-types/${userId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(cowTypeData)
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Failed to add cow type');
+    return data;
+}
+
+// Removes a cow type from the seller's farm
+// Calls DELETE /api/seller/cow-types/{userId}/{cowTypeId}
+export async function deleteCowType(userId, cowTypeId) {
+    const response = await fetch(`${API_URL}/cow-types/${userId}/${cowTypeId}`, {
+        method: 'DELETE',
+        credentials: 'include'
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Failed to delete cow type');
+    return data;
+}
+
 // Updates an existing seller profile
 // Calls PATCH /api/seller/profile/{userId}
 export async function updateSellerProfile(userId, profileData) {

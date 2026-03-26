@@ -1,4 +1,6 @@
 package com.prym.backend.controller;
+import com.prym.backend.model.CowType;
+import com.prym.backend.service.CowTypeService;
 import com.prym.backend.service.SessionService;
 import java.util.Optional;
 import com.prym.backend.model.User;
@@ -9,18 +11,19 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/seller")
 public class SellerController {
 
   private final SellerService sellerService;
-private final SessionService sessionService;
+  private final SessionService sessionService;
+  private final CowTypeService cowTypeService;
 
-public SellerController(SellerService sellerService, SessionService sessionService) {
+public SellerController(SellerService sellerService, SessionService sessionService, CowTypeService cowTypeService) {
     this.sellerService = sellerService;
     this.sessionService = sessionService;
+    this.cowTypeService = cowTypeService;
 }
 
     @PostMapping("/profile")
@@ -100,6 +103,17 @@ public ResponseEntity<?> getAllFarms() {
     try {
         List<Seller> farms = sellerService.getAllFarms();
         return ResponseEntity.ok(farms);
+    } catch (RuntimeException e) {
+        return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+    }
+}
+
+// Public endpoint — buyers can see a farm's cow types without being logged in as that seller
+@GetMapping("/{sellerId}/cow-types")
+public ResponseEntity<?> getCowTypes(@PathVariable Long sellerId) {
+    try {
+        List<CowType> cowTypes = cowTypeService.getCowTypesBySellerProfileId(sellerId);
+        return ResponseEntity.ok(cowTypes);
     } catch (RuntimeException e) {
         return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
     }

@@ -23,6 +23,11 @@ export async function saveFarm(farm){
 	return response.json();
 }
 
+export async function getCowTypes(farmId) {
+	const response = await fetch(`/api/seller/${farmId}/cow-types`);
+	return response.json();
+}
+
 export async function removeSavedFarm(farm){
 	const response = await fetch("/api/buyer/all", {
 		method: 'DELETE',

@@ -2,7 +2,7 @@ import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { logout } from "../api/auth";
 import { useState, useEffect } from "react";
-import { getSellerProfile, updateSellerProfile, getCertifications, setCertifications } from "../api/seller";
+import { getSellerProfile, updateSellerProfile, getCertifications, setCertifications, getSellerCowTypes, addCowType, deleteCowType } from "../api/seller";
 import EditAccountModal from "../components/EditAccountModal";
 import { generateRatingCode } from "../api/ratings";
 import { ALL_CERTS } from "../constants/certifications";
@@ -25,19 +25,24 @@ function SellerDashboard() {
   const [showAccountModal, setShowAccountModal] = useState(false);
   const [generatedCode, setGeneratedCode] = useState("");
   const [showCodeModal, setShowCodeModal] = useState(false);
+  const [cowTypes, setCowTypes] = useState([]);
+  const [newCow, setNewCow] = useState({ breed: "ANGUS", description: "", pricePerPound: "", availableCount: "" });
+  const [showAddCow, setShowAddCow] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
       if (!user?.id) return;
       try {
         setLoading(true);
-        const [data, certs] = await Promise.all([
+        const [data, certs, cows] = await Promise.all([
           getSellerProfile(user.id),
           getCertifications(user.id),
+          getSellerCowTypes(user.id),
         ]);
         setProfile(data);
         setCertList(certs);
         setSelectedCerts(certs.map((c) => c.name));
+        setCowTypes(cows);
         setFormData({
           shopName: data.shopName || "",
           shopAddress: data.shopAddress || "",
@@ -117,6 +122,33 @@ function SellerDashboard() {
     setSelectedCerts((prev) =>
       prev.includes(value) ? prev.filter((c) => c !== value) : [...prev, value]
     );
+  };
+
+  const handleAddCow = async () => {
+    setError("");
+    try {
+      const created = await addCowType(user.id, {
+        breed: newCow.breed,
+        description: newCow.description,
+        pricePerPound: parseFloat(newCow.pricePerPound),
+        availableCount: parseInt(newCow.availableCount),
+      });
+      setCowTypes((prev) => [...prev, created]);
+      setNewCow({ breed: "ANGUS", description: "", pricePerPound: "", availableCount: "" });
+      setShowAddCow(false);
+    } catch (err) {
+      setError("Failed to add cattle type.");
+    }
+  };
+
+  const handleDeleteCow = async (cowTypeId) => {
+    setError("");
+    try {
+      await deleteCowType(user.id, cowTypeId);
+      setCowTypes((prev) => prev.filter((c) => c.id !== cowTypeId));
+    } catch (err) {
+      setError("Failed to remove cattle type.");
+    }
   };
 
   const handleGenerateCode = async () => {
@@ -334,6 +366,92 @@ function SellerDashboard() {
               </button>
             </div>
           </div>
+        </div>
+
+        {/* Cattle Section */}
+        <div style={{ marginTop: "32px" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
+            <h2 style={styles.sectionHeading}>Your Cattle</h2>
+            <button style={styles.primaryButton} onClick={() => setShowAddCow((v) => !v)}>
+              {showAddCow ? "Cancel" : "+ Add Cattle"}
+            </button>
+          </div>
+
+          {showAddCow && (
+            <div style={{ ...styles.fieldCard, marginBottom: "16px" }}>
+              <p style={styles.fieldLabel}>New Cattle Type</p>
+              <div style={styles.cowFormGrid}>
+                <div>
+                  <p style={styles.cowFormLabel}>Breed</p>
+                  <select
+                    value={newCow.breed}
+                    onChange={(e) => setNewCow((p) => ({ ...p, breed: e.target.value }))}
+                    style={styles.cowSelect}
+                  >
+                    {["WAGYU","ANGUS","GRASS_FED","HERITAGE","CONVENTIONAL"].map((b) => (
+                      <option key={b} value={b}>{b.replace("_", " ")}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <p style={styles.cowFormLabel}>Price per lb ($)</p>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={newCow.pricePerPound}
+                    onChange={(e) => setNewCow((p) => ({ ...p, pricePerPound: e.target.value }))}
+                    placeholder="e.g. 8.50"
+                    style={styles.fieldInput}
+                  />
+                </div>
+                <div>
+                  <p style={styles.cowFormLabel}>Available Count</p>
+                  <input
+                    type="number"
+                    min="0"
+                    value={newCow.availableCount}
+                    onChange={(e) => setNewCow((p) => ({ ...p, availableCount: e.target.value }))}
+                    placeholder="e.g. 10"
+                    style={styles.fieldInput}
+                  />
+                </div>
+                <div style={{ gridColumn: "1 / -1" }}>
+                  <p style={styles.cowFormLabel}>Description</p>
+                  <input
+                    type="text"
+                    value={newCow.description}
+                    onChange={(e) => setNewCow((p) => ({ ...p, description: e.target.value }))}
+                    placeholder="e.g. Pasture-raised, hormone-free"
+                    style={styles.fieldInput}
+                  />
+                </div>
+              </div>
+              <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "16px" }}>
+                <button style={styles.primaryButton} onClick={handleAddCow}>Save Cattle</button>
+              </div>
+            </div>
+          )}
+
+          {cowTypes.length === 0 ? (
+            <p style={{ color: "#bbb", fontStyle: "italic" }}>No cattle listed yet. Add one above.</p>
+          ) : (
+            <div style={styles.cowGrid}>
+              {cowTypes.map((ct) => (
+                <div key={ct.id} style={styles.cowCard}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                    <span style={styles.cowBreed}>{ct.breed.replace("_", " ")}</span>
+                    <button style={styles.removeCowBtn} onClick={() => handleDeleteCow(ct.id)}>✕</button>
+                  </div>
+                  <p style={styles.cowDesc}>{ct.description || "—"}</p>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginTop: "auto" }}>
+                    <span style={styles.cowPrice}>${ct.pricePerPound?.toFixed(2)}/lb</span>
+                    <span style={styles.cowAvail}>{ct.availableCount} available</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -606,6 +724,82 @@ const styles = {
     flexDirection: "column",
     alignItems: "center",
     gap: "16px",
+  },
+  sectionHeading: {
+    fontSize: "20px",
+    fontWeight: "700",
+    color: SELLER_COLOR,
+    margin: 0,
+  },
+  cowGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
+    gap: "16px",
+  },
+  cowCard: {
+    backgroundColor: "white",
+    borderRadius: "8px",
+    padding: "20px",
+    boxShadow: "0 1px 4px rgba(0,0,0,0.07)",
+    border: "1px solid #e8e4e0",
+    display: "flex",
+    flexDirection: "column",
+    gap: "8px",
+    minHeight: "140px",
+  },
+  cowBreed: {
+    fontSize: "16px",
+    fontWeight: "700",
+    color: SELLER_COLOR,
+    textTransform: "capitalize",
+  },
+  cowDesc: {
+    fontSize: "13px",
+    color: "#666",
+    margin: 0,
+    flexGrow: 1,
+  },
+  cowPrice: {
+    fontSize: "15px",
+    fontWeight: "700",
+    color: GREEN,
+  },
+  cowAvail: {
+    fontSize: "13px",
+    color: "#999",
+  },
+  removeCowBtn: {
+    background: "none",
+    border: "none",
+    color: "#c00",
+    fontSize: "16px",
+    cursor: "pointer",
+    padding: "0 4px",
+    lineHeight: 1,
+  },
+  cowFormGrid: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr 1fr",
+    gap: "16px",
+    marginTop: "8px",
+  },
+  cowFormLabel: {
+    fontSize: "11px",
+    fontWeight: "700",
+    textTransform: "uppercase",
+    color: "#888",
+    margin: "0 0 4px 0",
+    letterSpacing: "0.05em",
+  },
+  cowSelect: {
+    width: "100%",
+    padding: "6px 4px",
+    border: "none",
+    borderBottom: `2px solid ${SELLER_COLOR}`,
+    backgroundColor: "transparent",
+    fontSize: "15px",
+    color: "#222",
+    outline: "none",
   },
   modalTitle: {
     fontSize: "22px",

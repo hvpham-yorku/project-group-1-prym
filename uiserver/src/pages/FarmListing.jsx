@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import farmImage from '../assets/rural-farm-landscape-stockcake.webp';
-import { getFarm, saveFarm, getSavedFarms, removeSavedFarm } from '../api/farm';
+import { getFarm, saveFarm, getSavedFarms, removeSavedFarm, getCowTypes } from '../api/farm';
 
 function FarmListing(){
 	
@@ -20,9 +20,13 @@ function FarmListing(){
 	
 	const [farm, setFarm] = useState(null);
 	const [savedIds, setSavedIds] = useState(new Set());
-	
+	const [cowTypes, setCowTypes] = useState([]);
+
 	useEffect(() => {
-		getFarm(farmname).then(setFarm).catch(console.error);
+		getFarm(farmname).then((f) => {
+			setFarm(f);
+			if (f) getCowTypes(f.id).then(setCowTypes).catch(console.error);
+		}).catch(console.error);
 		getSavedFarms().then((saved) => setSavedIds(new Set(saved.map((f) => f.id)))).catch(console.error);
 	}, [farmname]);
 	
@@ -70,11 +74,22 @@ function FarmListing(){
 				<ul style = {styles.certBox}><p>Our Farm Is:</p>{certs}</ul>
 			</div>
 
+			<h2 style={styles.sectionTitle}>Available Cattle</h2>
 			<div style={styles.container}>
-				<div style={styles.cowBox}> COW </div>
-				<div style={styles.cowBox}> COW </div>
-				<div style={styles.cowBox}> COW </div>
-				<div style={styles.cowBox}> COW </div>
+				{cowTypes.length === 0 ? (
+					<p style={{ margin: 20, color: '#888' }}>No cattle listed yet.</p>
+				) : (
+					cowTypes.map((ct) => (
+						<div key={ct.id} style={styles.cowCard}>
+							<div style={styles.cowBreed}>{ct.breed.replace('_', ' ')}</div>
+							<p style={styles.cowDesc}>{ct.description}</p>
+							<div style={styles.cowMeta}>
+								<span style={styles.cowPrice}>${ct.pricePerPound.toFixed(2)}/lb</span>
+								<span style={styles.cowAvail}>{ct.availableCount} available</span>
+							</div>
+						</div>
+					))
+				)}
 			</div>
 			
 			<div style={styles.bottomButtonContainer}>
@@ -199,17 +214,52 @@ const styles = {
 		width: '40%',
 		height: 100,
 	},
-	cowBox:	{
+	sectionTitle: {
+		fontFamily: 'Roboto',
+		fontSize: 28,
+		color: '#4a7c59',
+		margin: '20px 20px 0 20px',
+	},
+	cowCard: {
 		margin: 20,
-		display: 'flex',
-		justifyContent: 'center',
-		alignItems: 'center',
+		padding: 20,
 		backgroundColor: '#f5f5f0',
-		border: 'solid',
-		borderColor: '#333',
-		borderRadius: 5,
-		width: 400,
-		height: 600,
+		border: '1px solid #ccc',
+		borderRadius: 10,
+		width: 260,
+		display: 'flex',
+		flexDirection: 'column',
+		gap: 10,
+	},
+	cowBreed: {
+		fontFamily: 'Roboto',
+		fontSize: 22,
+		fontWeight: '700',
+		color: '#4a7c59',
+		textTransform: 'capitalize',
+	},
+	cowDesc: {
+		fontFamily: 'Roboto',
+		fontSize: 14,
+		color: '#555',
+		margin: 0,
+		flexGrow: 1,
+	},
+	cowMeta: {
+		display: 'flex',
+		justifyContent: 'space-between',
+		alignItems: 'center',
+	},
+	cowPrice: {
+		fontFamily: 'Roboto',
+		fontSize: 16,
+		fontWeight: '700',
+		color: '#2e7d32',
+	},
+	cowAvail: {
+		fontFamily: 'Roboto',
+		fontSize: 13,
+		color: '#888',
 	},
 	bottomButtonContainer: {
 		display: 'flex',
