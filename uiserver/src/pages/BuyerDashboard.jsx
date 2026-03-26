@@ -261,15 +261,15 @@ function BuyerDashboard() {
           <div style={{ marginLeft: "auto", display: "flex", gap: "10px" }}>
             <button
               style={{
-                ...styles.logoutBtn,
-                ...(isEditing ? { opacity: 0.4, cursor: "not-allowed" } : {}),
+                ...styles.bannerBtn,
+                ...(isEditing ? styles.joinButtonDisabled : {}),
               }}
               onClick={() => setIsEditing(true)}
               disabled={isEditing}
             >
               Edit Profile
             </button>
-            <button style={styles.logoutBtn} onClick={handleLogout}>
+            <button style={styles.bannerBtn} onClick={handleLogout}>
               Logout
             </button>
           </div>
@@ -561,7 +561,7 @@ const styles = {
     marginRight: "8px",
     flexShrink: 0,
   },
-  logoutBtn: {
+  bannerBtn: {
     background: "none",
     border: "2px solid rgba(255,255,255,0.6)",
     borderRadius: "6px",
