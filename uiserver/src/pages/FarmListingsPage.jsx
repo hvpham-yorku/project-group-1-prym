@@ -14,12 +14,17 @@ function FarmListingsPage() {
 	const profilePath = user?.role === 'BUYER' ? '/buyer/profile' : '/seller/dashboard';
 	
 	const [farms, setFarms] = useState([]);
+	const [searchQuery, setSearchQuery] = useState('');
 	
 	useEffect(() => {
 		getAllFarms().then(setFarms).catch(console.error);
 	}, []);
+
+	const filteredFarms = farms.filter(farm =>
+    	farm.shopName.toLowerCase().includes(searchQuery.toLowerCase())
+	);
 	
-	const listItems = farms.map(farm => {
+	const listItems = filteredFarms.map(farm => {
 		let certs = (farm.certifications || []).map(c => <li key={c.id} style={styles.cert}>{c.name}</li>);
 		return (<li key={farm.id}>
 			<Link to={`/buyer/farmlistings/${farm.id}`}>
@@ -66,6 +71,17 @@ function FarmListingsPage() {
 			</nav>
 
 			<h1 style={styles.header}>Farm Listings</h1>
+
+			{/* Search bar */}
+			<div style={styles.searchContainer}>
+    			<input
+        			style={styles.searchInput}
+        			type="text"
+        			placeholder="Search farms by name..."
+        			value={searchQuery}
+        			onChange={e=> setSearchQuery(e.target.value)}
+    			/>
+			</div>
 
 			<div style={styles.containerMain}>
 				{/* where all the farm listings are shown */}
@@ -242,6 +258,20 @@ const styles = {
 		fontSize: 20,
 		margin: 5,
 		padding: '4px 8px',
+	},
+	searchContainer: {
+    	display: 'flex',
+    	justifyContent: 'center',
+    	margin: '0 0 20px 0',
+	},
+	searchInput: {
+    	width: '60%',
+    	padding: '12px 20px',
+    	fontSize: '18px',
+    	border: '2px solid #4a7c59',
+    	borderRadius: '30px',
+    	outline: 'none',
+    	fontFamily: 'Roboto',
 	},
 };
 
