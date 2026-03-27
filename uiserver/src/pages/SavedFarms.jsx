@@ -20,7 +20,7 @@ function savedFarms(){
 	
 	async function handleUnsave(farm){
 		await removeSavedFarm(farm);
-		setFarms((prev) => prev.filter((f) => f != farm));
+		setFarms((prev) => prev.filter((f) => f.id !== farm.id));
 	}
 	
 	{/*making the list of farms to display */}

@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import farmImage from '../assets/rural-farm-landscape-stockcake.webp';
 import { getFarm, saveFarm, getSavedFarms, removeSavedFarm, getCowTypes } from '../api/farm';
 
 function FarmListing(){
@@ -16,7 +14,6 @@ function FarmListing(){
 	const profilePath = user?.role === 'BUYER' ? '/buyer/profile' : '/seller/dashboard';
 	
 	let {farmname} = useParams();
-	console.log(farmname);
 	
 	const [farm, setFarm] = useState(null);
 	const [savedIds, setSavedIds] = useState(new Set());
@@ -61,7 +58,7 @@ function FarmListing(){
 					<div style={{ width: 90 }} />
 			</nav>
 			
-			<div style={{width: '100%', height: '300'}} alt="farm image"/>
+			<div style={{width: '100%', height: '300'}} />
 
 			<h1 style={styles.header}>{farm.shopName}</h1>
 			<div style={styles.ratingRow}>

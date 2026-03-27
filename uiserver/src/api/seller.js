@@ -97,6 +97,7 @@ export async function deleteCowType(userId, cowTypeId) {
         method: 'DELETE',
         credentials: 'include'
     });
+    if (response.status === 204) return {};
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || 'Failed to delete cow type');
     return data;

@@ -24,12 +24,12 @@ export async function saveFarm(farm){
 }
 
 export async function getCowTypes(farmId) {
-	const response = await fetch(`/api/seller/${farmId}/cow-types`);
+	const response = await fetch(`/api/seller/${farmId}/cow-types`, { credentials: 'include' });
 	return response.json();
 }
 
 export async function removeSavedFarm(farm){
-	const response = await fetch("/api/buyer/all", {
+	const response = await fetch("/api/buyer/saved-farms", {
 		method: 'DELETE',
 		headers: { 'Content-Type': 'application/json' },
 		credentials: 'include',

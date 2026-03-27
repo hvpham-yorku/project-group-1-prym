@@ -20,11 +20,11 @@ public class SellerController {
   private final SessionService sessionService;
   private final CowTypeService cowTypeService;
 
-public SellerController(SellerService sellerService, SessionService sessionService, CowTypeService cowTypeService) {
-    this.sellerService = sellerService;
-    this.sessionService = sessionService;
-    this.cowTypeService = cowTypeService;
-}
+    public SellerController(SellerService sellerService, SessionService sessionService, CowTypeService cowTypeService) {
+        this.sellerService = sellerService;
+        this.sessionService = sessionService;
+        this.cowTypeService = cowTypeService;
+    }
 
     @PostMapping("/profile")
     public ResponseEntity<?> createSeller(@RequestBody Map<String, String> request) {
