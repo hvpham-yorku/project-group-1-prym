@@ -22,3 +22,19 @@ export async function saveFarm(farm){
 	});
 	return response.json();
 }
+
+export async function getCowTypes(farmId) {
+	const response = await fetch(`/api/seller/${farmId}/cow-types`, { credentials: 'include' });
+	return response.json();
+}
+
+export async function removeSavedFarm(farm){
+	const response = await fetch("/api/buyer/saved-farms", {
+		method: 'DELETE',
+		headers: { 'Content-Type': 'application/json' },
+		credentials: 'include',
+		body: JSON.stringify({ sellerId: farm.id })
+	});
+	if (!response.ok) throw new Error(`Failed to remove farm: ${response.status}`);
+	return response.json();
+}

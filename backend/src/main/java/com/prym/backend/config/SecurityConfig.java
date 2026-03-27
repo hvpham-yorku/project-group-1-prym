@@ -37,6 +37,7 @@ public class SecurityConfig {
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/ratings/**").permitAll() // anyone can view farm ratings
                 .requestMatchers("/api/buyer/**").hasRole("BUYER") // only buyers can access
                 .requestMatchers("/api/seller/all").hasRole("BUYER")//(SPECIAL CASE) allow buyers to access the farm listings
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/seller/*/cow-types").hasRole("BUYER") //(SPECIAL CASE) allow buyers to view a farm's cattle
                 .requestMatchers("/api/seller/**").hasRole("SELLER") //only Sellers can access
                 .anyRequest().authenticated() //everything else requires just being logged in
             )

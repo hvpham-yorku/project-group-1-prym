@@ -120,4 +120,19 @@ public class BuyerController {
 			return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
 		}
 	}
+	
+	@DeleteMapping("/saved-farms")
+	public ResponseEntity<?> removeSavedFarm(@RequestBody Map<String, Long> body){
+		try {
+			Long userId = getLoggedInUserId();
+			Long sellerId = body.get("sellerId");
+			if (sellerId == null) {
+				return ResponseEntity.badRequest().body(Map.of("error", "sellerId is required"));
+			}
+			Buyer buyer = buyerService.removeSavedFarm(userId, sellerId);
+			return ResponseEntity.ok(buyer);
+		} catch (RuntimeException e) {
+			return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+		}
+	}
 }

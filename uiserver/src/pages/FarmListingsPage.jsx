@@ -32,7 +32,7 @@ function FarmListingsPage() {
 						<div style={styles.description}>{farm.description}</div>
 						<div style={styles.location}>{farm.shopAddress}</div>
 						<div style={styles.certifications}>{certs}</div>
-						<div style={styles.rating}>RATING</div>
+						<div style={styles.rating}>{'★'.repeat(Math.round(farm.averageRating))}{'☆'.repeat(5 - Math.round(farm.averageRating))} {farm.averageRating.toFixed(1)} ({farm.totalRatings} ratings)</div>
 					</div>
 				</button>
 			</Link>
@@ -209,7 +209,7 @@ const styles = {
 		fontSize: 30,
 	},
 	rating: {
-		color: 'yellow',
+		color: '#f5a623',
 		margin: 5,
 		fontSize: 20,
 	},

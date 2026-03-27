@@ -54,4 +54,9 @@ public class CowTypeService {
     public void deleteCowType(Long cowTypeId) {
         cowTypeRepository.deleteById(cowTypeId);
     }
+
+    // Public lookup by seller profile ID (not user ID) — used by buyers viewing a farm listing
+    public List<CowType> getCowTypesBySellerProfileId(Long sellerId) {
+        return cowTypeRepository.findBySellerId(sellerId);
+    }
 }
