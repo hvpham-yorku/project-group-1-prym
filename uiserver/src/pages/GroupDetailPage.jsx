@@ -9,6 +9,12 @@ import {
   regenerateInviteCode,
   getMatchingFarms,
 } from "../api/groups";
+import {
+  getGroupAssociation,
+  requestAssociation,
+  cancelAssociation,
+  requestDisassociation,
+} from "../api/association";
 import GroupCowDiagram from "../components/GroupCowDiagram";
 import { Client } from "@stomp/stompjs";
 import { submitRating } from "../api/ratings";
@@ -90,6 +96,11 @@ function GroupDetailPage() {
   const stompClientRef = useRef(null);
   const messagesContainerRef = useRef(null);
 
+  // Association state
+  const [association, setAssociation] = useState(null); // null = none, {} = no active assoc
+  const [assocLoading, setAssocLoading] = useState(false);
+  const [assocError, setAssocError] = useState("");
+
   // Rating modal state
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [ratingCode, setRatingCode] = useState("");
@@ -103,12 +114,14 @@ function GroupDetailPage() {
     if (!user?.id) return;
     try {
       setLoading(true);
-      const [data, farmsData] = await Promise.all([
+      const [data, farmsData, assocData] = await Promise.all([
         getGroup(user.id, groupId),
         getMatchingFarms(user.id, groupId),
+        getGroupAssociation(user.id, groupId),
       ]);
       setGroup(data);
       setFarms(farmsData);
+      setAssociation(assocData && assocData.associationId ? assocData : null);
       // Pre-fill diagram with the user's currently saved cuts
       setSelectedCuts(parseCuts(data.myClaimedCuts));
     } catch (err) {
@@ -120,7 +133,7 @@ function GroupDetailPage() {
 
   useEffect(() => {
     fetchGroup();
-  }, [user?.id, groupId]);
+  }, [user?.id, groupId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Load message history and connect WebSocket when the user is a member
   useEffect(() => {
@@ -128,23 +141,37 @@ function GroupDetailPage() {
 
     // Fetch message history
     fetch(
-      `http://localhost:8080/api/buyer/groups/${groupId}/messages?userId=${user.id}`,
-      {
-        credentials: "include",
-      },
+      `/api/buyer/groups/${groupId}/messages?userId=${user.id}`,
+      { credentials: "include" },
     )
       .then((r) => r.json())
       .then((data) => setMessages(Array.isArray(data) ? data : []))
       .catch(() => {});
 
-    // Connect to WebSocket
+    // Connect to WebSocket — chat + association status updates
+    const wsProtocol = window.location.protocol === "https:" ? "wss" : "ws";
     const client = new Client({
-      brokerURL: "ws://localhost:8080/ws/websocket",
+      brokerURL: `${wsProtocol}://${window.location.host}/ws/websocket`,
       reconnectDelay: 5000,
       onConnect: () => {
         client.subscribe(`/topic/group/${groupId}`, (frame) => {
           const msg = JSON.parse(frame.body);
           setMessages((prev) => [...prev, msg]);
+        });
+        // Real-time association status updates for this group
+        client.subscribe(`/topic/group/${groupId}/association`, (frame) => {
+          const event = JSON.parse(frame.body);
+          if (
+            event.type === "ASSOCIATION_APPROVED" ||
+            event.type === "ASSOCIATION_DENIED" ||
+            event.type === "DISASSOCIATION_CONFIRMED" ||
+            event.type === "DISASSOCIATION_DENIED"
+          ) {
+            // Re-fetch association state from server for accuracy
+            getGroupAssociation(user.id, groupId)
+              .then((a) => setAssociation(a && a.associationId ? a : null))
+              .catch(() => {});
+          }
         });
       },
     });
@@ -161,6 +188,46 @@ function GroupDetailPage() {
     const el = messagesContainerRef.current;
     if (el) el.scrollTop = el.scrollHeight;
   }, [messages]);
+
+  const handleRequestAssociation = async (sellerId) => {
+    setAssocLoading(true);
+    setAssocError("");
+    try {
+      const result = await requestAssociation(user.id, groupId, sellerId);
+      setAssociation(result);
+    } catch (err) {
+      setAssocError(err.message || "Failed to send request.");
+    } finally {
+      setAssocLoading(false);
+    }
+  };
+
+  const handleCancelAssociation = async () => {
+    setAssocLoading(true);
+    setAssocError("");
+    try {
+      await cancelAssociation(user.id, groupId);
+      setAssociation(null);
+    } catch (err) {
+      setAssocError(err.message || "Failed to cancel request.");
+    } finally {
+      setAssocLoading(false);
+    }
+  };
+
+  const handleRequestDisassociation = async () => {
+    if (!window.confirm("Request disassociation from this seller? They must confirm before it takes effect.")) return;
+    setAssocLoading(true);
+    setAssocError("");
+    try {
+      const result = await requestDisassociation(user.id, groupId);
+      setAssociation(result);
+    } catch (err) {
+      setAssocError(err.message || "Failed to request disassociation.");
+    } finally {
+      setAssocLoading(false);
+    }
+  };
 
   const handleSendMessage = () => {
     const content = chatInput.trim();
@@ -298,7 +365,7 @@ function GroupDetailPage() {
           setRatingSuccess("");
         }, 1500);
       }
-    } catch (err) {
+    } catch {
       setRatingError("Something went wrong. Please try again");
     } finally {
       setRatingSubmitting(false);
@@ -556,6 +623,7 @@ function GroupDetailPage() {
                   )}
                   {messages.map((msg) => {
                     const isMe = msg.senderId === user.id;
+                    const isSeller = msg.senderRole === "SELLER";
                     return (
                       <div
                         key={msg.id ?? msg.sentAt}
@@ -569,11 +637,18 @@ function GroupDetailPage() {
                             ...styles.chatBubble,
                             ...(isMe
                               ? styles.chatBubbleMe
+                              : isSeller
+                              ? styles.chatBubbleSeller
                               : styles.chatBubbleOther),
                           }}
                         >
                           {!isMe && (
-                            <p style={styles.chatSender}>{msg.senderName}</p>
+                            <p style={styles.chatSender}>
+                              {msg.senderName}
+                              {isSeller && (
+                                <span style={styles.sellerChatBadge}> SELLER</span>
+                              )}
+                            </p>
                           )}
                           <p style={styles.chatContent}>{msg.content}</p>
                           <p style={styles.chatTime}>
@@ -620,6 +695,50 @@ function GroupDetailPage() {
             {farms && (
               <div style={styles.membersCard}>
                 <h2 style={styles.sectionTitle}>Matching Farms</h2>
+
+                {/* Association status banner */}
+                {assocError && (
+                  <div style={{ ...styles.assocBanner, ...styles.assocBannerError }}>
+                    {assocError}
+                  </div>
+                )}
+                {association?.status === "PENDING_ASSOCIATION" && (
+                  <div style={{ ...styles.assocBanner, ...styles.assocBannerPending }}>
+                    <span>
+                      Request sent to <strong>{association.shopName || "seller"}</strong> — waiting for their response.
+                    </span>
+                    {group.isCreator && (
+                      <button
+                        style={styles.assocCancelBtn}
+                        onClick={handleCancelAssociation}
+                        disabled={assocLoading}
+                      >
+                        Withdraw
+                      </button>
+                    )}
+                  </div>
+                )}
+                {association?.status === "ASSOCIATED" && (
+                  <div style={{ ...styles.assocBanner, ...styles.assocBannerActive }}>
+                    <span>
+                      Associated with <strong>{association.shopName || "seller"}</strong>
+                    </span>
+                    {group.isCreator && (
+                      <button
+                        style={styles.assocCancelBtn}
+                        onClick={handleRequestDisassociation}
+                        disabled={assocLoading}
+                      >
+                        Request Disassociation
+                      </button>
+                    )}
+                  </div>
+                )}
+                {association?.status === "PENDING_DISASSOCIATION" && (
+                  <div style={{ ...styles.assocBanner, ...styles.assocBannerPending }}>
+                    Disassociation request sent to <strong>{association.shopName || "seller"}</strong> — awaiting their confirmation.
+                  </div>
+                )}
 
                 {/* Distance Filter */}
                 <div style={styles.distanceFilter}>
@@ -703,6 +822,19 @@ function GroupDetailPage() {
                             ))}
                           </div>
                         )}
+                        {group.isCreator && !association && (
+                          <button
+                            style={styles.assocRequestBtn}
+                            onClick={() => handleRequestAssociation(f.sellerId)}
+                            disabled={assocLoading}
+                          >
+                            Request Association
+                          </button>
+                        )}
+                        {association?.status === "ASSOCIATED" &&
+                          association.sellerId === f.sellerId && (
+                            <span style={styles.assocActiveBadge}>✓ Associated</span>
+                          )}
                       </div>
                     ))}
                   </div>
@@ -766,6 +898,19 @@ function GroupDetailPage() {
                               ))}
                             </div>
                           )}
+                          {group.isCreator && !association && (
+                            <button
+                              style={styles.assocRequestBtn}
+                              onClick={() => handleRequestAssociation(f.sellerId)}
+                              disabled={assocLoading}
+                            >
+                              Request Association
+                            </button>
+                          )}
+                          {association?.status === "ASSOCIATED" &&
+                            association.sellerId === f.sellerId && (
+                              <span style={styles.assocActiveBadge}>✓ Associated</span>
+                            )}
                         </div>
                       ))}
                     </div>
@@ -1210,6 +1355,22 @@ const styles = {
     color: "#222",
     borderBottomLeftRadius: "4px",
   },
+  chatBubbleSeller: {
+    backgroundColor: "#fff8e1",
+    color: "#222",
+    borderBottomLeftRadius: "4px",
+    border: "1px solid #ffe082",
+  },
+  sellerChatBadge: {
+    fontSize: "9px",
+    fontWeight: "700",
+    letterSpacing: "0.06em",
+    color: "#f57f17",
+    backgroundColor: "#fff3cd",
+    padding: "1px 5px",
+    borderRadius: "4px",
+    marginLeft: "4px",
+  },
   chatSender: {
     fontSize: "11px",
     fontWeight: "700",
@@ -1377,6 +1538,35 @@ const styles = {
   distanceBadge: {
     fontSize: "12px", color: "#666", backgroundColor: "#f0f0f0",
     padding: "3px 8px", borderRadius: "10px", fontWeight: "600",
+  },
+  assocBanner: {
+    display: "flex", alignItems: "center", justifyContent: "space-between",
+    gap: "12px", padding: "10px 14px", borderRadius: "6px",
+    fontSize: "13px", marginBottom: "12px", flexWrap: "wrap",
+  },
+  assocBannerPending: {
+    backgroundColor: "#fff8e1", border: "1px solid #ffe082", color: "#7b5800",
+  },
+  assocBannerActive: {
+    backgroundColor: "#e8f5e9", border: "1px solid #a5d6a7", color: "#1b5e20",
+  },
+  assocBannerError: {
+    backgroundColor: "#fee", border: "1px solid #f5c6c6", color: "#c00",
+  },
+  assocCancelBtn: {
+    padding: "5px 12px", backgroundColor: "white", border: "1px solid #ccc",
+    borderRadius: "5px", fontSize: "12px", fontWeight: "600",
+    cursor: "pointer", color: "#555", flexShrink: 0,
+  },
+  assocRequestBtn: {
+    marginTop: "10px", padding: "7px 14px", backgroundColor: BUYER_COLOR,
+    color: "white", border: "none", borderRadius: "5px",
+    fontSize: "12px", fontWeight: "600", cursor: "pointer",
+  },
+  assocActiveBadge: {
+    display: "inline-block", marginTop: "10px", padding: "4px 10px",
+    backgroundColor: "#e8f5e9", color: "#2e7d32", borderRadius: "99px",
+    fontSize: "11px", fontWeight: "700",
   },
 };
 
