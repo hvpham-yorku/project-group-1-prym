@@ -1,6 +1,9 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { getCurrentUser } from '../api/auth';
 
+//global auth context that holds the logged-in user object.
+//wraps the whole app so any component can call useAuth() to
+//get the user, save updated user data, or clear it on logout.
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
@@ -51,6 +54,7 @@ export function AuthProvider({ children }) {
     );
 }
 
+//convenience hook so you don't have to import useContext and AuthContext separately
 export function useAuth() {
     return useContext(AuthContext);
 }

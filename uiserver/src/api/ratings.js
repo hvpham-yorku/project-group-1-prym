@@ -1,8 +1,15 @@
+//API helpers for the rating system.
+//Ratings are a two step thing: seller generates a code, buyer redeems it.
+
+//internal helper, fetches all farms to look up a seller's username by id
+//kinda roundabout but the ratings endpoint needs the username not the id
 async function getAllFarms() {
     const response = await fetch('/api/seller/all');
     return response.json();
 }
 
+//gets ratings for a farm by seller id. Has to look up the username first
+//because the backend ratings endpoint is keyed by username for some reason
 export async function getFarmRatings(sellerId){
     const farms = await getAllFarms();
     const farm = farms.find((f) => f.id === Number(sellerId));

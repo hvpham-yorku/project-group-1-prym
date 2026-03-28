@@ -24,16 +24,20 @@ public class Buyer {
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
+    //comma separated list of cut names the buyer prefers, like "Chuck, Rib"
     private String preferredCuts;
-    
+
+    //list of farms this buyer has bookmarked/saved for quick access
     @ManyToMany()
     @JoinTable(name="saved_farms", joinColumns = @JoinColumn(name = "buyer_id"), inverseJoinColumns = @JoinColumn(name = "seller_id"))
     private List<Seller> savedFarms = new ArrayList<>();
-    
+
+    //helper to add a farm to the saved list
     public void saveFarm(Seller farm) {
     	savedFarms.add(farm);
     }
-    
+
+    //helper to unsave a farm, pretty straightforward
     public void removeSavedFarm(Seller farm) {
     	savedFarms.remove(farm);
     }

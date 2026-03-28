@@ -26,6 +26,9 @@ function serializeCuts(cutsObj) {
     .join(", ");
 }
 
+//Main buyer dashboard / profile page. Shows user info in a banner,
+//the cow diagram for preferred cuts, and the groups panel on the right.
+//Pretty much the hub for everything a buyer does after logging in.
 function BuyerDashboard() {
   const { user, clearUser, saveUser } = useAuth();
   const navigate = useNavigate();
@@ -48,6 +51,7 @@ function BuyerDashboard() {
   const [inviteCode, setInviteCode] = useState("");
   const [codeError, setCodeError] = useState("");
 
+  //loads the buyer profile on mount so we can show their preferred cuts
   useEffect(() => {
     const fetchProfile = async () => {
       if (!user?.id) return;
@@ -69,6 +73,7 @@ function BuyerDashboard() {
     fetchProfile();
   }, [user?.id]);
 
+  //fetches both available groups and the user's own groups in parallel
   useEffect(() => {
     const fetchGroups = async () => {
       if (!user?.id) return;
@@ -101,6 +106,8 @@ function BuyerDashboard() {
     }
   };
 
+  //saves the edited profile — validates phone number then sends
+  //the preferred cuts and phone to the backend
   const handleSave = async () => {
     setError("");
     try {
@@ -155,6 +162,7 @@ function BuyerDashboard() {
     });
   };
 
+  //joins a group directly from the available groups list then navigates there
   const handleJoinGroup = async (groupId) => {
     setJoiningGroupId(groupId);
     setGroupsError("");
@@ -167,6 +175,7 @@ function BuyerDashboard() {
     }
   };
 
+  //looks up a group by its invite code and navigates to it
   const handleJoinByCode = async () => {
     if (!inviteCode.trim()) return;
     setCodeError("");
@@ -178,6 +187,7 @@ function BuyerDashboard() {
     }
   };
 
+  //throws away any unsaved edits and resets form back to what's in the profile
   const handleDiscard = () => {
     setFormData({
       phoneNumber: user?.phoneNumber || "",

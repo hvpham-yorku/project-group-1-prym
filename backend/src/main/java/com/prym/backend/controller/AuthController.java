@@ -140,6 +140,8 @@ public class AuthController {
 		return ResponseEntity.ok(Map.of("message", "Logged out successfully"));
 	}
 
+	//called by the frontend on page load to check if the user is still logged in
+	//basically validates the session cookie and returns the user data if its good
 	@GetMapping("/me")
 	public ResponseEntity<?> getCurrentUser(@CookieValue(name = "SESSION_ID", required = false) String sessionId) {
 		if (sessionId == null) {
@@ -155,6 +157,7 @@ public class AuthController {
 		return ResponseEntity.status(401).body(Map.of("error", "Session expired"));
 	}
 
+	//sticks the session cookie onto the response so the browser stores it
 	private void addSessionCookie(HttpServletResponse response, String sessionId) {
 		ResponseCookie cookie = ResponseCookie.from("SESSION_ID", sessionId)
 				.httpOnly(true)
@@ -165,6 +168,8 @@ public class AuthController {
 		response.addHeader("Set-Cookie", cookie.toString());
 	}
 
+	//builds the JSON response object we send back to the frontend after login/register
+	//basically flattens the User entity into a simple map
 	private Map<String, Object> buildUserResponse(User user) {
 		Map<String, Object> response = new HashMap<>();
 		response.put("id", user.getId());
@@ -182,6 +187,8 @@ public class AuthController {
 		return response;
 	}
 
+	//lets a logged in user update their basic account info (name, email, username, etc)
+	//used by the edit account modal on both buyer and seller dashboards
 	@PatchMapping("/user")
 	public ResponseEntity<?> updateUserInfo(@CookieValue(name = "SESSION_ID", required = false) String sessionId,
 			@RequestBody Map<String, String> request) {

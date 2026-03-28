@@ -7,18 +7,21 @@ import org.springframework.transaction.annotation.Transactional;
 import java.security.SecureRandom;
 import java.util.*;
 
+//Handles the whole rating flow — sellers generate codes, buyers redeem them to leave ratings.
+//This is a two-step process so random people cant just rate farms without actually buying.
 @Service
 public class RatingService {
     private final RatingRepository ratingRepository;
     private final RatingCodeRepository ratingCodeRepository;
     private final SellerRepository sellerRepository;
     private final BuyerRepository buyerRepository;
+    //characters used for generating random rating codes
     private static final String CODE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
-    public RatingService(RatingRepository ratingRepository, 
-        RatingCodeRepository ratingCodeRepository, 
-        SellerRepository sellerRepository, 
+    public RatingService(RatingRepository ratingRepository,
+        RatingCodeRepository ratingCodeRepository,
+        SellerRepository sellerRepository,
         BuyerRepository buyerRepository){
             this.ratingRepository = ratingRepository;
             this.ratingCodeRepository = ratingCodeRepository;
@@ -26,6 +29,7 @@ public class RatingService {
             this.buyerRepository = buyerRepository;
     }
 
+    //makes a random 6-char code with the "PRYM-" prefix so it looks official
     private String generateCode(){
         StringBuilder sb = new StringBuilder("PRYM-");
         for(int i = 0; i<6; i++){
@@ -93,12 +97,14 @@ public class RatingService {
         return Map.of("message", "Rating submitted successfully!");
     }
 
-    //get average of ratings of a farm
+    //get average rating and all individual ratings for a farm, looked up by username
+    //returns a nice DTO with shopName, average, total count, and the individual scores
     @Transactional
     public Map<String, Object> getFarmRatings(String sellerUsername){
         Seller seller = sellerRepository.findByUserUsername(sellerUsername)
                 .orElseThrow(() -> new RuntimeException("Seller not found"));
         List<Rating> ratings = ratingRepository.findBySeller(seller);
+        //build a list of simple DTOs with just the score and timestamp
         List<Map<String, Object>> ratingDTOs = ratings.stream().map(r -> {
             Map<String, Object> dto = new LinkedHashMap<>();
             dto.put("score", r.getScore());

@@ -3,6 +3,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import { login } from '../../api/auth';
 import { useAuth } from '../../context/AuthContext';
 
+//Login page — handles both buyer and seller logins.
+//After successful login, redirects to the appropriate dashboard based on the user's role.
 function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -12,6 +14,7 @@ function Login() {
     const navigate = useNavigate();
     const { saveUser } = useAuth();
 
+    //handles form submission, calls the login API and routes by role
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');

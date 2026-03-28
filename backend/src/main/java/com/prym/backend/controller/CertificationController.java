@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+//Endpoints for managing a seller's certifications (Halal, Organic, etc).
+//Supports adding one at a time, bulk-replacing all of them, fetching, and deleting.
 @RestController
 @RequestMapping("/api/seller/certifications")
 public class CertificationController {
@@ -24,6 +26,7 @@ public class CertificationController {
         this.sessionService = sessionService;
     }
 
+    //adds a single certification with issuing body and expiry date
     @PostMapping("/{userId}")
     public ResponseEntity<?> addCertification(
             @PathVariable Long userId,
@@ -51,6 +54,7 @@ public class CertificationController {
         }
     }
 
+    //fetch all certs for a seller, used by the dashboard to show badges
     @GetMapping("/{userId}")
     public ResponseEntity<?> getCertifications(
             @PathVariable Long userId,
@@ -69,6 +73,8 @@ public class CertificationController {
         }
     }
 
+    //bulk replace — wipes all existing certs and saves the new list.
+    //the frontend uses this when the seller edits their profile.
     @PutMapping("/{userId}")
     public ResponseEntity<?> setCertifications(
             @PathVariable Long userId,
@@ -92,6 +98,7 @@ public class CertificationController {
         }
     }
 
+    //deletes one specific certification by its id
     @DeleteMapping("/{userId}/{certId}")
     public ResponseEntity<?> deleteCertification(
             @PathVariable Long userId,

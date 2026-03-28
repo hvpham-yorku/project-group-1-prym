@@ -4,6 +4,9 @@ import { useAuth } from "../context/AuthContext";
 import { updateSellerProfile, getSellerProfile, getCertifications, setCertifications } from "../api/seller";
 import { ALL_CERTS } from "../constants/certifications";
 
+//Post-signup setup page for sellers. They pick their certifications
+//and write a farm description here before getting dropped into the
+//main dashboard. Kind of a quick onboarding step.
 function SellerProfileSetup() {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -13,6 +16,7 @@ function SellerProfileSetup() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  //loads existing profile data in case they already set something up before
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -39,6 +43,7 @@ function SellerProfileSetup() {
     );
   };
 
+  //saves the description and certs then sends them to the seller dashboard
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");

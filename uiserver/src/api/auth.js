@@ -1,5 +1,9 @@
+//API helpers for authentication — register, login, logout, session check, and account updates.
+//All requests include credentials so the session cookie gets sent along.
 const API_URL = '/api/auth';
 
+//safely parses the response body as JSON, handles empty responses
+//and non-JSON errors without crashing everything
 async function parseResponse(response) {
     const text = await response.text();
     try {
@@ -9,6 +13,7 @@ async function parseResponse(response) {
     }
 }
 
+//registers a new buyer account and auto-logs them in via session cookie
 export async function registerBuyer(userData) { // userData: { email, password, username, firstName, lastName, phoneNumber, profilePicture (optional) }
 
     const response = await fetch(`${API_URL}/register/buyer`, {
@@ -27,6 +32,7 @@ export async function registerBuyer(userData) { // userData: { email, password, 
     return data;
 }
 
+//registers a new seller account, also creates an empty seller profile on the backend
 export async function registerSeller(userData) {
     const response = await fetch(`${API_URL}/register/seller`, {
         method: 'POST',
@@ -44,6 +50,7 @@ export async function registerSeller(userData) {
     return data;
 }
 
+//logs in with email and password, backend sets the session cookie
 export async function login(email, password) {
     const response = await fetch(`${API_URL}/login`, {
         method: 'POST',
@@ -61,6 +68,7 @@ export async function login(email, password) {
     return data;
 }
 
+//tells the backend to kill the session, cookie gets cleared
 export async function logout() {
     const response = await fetch(`${API_URL}/logout`, {
         method: 'POST',
@@ -76,6 +84,8 @@ export async function logout() {
     return data;
 }
 
+//checks if the user is still logged in by validating their session cookie
+//called on page load by AuthContext to restore the user state
 export async function getCurrentUser() {
     const response = await fetch(`${API_URL}/me`, {
         method: 'GET',
@@ -91,6 +101,8 @@ export async function getCurrentUser() {
     return data;
 }
 
+//updates basic account info like name, email, pic, zip code etc
+//used by the edit account modal on both dashboards
 export async function updateUserInfo({firstName, lastName, email, username, profilePicture, zipCode}){
     const response = await fetch(`${API_URL}/user`,{
         method: 'PATCH',

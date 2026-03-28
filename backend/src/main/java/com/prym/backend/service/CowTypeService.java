@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+//Handles CRUD for cow types (breeds) that sellers offer on their farm.
+//A cow type is like a template — individual cows are created from these.
 @Service
 public class CowTypeService {
 
@@ -19,6 +21,7 @@ public class CowTypeService {
         this.sellerRepository = sellerRepository;
     }
 
+    //creates a new cow type/breed listing for a seller
     public CowType createCowType(Long userId, String breed, String description, Double pricePerPound, Integer availableCount) {
         Seller seller = sellerRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Seller not found"));
@@ -33,12 +36,14 @@ public class CowTypeService {
         return cowTypeRepository.save(cowType);
     }
 
+    //fetches all cow types for a given seller, used on their dashboard
     public List<CowType> getCowTypesBySeller(Long userId) {
         Seller seller = sellerRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Seller not found"));
         return cowTypeRepository.findBySellerId(seller.getId());
     }
 
+    //partial update, only overwrites fields that are actually provided (not null)
     public CowType updateCowType(Long cowTypeId, String breed, String description, Double pricePerPound, Integer availableCount) {
         CowType cowType = cowTypeRepository.findById(cowTypeId)
                 .orElseThrow(() -> new RuntimeException("CowType not found"));
@@ -51,6 +56,7 @@ public class CowTypeService {
         return cowTypeRepository.save(cowType);
     }
 
+    //straight up deletes a cow type, no soft delete or anything fancy
     public void deleteCowType(Long cowTypeId) {
         cowTypeRepository.deleteById(cowTypeId);
     }
