@@ -16,6 +16,7 @@ function SellerDashboard() {
     shopName: "",
     shopAddress: "",
     description: "",
+    category: "",
   });
   const [profile, setProfile] = useState(null);
   const [certList, setCertList] = useState([]);
@@ -47,6 +48,7 @@ function SellerDashboard() {
           shopName: data.shopName || "",
           shopAddress: data.shopAddress || "",
           description: data.description || "",
+          category: data.category || "",
         });
       } catch (err) {
         setError("Failed to load profile.");
@@ -95,6 +97,7 @@ function SellerDashboard() {
           shopName: data.shopName || "",
           shopAddress: data.shopAddress || "",
           description: data.description || "",
+          category: data.category || "",
         });
       } catch {
         //ignore the re-fetch failure
@@ -112,6 +115,7 @@ function SellerDashboard() {
       shopName: profile?.shopName || "",
       shopAddress: profile?.shopAddress || "",
       description: profile?.description || "",
+      category: profile?.category || "",
     });
     setSelectedCerts(certList.map((c) => c.name));
     setError("");
@@ -273,6 +277,31 @@ function SellerDashboard() {
                 ) : (
                   <p style={profile?.shopAddress ? styles.fieldValue : styles.fieldValueEmpty}>
                     {profile?.shopAddress || "Not set"}
+                  </p>
+                )}
+              </div>
+
+              {/* Category */}
+              <div style={styles.fieldCard}>
+                <p style={styles.fieldLabel}>Category</p>
+                {isEditing ? (
+                  <select
+                    name="category"
+                    value={formData.category}
+                    onChange={handleChange}
+                    style={{ ...styles.fieldInput, paddingLeft: 0 }}
+                  >
+                    <option value="">Not set</option>
+                    <option value="HALAL">Halal</option>
+                    <option value="KOSHER">Kosher</option>
+                    <option value="ORGANIC">Organic</option>
+                    <option value="CONVENTIONAL">Conventional</option>
+                  </select>
+                ) : (
+                  <p style={profile?.category ? styles.fieldValue : styles.fieldValueEmpty}>
+                    {profile?.category
+                      ? profile.category.charAt(0) + profile.category.slice(1).toLowerCase()
+                      : "Not set"}
                   </p>
                 )}
               </div>

@@ -3,6 +3,7 @@ import com.prym.backend.controller.SellerController;
 
 import com.prym.backend.model.Seller;
 import com.prym.backend.model.User;
+import com.prym.backend.service.CowTypeService;
 import com.prym.backend.service.SellerService;
 import com.prym.backend.service.SessionService;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,6 +29,9 @@ public class SellerControllerTest {
     @Mock
     private SessionService sessionService;
 
+    @Mock
+    private CowTypeService cowTypeService;
+
     private SellerController sellerController;
 
     private User testUser;
@@ -37,7 +41,7 @@ public class SellerControllerTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        sellerController = new SellerController(sellerService, sessionService);
+        sellerController = new SellerController(sellerService, sessionService, cowTypeService);
 
         // Setup a User
         testUser = new User();

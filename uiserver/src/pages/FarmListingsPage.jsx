@@ -24,8 +24,8 @@ function FarmListingsPage() {
 		getAllFarms().then(setFarms).catch(console.error);
 	}, []);
 
-	let filteredFarms = farms.filter(farm => 
-		farm.shopName.toLowerCase().includes(searchQuery.toLowerCase())
+	let filteredFarms = farms.filter(farm =>
+		(farm.shopName || '').toLowerCase().includes(searchQuery.toLowerCase())
 	)
 
 	//category filter

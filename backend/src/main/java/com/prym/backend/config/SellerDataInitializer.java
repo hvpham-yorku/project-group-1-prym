@@ -51,6 +51,7 @@ public class SellerDataInitializer implements CommandLineRunner {
             User u = authService.register("green_valley@prym.com", "sellerPass1", User.Role.SELLER,
                     "green_valley", "Green", "Valley", "4165550001", null, "M5V 3A8"); // Toronto
             sellerService.createSellerProfile(u.getId(), "Green Valley Farm", "100 Farm Rd, Toronto", "Locally raised, certified organic beef.");
+            sellerService.updateSellerProfile(u.getId(), null, null, null, null, "ORGANIC");
             addCerts(u.getId(), "ORGANIC", "GRASS_FED");
             sellerService.setRating(u.getId(), 4.8, 42);
             addCowType(u.getId(), "GRASS_FED", "Pasture-raised on open fields, no hormones or antibiotics.", 7.50, 12);
@@ -64,6 +65,7 @@ public class SellerDataInitializer implements CommandLineRunner {
             User u = authService.register("halal_haven@prym.com", "sellerPass1", User.Role.SELLER,
                     "halal_haven", "Halal", "Haven", "2125550002", null, "10001"); // New York
             sellerService.createSellerProfile(u.getId(), "Halal Haven Ranch", "200 Ranch Ave, New York", "Premium halal-certified beef and lamb.");
+            sellerService.updateSellerProfile(u.getId(), null, null, null, null, "HALAL");
             addCerts(u.getId(), "HALAL", "ORGANIC");
             sellerService.setRating(u.getId(), 4.6, 87);
             addCowType(u.getId(), "WAGYU", "Halal-certified Wagyu, exceptionally tender with intense marbling.", 18.00, 5);
@@ -77,6 +79,7 @@ public class SellerDataInitializer implements CommandLineRunner {
             User u = authService.register("prairie_pure@prym.com", "sellerPass1", User.Role.SELLER,
                     "prairie_pure", "Prairie", "Pure", "3125550003", null, "60601"); // Chicago
             sellerService.createSellerProfile(u.getId(), "Prairie Pure Meats", "300 Prairie St, Chicago", "Kosher certified, non-GMO meats.");
+            sellerService.updateSellerProfile(u.getId(), null, null, null, null, "KOSHER");
             addCerts(u.getId(), "KOSHER", "NON_GMO");
             sellerService.setRating(u.getId(), 4.2, 31);
             addCowType(u.getId(), "HERITAGE", "Kosher-certified heritage breed, non-GMO feed, slow-grown for flavor.", 10.00, 7);
@@ -90,6 +93,7 @@ public class SellerDataInitializer implements CommandLineRunner {
             User u = authService.register("pacific_coast@prym.com", "sellerPass1", User.Role.SELLER,
                     "pacific_coast", "Pacific", "Coast", "3105550004", null, "90001"); // Los Angeles
             sellerService.createSellerProfile(u.getId(), "Pacific Coast Butcher", "400 Coast Blvd, Los Angeles", "Animal welfare approved, organic, non-GMO.");
+            sellerService.updateSellerProfile(u.getId(), null, null, null, null, "ORGANIC");
             addCerts(u.getId(), "ORGANIC", "ANIMAL_WELFARE_APPROVED", "NON_GMO");
             sellerService.setRating(u.getId(), 4.9, 156);
             addCowType(u.getId(), "WAGYU", "Certified organic Wagyu, raised with full animal welfare approval.", 20.00, 4);
@@ -103,6 +107,7 @@ public class SellerDataInitializer implements CommandLineRunner {
             User u = authService.register("lone_star@prym.com", "sellerPass1", User.Role.SELLER,
                     "lone_star", "Lone", "Star", "2145550005", null, "75201"); // Dallas
             sellerService.createSellerProfile(u.getId(), "Lone Star Ranch", "500 Star Rd, Dallas", "Halal and grass-fed beef from Texas.");
+            sellerService.updateSellerProfile(u.getId(), null, null, null, null, "HALAL");
             addCerts(u.getId(), "HALAL", "GRASS_FED");
             sellerService.setRating(u.getId(), 4.4, 63);
             addCowType(u.getId(), "ANGUS", "Halal-certified Texas Angus, 100% grass-fed on sprawling ranch land.", 9.00, 14);
@@ -116,6 +121,7 @@ public class SellerDataInitializer implements CommandLineRunner {
             User u = authService.register("cascade_farms@prym.com", "sellerPass1", User.Role.SELLER,
                     "cascade_farms", "Cascade", "Farms", "2065550006", null, "98101"); // Seattle
             sellerService.createSellerProfile(u.getId(), "Cascade Farms", "600 Cascade Way, Seattle", "Certified organic, grass-fed, animal welfare approved.");
+            sellerService.updateSellerProfile(u.getId(), null, null, null, null, "ORGANIC");
             addCerts(u.getId(), "ORGANIC", "GRASS_FED", "ANIMAL_WELFARE_APPROVED");
             sellerService.setRating(u.getId(), 4.7, 94);
             addCowType(u.getId(), "GRASS_FED", "Organic grass-fed, rotationally grazed on Pacific Northwest pastures.", 8.00, 13);
@@ -129,6 +135,7 @@ public class SellerDataInitializer implements CommandLineRunner {
             User u = authService.register("liberty_meats@prym.com", "sellerPass1", User.Role.SELLER,
                     "liberty_meats", "Liberty", "Meats", "6175550007", null, "02101"); // Boston
             sellerService.createSellerProfile(u.getId(), "Liberty Meats", "700 Liberty St, Boston", "Kosher, halal, and organic certified.");
+            sellerService.updateSellerProfile(u.getId(), null, null, null, null, "KOSHER");
             addCerts(u.getId(), "KOSHER", "HALAL", "ORGANIC");
             sellerService.setRating(u.getId(), 4.5, 78);
             addCowType(u.getId(), "WAGYU", "Dual-certified Kosher and Halal Wagyu, premium organic finish.", 19.00, 4);
@@ -142,6 +149,7 @@ public class SellerDataInitializer implements CommandLineRunner {
             User u = authService.register("rocky_ridge@prym.com", "sellerPass1", User.Role.SELLER,
                     "rocky_ridge", "Rocky", "Ridge", "7205550008", null, "80201"); // Denver
             sellerService.createSellerProfile(u.getId(), "Rocky Ridge Ranch", "800 Ridge Rd, Denver", "Grass-fed and non-GMO certified beef.");
+            sellerService.updateSellerProfile(u.getId(), null, null, null, null, "CONVENTIONAL");
             addCerts(u.getId(), "GRASS_FED", "NON_GMO");
             sellerService.setRating(u.getId(), 4.3, 45);
             addCowType(u.getId(), "GRASS_FED", "High-altitude grass-fed, non-GMO certified Rocky Mountain beef.", 7.50, 16);
@@ -155,6 +163,7 @@ public class SellerDataInitializer implements CommandLineRunner {
             User u = authService.register("magnolia_meats@prym.com", "sellerPass1", User.Role.SELLER,
                     "magnolia_meats", "Magnolia", "Meats", "4045550009", null, "30301"); // Atlanta
             sellerService.createSellerProfile(u.getId(), "Magnolia Meats", "900 Magnolia Ln, Atlanta", "Halal, organic, and grass-fed certified.");
+            sellerService.updateSellerProfile(u.getId(), null, null, null, null, "HALAL");
             addCerts(u.getId(), "HALAL", "ORGANIC", "GRASS_FED");
             sellerService.setRating(u.getId(), 4.8, 112);
             addCowType(u.getId(), "WAGYU", "Halal-certified organic Wagyu, pasture-raised in Southern Georgia.", 17.50, 5);
@@ -168,6 +177,7 @@ public class SellerDataInitializer implements CommandLineRunner {
             User u = authService.register("sunrise_butcher@prym.com", "sellerPass1", User.Role.SELLER,
                     "sunrise_butcher", "Sunrise", "Butcher", "2105550010", null, "78201"); // San Antonio
             sellerService.createSellerProfile(u.getId(), "Sunrise Butcher Co.", "1000 Sunrise Blvd, San Antonio", "Kosher and non-GMO meats.");
+            sellerService.updateSellerProfile(u.getId(), null, null, null, null, "KOSHER");
             addCerts(u.getId(), "KOSHER", "NON_GMO");
             sellerService.setRating(u.getId(), 4.1, 27);
             addCowType(u.getId(), "HERITAGE", "Kosher-certified heritage breed, non-GMO and slow-finished.", 10.50, 7);
