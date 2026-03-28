@@ -54,19 +54,38 @@ function FarmListingsPage() {
 	}
 
 	const listItems = filteredFarms.map(farm => {
-		let certs = (farm.certifications || []).map(c => <li key={c.id} style={styles.cert}>{c.name}</li>);
+		let certs = (farm.certifications || []).map(c =>
+			 <li key={c.id}>
+			 {c.name === "KOSHER" && (
+			 	<span style={{ ...styles.badge, ...styles.badgeKosher }}>Kosher</span>
+			 )}
+			 {c.name === "HALAL" && (
+			 	<span style={{ ...styles.badge, ...styles.badgeHalal }}>Halal</span>
+			 )}
+			 {c.name === "ORGANIC" && (
+			 	<span style={{ ...styles.badge, ...styles.badgeOrganic }}>Organic</span>
+			 )}
+			 {c.name === "GRASS_FED" && (
+			 	<span style={{ ...styles.badge, ...styles.badgeGrassFed }}>Grass-Fed</span>
+			 )}
+			 {c.name === "NON_GMO" && (
+			 	<span style={{ ...styles.badge, ...styles.badgeNonGmo }}>Non-GMO</span>
+			 )}
+			 </li>
+		 );
 		return (<li key={farm.id}>
 			<Link to={`/buyer/farmlistings/${farm.id}`}>
 				<button style={{...styles.button, borderLeft: '10px solid #2e7d32'}}>
 					<div style={{...styles.colContainer, width: "40%"}}>
-						<div style={styles.farmImage}>FARM IMAGE</div>
+						<div style={styles.farmImage}>{user?.profilePicture ? (
+							<img src={farm.getUser().getProfilePicture()} alt="farm_photo" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />) : ( 'no image found' )}
+						</div>
 						<div style={styles.farmName}>{farm.shopName}</div>
+						<div style ={styles.certBadges}>{certs}</div>
 					</div>
 					<div style={{...styles.colContainer, width: "60%"}}>
 						<div style={styles.description}>{farm.description}</div>
 						<div style={styles.location}>{farm.shopAddress}</div>
-						<div style={styles.certifications}>{certs}</div>
-						<div style={styles.rating}>{'★'.repeat(Math.round(farm.averageRating || 0))}{'☆'.repeat(5 - Math.round(farm.averageRating || 0))} {(farm.averageRating || 0).toFixed(1)} ({farm.totalRatings} ratings)</div>
 					</div>
 				</button>
 			</Link>
@@ -260,14 +279,14 @@ const styles = {
 		backgroundColor: '#4a7c59',
 		color: 'white',
 		fontSize: 40,
-		fontFamily: 'Roboto',
+		fontFamily: 'Roboto, sans-serif',
 	},
 	button: {
 		display: 'flex',
 		flexDirection: 'row',
 		backgroundColor: 'white',
 		fontSize: 50,
-		fontFamily: 'Roboto',
+		fontFamily: 'Roboto, sans-serif',
 		width: 1100,
 		height: 300,
 		border: '1px solid',
@@ -281,7 +300,7 @@ const styles = {
 		margin: 5,
 	},
 	header: {
-		fontFamily: 'Roboto',
+		fontFamily: 'Roboto, sans-serif',
 		display: 'flex',
 		alignItems: 'center',
 		justifyContent: 'center',
@@ -293,6 +312,7 @@ const styles = {
 		border: 'solid',
 		margin: 5,
 		color: 'grey',
+		borderRadius: 8,
 	},
 	farmName: {
 		backgroundColor: '#4a7c59',
@@ -301,23 +321,24 @@ const styles = {
 		padding: "5px 5px",
 		margin: 5,
 		fontSize: 30,
+		fontFamily: 'Roboto, sans-serif',
 	},
 	rating: {
 		color: '#f5a623',
 		margin: 5,
 		fontSize: 20,
+		fontFamily: 'Roboto, sans-serif',
 	},
 	description: {
 		height: '40%',
-		border: 'solid',
-		borderColor: 'grey',
-		borderRadius: 8,
-		margin: 10,
 		fontSize: 20,
+		marginTop: 40,
+		fontFamily: 'Roboto, sans-serif',
 	},
 	location: {
 		color: '#4a7c59',
 		fontSize: 30,
+		fontFamily: 'Roboto, sans-serif',
 	},
 	certifications: {
 		display: 'flex',
@@ -325,6 +346,7 @@ const styles = {
 		flexWrap: "wrap",
 		margin: 5,
 		fontSize: 50,
+		fontFamily: 'Roboto, sans-serif',
 	},
 	cert: {
 		display: 'flex',
@@ -336,7 +358,31 @@ const styles = {
 		fontSize: 20,
 		margin: 5,
 		padding: '4px 8px',
+		fontFamily: 'Roboto, sans-serif',
 	},
+	badge: {
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+		height: 25,
+		backgroundColor: 'green',
+		fontSize: 20,
+		margin: 5,
+		padding: '4px 8px',
+		borderRadius: 99,
+		textTransform: "uppercase",
+		fontFamily: 'Roboto, sans-serif',
+	},
+	certBadges: {
+	    display: "flex",
+	    gap: "6px",
+	    flexWrap: "wrap",
+	 },
+	 badgeKosher:   { backgroundColor: "#e3f2fd", color: "#1565c0" },
+	 badgeHalal:    { backgroundColor: "#fff3e0", color: "#e65100" },
+	 badgeOrganic:  { backgroundColor: "#e8f5e9", color: "#2e7d32" },
+	 badgeGrassFed: { backgroundColor: "#f1f8e9", color: "#558b2f" },
+	 badgeNonGmo:   { backgroundColor: "#fce4ec", color: "#880e4f" },
 	searchContainer: {
     	display: 'flex',
     	justifyContent: 'center',

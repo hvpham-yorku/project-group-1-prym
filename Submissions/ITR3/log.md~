@@ -50,10 +50,6 @@ To do:
 ___
 
 ### March 28 2026
-Agenda: lab 5 discussion and more finalization
-
-- Jacob needs to wait for sufyan to commit his extra commentation
-- figuring out lab 5 documents 
 
 ___
 
@@ -63,7 +59,6 @@ ___
 |------|-------------|
 | Not implementing contract | After discussion with the customer, we found it to be a feature that would not add anything of significance to the app, and therefore deemed in unecessary |
 | No group chat settings | This feature seemed unecessary and were not a significant addition to the platform at this stage |
-
 
 ---
 
@@ -92,7 +87,6 @@ ___
 | Seller dashboard modification | Sufyan |
 | Cow icon integration with farm listings | Sufyan |
 | Submit ratings | Harleen |
-
 ---
 
 ## Development Tasks Per User Story
