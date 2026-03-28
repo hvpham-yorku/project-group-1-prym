@@ -135,12 +135,12 @@ public class SellerServiceTest {
         existingSeller.setShopName("My Shop");
         when(sellerRepository.findByUserId(1L)).thenReturn(Optional.of(existingSeller));
         when(sellerRepository.save(any(Seller.class))).thenAnswer(i -> i.getArgument(0));
-        when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
 
         sellerService.updateSellerProfile(1L, "My Shop", "647-555-1234", "Same Address", null);
 
         assertEquals("647-555-1234", existingSeller.getUser().getPhoneNumber());
-        verify(userRepository).save(any(User.class));
+        // Phone update is applied via Hibernate dirty checking — no explicit userRepository.save() needed
+        verify(userRepository, never()).save(any(User.class));
     }
 
     // Test 8: updateSellerProfile_BlankPhoneSkipped

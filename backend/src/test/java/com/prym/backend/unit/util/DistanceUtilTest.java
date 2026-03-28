@@ -26,9 +26,9 @@ public class DistanceUtilTest {
 
     @Test
     void calculateDistance_TorontoToMontreal_IsApproximatelyCorrect() {
-        // Toronto (43.6532, -79.3832) → Montreal (45.5017, -73.5673) ≈ 335 miles
+        // Toronto (43.6532, -79.3832) → Montreal (45.5017, -73.5673) ≈ 313 miles
         double dist = DistanceUtil.calculateDistance(43.6532, -79.3832, 45.5017, -73.5673);
-        assertEquals(335.0, dist, DELTA);
+        assertEquals(313.0, dist, DELTA);
     }
 
     @Test

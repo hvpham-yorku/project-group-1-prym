@@ -85,13 +85,12 @@ public class SellerJourneyTest {
     void seller_UpdatesFarmProfile() {
         User user = registerSeller("updatefarm@example.com", "updatefarm", "Old Name Farm");
 
-        sellerService.updateSellerProfile(user.getId(), "Updated Farm", null, "789 New Road", "Premium cuts", "Beef");
+        sellerService.updateSellerProfile(user.getId(), "Updated Farm", null, "789 New Road", "Premium cuts");
         Seller updated = sellerService.getSellerProfile(user.getId());
 
         assertEquals("Updated Farm", updated.getShopName());
         assertEquals("789 New Road", updated.getShopAddress());
         assertEquals("Premium cuts", updated.getDescription());
-        assertEquals("Beef", updated.getCategory());
     }
 
     /**
