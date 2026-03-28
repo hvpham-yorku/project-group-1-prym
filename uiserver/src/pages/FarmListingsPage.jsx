@@ -31,7 +31,7 @@ function FarmListingsPage() {
 	//category filter
 	if(selectedCategory){
 		filteredFarms = filteredFarms.filter(farm=>
-			farm.category == selectedCategory
+			(farm.certifications || []).some(c => c.name === selectedCategory)
 		);
 	}
 

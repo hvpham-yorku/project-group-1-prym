@@ -29,7 +29,6 @@ public class Seller {
     private String shopName;       // Name of the farm/shop
     private String shopAddress;    // Address of the farm
     private String description;    // Description of the farm and its practices
-    private String category;       // Category of meat (e.g. Beef, Poultry, Lamb)
     @Column(nullable = false)
     private double averageRating = 0.0;
 
