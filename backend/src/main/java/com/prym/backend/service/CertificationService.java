@@ -13,6 +13,8 @@ import java.util.stream.Collectors;
 
 import org.springframework.transaction.annotation.Transactional;
 
+//Manages seller certifications like Halal, Organic, etc.
+//Sellers can have multiple certs and we need to be able to replace them all at once too.
 @Service
 public class CertificationService {
 
@@ -24,6 +26,7 @@ public class CertificationService {
         this.sellerRepository = sellerRepository;
     }
 
+    //adds a single certification to a seller, used mainly by the data initializer
     public Certification addCertification(Long userId, String name, String issuingBody, LocalDate expiryDate) {
         Seller seller = sellerRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Seller not found"));
@@ -37,12 +40,14 @@ public class CertificationService {
         return certificationRepository.save(cert);
     }
 
+    //gets all certifications for a seller, pretty self explanatory
     public List<Certification> getCertificationsBySeller(Long userId) {
         Seller seller = sellerRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Seller not found"));
         return certificationRepository.findBySellerId(seller.getId());
     }
 
+    //removes a single certification by its id, verifies ownership first
     public void deleteCertification(Long userId, Long certId) {
         Seller seller = sellerRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Seller not found"));
@@ -54,10 +59,14 @@ public class CertificationService {
         certificationRepository.deleteById(certId);
     }
 
+    //replaces ALL of a seller's certifications in one shot. Nukes the old ones
+    //and creates fresh records from the list provided. Needs @Transactional because
+    //if any cert name is invalid we want to roll back the delete too.
     @Transactional
     public void setCertifications(Long userId, List<String> certNames) {
         Seller seller = sellerRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Seller not found"));
+        //wipe existing certs first, then re-add from the new list
         certificationRepository.deleteBySellerId(seller.getId());
         for (String name : certNames) {
             Certification cert = new Certification();

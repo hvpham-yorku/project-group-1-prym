@@ -13,6 +13,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+//Manages individual cows and their cuts. This is where the 22-cut auto-generation
+//happens when a new cow gets created, which is honestly the most important part.
 @Service
 public class CowService {
 
@@ -20,6 +22,7 @@ public class CowService {
     private final CowTypeRepository cowTypeRepository;
     private final CowCutRepository cowCutRepository;
 
+    //spring injects all three repos here, we need all of them for cow + cut creation
     public CowService(CowRepository cowRepository, CowTypeRepository cowTypeRepository, CowCutRepository cowCutRepository) {
         this.cowRepository = cowRepository;
         this.cowTypeRepository = cowTypeRepository;
@@ -58,14 +61,17 @@ public class CowService {
         return savedCow;
     }
 
+    //gets all cows belonging to a seller, goes through the cowType relationship
     public List<Cow> getCowsBySeller(Long userId) {
         return cowRepository.findByCowTypeSellerId(userId);
     }
 
+    //only returns cuts that havent been claimed yet for a specific cow
     public List<CowCut> getAvailableCuts(Long cowId) {
         return cowCutRepository.findByCowIdAndStatus(cowId, CowCut.CutStatus.AVAILABLE);
     }
 
+    //returns every cut for a cow regardless of status, useful for the diagram display
     public List<CowCut> getAllCuts(Long cowId) {
         return cowCutRepository.findByCowId(cowId);
     }

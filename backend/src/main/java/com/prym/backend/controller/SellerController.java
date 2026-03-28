@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
+//REST controller for seller profile operations.
+//Uses session cookie auth instead of SecurityContext because seller endpoints
+//are under /api/seller which has its own auth pattern.
 @RestController
 @RequestMapping("/api/seller")
 public class SellerController {
@@ -26,6 +29,7 @@ public class SellerController {
         this.cowTypeService = cowTypeService;
     }
 
+    //creates a brand new seller profile, usually called right after registration
     @PostMapping("/profile")
     public ResponseEntity<?> createSeller(@RequestBody Map<String, String> request) {
         try {
@@ -42,6 +46,8 @@ public class SellerController {
         }
     }
     
+    //fetches the seller profile along with the user info, returns a flat DTO
+    //with null-safe defaults so the frontend doesnt break on empty fields
     @GetMapping("/profile/{userId}")
 public ResponseEntity<?> getSeller(@PathVariable Long userId,
         @CookieValue(name = "SESSION_ID", required = false) String sessionId) {
@@ -71,9 +77,9 @@ public ResponseEntity<?> getSeller(@PathVariable Long userId,
         return ResponseEntity.status(404).body(Map.of("error", "Profile not found"));
     }
 }
+//updates seller profile fields, only changes what was actually sent in the request
 @PatchMapping("/profile/{userId}")
-
-        public ResponseEntity<?> updateSeller(@PathVariable Long userId, 
+        public ResponseEntity<?> updateSeller(@PathVariable Long userId,
         @RequestBody Map<String, String> request,
         @CookieValue(name = "SESSION_ID", required = false) String sessionId) {
     
@@ -98,6 +104,8 @@ public ResponseEntity<?> getSeller(@PathVariable Long userId,
     }
 }
 
+//returns every single farm/seller in the system, used by the farm listings page
+//no auth check here because buyers need to see these too
 @GetMapping("/all")
 public ResponseEntity<?> getAllFarms() {
     try {

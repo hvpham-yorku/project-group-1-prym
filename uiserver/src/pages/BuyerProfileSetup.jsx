@@ -1,3 +1,5 @@
+//profile setup page for new buyers, lets them pick which cuts they prefer
+//uses the cow diagram component so they can visually click on parts of the cow
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createBuyerProfile } from '../api/buyer';
@@ -6,11 +8,13 @@ import CowDiagram from '../components/CowDiagram';
 
 function BuyerProfileSetup() {
     // { cutId: quantity }  e.g. { 'Chuck': 1, 'Rib': 2 }
+    //tracks which cuts the buyer picked and how many of each
     const [selectedCuts, setSelectedCuts] = useState({});
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
     const navigate = useNavigate();
+    //grabs the user data from context so we know who is logged in
     const { user } = useAuth();
 
     // Add with qty=1, or remove if already selected

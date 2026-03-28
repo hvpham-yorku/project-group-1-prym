@@ -7,6 +7,9 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+//Seeds test buyer groups on startup. Runs at Order(3) because it needs
+//both sellers (Order 1) and buyers (Order 2) to already exist.
+//Skips entirely if any groups already exist in the db.
 @Component
 @Order(3)
 public class GroupDataInitializer implements CommandLineRunner {
@@ -45,6 +48,7 @@ public class GroupDataInitializer implements CommandLineRunner {
             return;
         }
 
+        //create one group per buyer, each with different certification preferences
         groupService.createGroup(buyer1Id, "Organic Circle",          "ORGANIC");
         groupService.createGroup(buyer2Id, "Halal Buyers Group",      "HALAL");
         groupService.createGroup(buyer3Id, "Kosher Crew",             "KOSHER");

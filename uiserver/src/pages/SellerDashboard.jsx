@@ -7,6 +7,9 @@ import EditAccountModal from "../components/EditAccountModal";
 import { generateRatingCode } from "../api/ratings";
 import { ALL_CERTS } from "../constants/certifications";
 
+//Seller's main dashboard page. Shows their farm info, certifications,
+//description, and a rating code generator on the side. Everything
+//is editable inline when you click the edit button.
 function SellerDashboard() {
   const { user, clearUser, saveUser } = useAuth();
   const navigate = useNavigate();
@@ -29,6 +32,7 @@ function SellerDashboard() {
   const [newCow, setNewCow] = useState({ breed: "ANGUS", description: "", pricePerPound: "", availableCount: "" });
   const [showAddCow, setShowAddCow] = useState(false);
 
+  //pulls seller profile and certifications on mount so we have something to show
   useEffect(() => {
     const fetchProfile = async () => {
       if (!user?.id) return;
@@ -69,6 +73,7 @@ function SellerDashboard() {
     }
   };
 
+  //saves the shop info and certifications in parallel then updates local state
   const handleSave = async () => {
     setError("");
     try {
@@ -107,6 +112,7 @@ function SellerDashboard() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  //reverts all form fields and cert selections back to what was saved
   const handleDiscard = () => {
     setFormData({
       shopName: profile?.shopName || "",
@@ -151,6 +157,7 @@ function SellerDashboard() {
     }
   };
 
+  //asks the backend for a one-time rating code the seller can hand to a buyer
   const handleGenerateCode = async () => {
     setError("");
     try {

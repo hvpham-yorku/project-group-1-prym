@@ -15,6 +15,9 @@ const CERT_OPTIONS = [
   { value: 'CONVENTIONAL',             label: 'Conventional' },
 ];
 
+//Page for creating a new buyer group. Lets you pick a name and
+//certifications, then sends it off to the backend. Also checks
+//if you're already in a group first since we only allow one at a time.
 function CreateGroupPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -35,6 +38,7 @@ function CreateGroupPage() {
       .finally(() => setCheckingMembership(false));
   }, [user?.id]);
 
+  //flips a cert on or off in the set when you click the checkbox
   const toggleCert = (cert) => {
     setSelectedCerts((prev) => {
       const next = new Set(prev);
@@ -44,6 +48,8 @@ function CreateGroupPage() {
     });
   };
 
+  //fires on form submit, joins selected certs into a comma string and
+  //sends the create request, then navigates to the new group page
   const handleCreate = async (e) => {
     e.preventDefault();
     if (!name.trim()) {

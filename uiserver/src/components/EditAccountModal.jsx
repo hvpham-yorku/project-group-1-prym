@@ -3,6 +3,9 @@ import { updateUserInfo } from "../api/auth";
 import { useAuth } from "../context/AuthContext";
 import { useAsyncError } from "react-router-dom";
 
+//Modal that pops up for editing your account info (name, email, phone,
+//profile picture, zip code). Used by both buyer and seller dashboards,
+//the accentColor prop keeps it on-brand for whichever side you're on.
 function EditAccountModal({ onClose, accentColor }) {
   const { user, saveUser } = useAuth();
 
@@ -47,6 +50,8 @@ function EditAccountModal({ onClose, accentColor }) {
     reader.readAsDataURL(file);
   };
 
+  //validates the form fields then sends the update to the backend,
+  //updates the auth context with the new info, and closes the modal
   const handleSave = async () => {
     setError("");
     if (!form.firstName.trim() || !form.lastName.trim()) {

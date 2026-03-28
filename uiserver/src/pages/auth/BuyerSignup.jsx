@@ -3,6 +3,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import { registerBuyer } from '../../api/auth';
 import { useAuth } from '../../context/AuthContext';
 
+//Buyer registration page. Collects personal info, profile pic, zip code, etc.
+//After registering, sends the user to the buyer profile setup page to pick preferred cuts.
 function BuyerSignup() {
     const [formData, setFormData] = useState({
         email: '',
@@ -27,6 +29,8 @@ function BuyerSignup() {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
+    //reads the selected image file and converts it to base64 for storage
+    //also enforces a 2MB size limit so we dont blow up the database
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         if (file) {

@@ -8,9 +8,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+//database access for seller certifications (Halal, Organic, etc)
 @Repository
 public interface CertificationRepository extends JpaRepository<Certification, Long> {
+    //get all certs for a seller
     List<Certification> findBySellerId(Long sellerId);
+    //wipe all certs for a seller, used by the bulk-replace flow.
+    //needs to be called inside a @Transactional method or it will complain
     @Modifying
     @Transactional
     void deleteBySellerId(Long sellerId);

@@ -1,18 +1,26 @@
+//API helpers for farm listings and saved farms.
+//These talk to both /api/seller (for listings) and /api/buyer (for saving farms).
+
+//grabs every single farm/seller from the backend, no auth needed
 export async function getAllFarms() {
 	const response = await fetch('/api/seller/all');
 	return response.json();
 }
 
+//finds one farm by id from the full list. Not super efficient but works
+//since we dont have a dedicated single-farm endpoint
 export async function getFarm(id) {
 	const farms = await getAllFarms();
 	return farms.find((f) => f.id === Number(id));
 }
 
+//gets the list of farms this buyer has bookmarked
 export async function getSavedFarms(){
 	const response = await fetch('/api/buyer/all', { credentials: 'include' });
 	return response.json();
 }
 
+//bookmarks a farm for the logged in buyer
 export async function saveFarm(farm){
 	const response = await fetch("/api/buyer/all", {
 		method: 'PATCH',

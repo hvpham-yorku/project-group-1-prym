@@ -11,6 +11,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+//CRUD endpoints for managing cow types (breeds) that a seller offers.
+//All endpoints verify the session cookie matches the userId in the path
+//so sellers can only mess with their own stuff.
 @RestController
 @RequestMapping("/api/seller/cow-types")
 public class CowTypeController {
@@ -23,6 +26,7 @@ public class CowTypeController {
         this.sessionService = sessionService;
     }
 
+    //create a new breed/type listing for this seller
     @PostMapping("/{userId}")
     public ResponseEntity<?> createCowType(
             @PathVariable Long userId,
@@ -49,6 +53,7 @@ public class CowTypeController {
         }
     }
 
+    //get all cow types belonging to this seller
     @GetMapping("/{userId}")
     public ResponseEntity<?> getCowTypes(
             @PathVariable Long userId,
@@ -67,6 +72,7 @@ public class CowTypeController {
         }
     }
 
+    //partial update for a cow type, only changes non-null fields
     @PatchMapping("/{userId}/{cowTypeId}")
     public ResponseEntity<?> updateCowType(
             @PathVariable Long userId,
@@ -94,6 +100,7 @@ public class CowTypeController {
         }
     }
 
+    //permanently removes a cow type, hopefully the seller meant to do this
     @DeleteMapping("/{userId}/{cowTypeId}")
     public ResponseEntity<?> deleteCowType(
             @PathVariable Long userId,

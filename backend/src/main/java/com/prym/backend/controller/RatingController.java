@@ -8,6 +8,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
+//Rating endpoints — sellers generate codes, buyers use them to submit ratings.
+//The generate endpoint is for sellers, the submit endpoint is for buyers,
+//and the GET endpoint is public so anyone can see a farm's ratings.
 @RestController
 @RequestMapping("/api/ratings")
 public class RatingController {
@@ -19,6 +22,7 @@ public class RatingController {
         this.userRepository = userRepository;
     }
 
+    //grabs the logged in user's id from the security context
     private Long getLoggedInUserId() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByEmail(email)
