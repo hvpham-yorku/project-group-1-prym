@@ -68,19 +68,16 @@ public class SellerService {
 
     // Updates an existing seller's shop info
     @Transactional
-	public Seller updateSellerProfile(Long userId, String shopName, String phoneNumber, String shopAddress, String description, String category) {
+	public Seller updateSellerProfile(Long userId, String shopName, String phoneNumber, String shopAddress, String description) {
         Seller seller = sellerRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Seller profile not found"));
 
         if (shopName != null) seller.setShopName(shopName);
         if (shopAddress != null) seller.setShopAddress(shopAddress);
         if (description != null) seller.setDescription(description);
-        if (category != null) seller.setCategory(category);
 
         if (phoneNumber != null && !phoneNumber.isBlank()) {
-            User user = seller.getUser();
-            user.setPhoneNumber(phoneNumber);
-            userRepository.save(user);
+            seller.getUser().setPhoneNumber(phoneNumber);
         }
 
         return sellerRepository.save(seller);
