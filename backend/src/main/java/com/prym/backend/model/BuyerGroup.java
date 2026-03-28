@@ -46,4 +46,10 @@ public class BuyerGroup {
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     private List<BuyerGroupMember> members = new ArrayList<>();
+
+    // Set when a GroupSellerAssociation reaches ASSOCIATED status; cleared on DISASSOCIATED.
+    // Null means the group has no active seller association.
+    @ManyToOne
+    @JoinColumn(name = "associated_seller_id")
+    private Seller associatedSeller;
 }

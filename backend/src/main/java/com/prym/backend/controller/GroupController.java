@@ -1,8 +1,11 @@
 package com.prym.backend.controller;
 
+import com.prym.backend.model.AssociationStatus;
 import com.prym.backend.model.GroupMessage;
 import com.prym.backend.model.User;
 import com.prym.backend.repository.GroupMessageRepository;
+import com.prym.backend.repository.GroupSellerAssociationRepository;
+import com.prym.backend.repository.SellerRepository;
 import com.prym.backend.repository.UserRepository;
 import com.prym.backend.service.GroupService;
 import org.springframework.http.ResponseEntity;
@@ -21,12 +24,18 @@ public class GroupController {
     private final GroupService groupService;
     private final UserRepository userRepository;
     private final GroupMessageRepository groupMessageRepository;
+    private final GroupSellerAssociationRepository associationRepository;
+    private final SellerRepository sellerRepository;
 
     public GroupController(GroupService groupService, UserRepository userRepository,
-                           GroupMessageRepository groupMessageRepository) {
+                           GroupMessageRepository groupMessageRepository,
+                           GroupSellerAssociationRepository associationRepository,
+                           SellerRepository sellerRepository) {
         this.groupService = groupService;
         this.userRepository = userRepository;
         this.groupMessageRepository = groupMessageRepository;
+        this.associationRepository = associationRepository;
+        this.sellerRepository = sellerRepository;
     }
 
     private Long getLoggedInUserId() {
@@ -177,6 +186,7 @@ public class GroupController {
 
     // GET /api/buyer/groups/{groupId}/messages?userId={userId}
     // Returns the last 50 chat messages for a group, oldest first.
+    // Each message includes senderRole (BUYER or SELLER) so the frontend can style them.
     @GetMapping("/groups/{groupId}/messages")
     public ResponseEntity<?> getMessages(
             @PathVariable Long groupId,
@@ -184,14 +194,27 @@ public class GroupController {
         try {
             if (!getLoggedInUserId().equals(userId))
                 return ResponseEntity.status(403).body(Map.of("error", "Access denied"));
+
+            // Resolve the associated seller's user ID (if any) for senderRole classification
+            Long associatedSellerUserId = associationRepository
+                    .findByGroupIdAndStatusIn(groupId,
+                            List.of(AssociationStatus.ASSOCIATED, AssociationStatus.PENDING_DISASSOCIATION))
+                    .map(a -> a.getSeller().getUser().getId())
+                    .orElse(null);
+
             var messages = groupMessageRepository.findTop50ByGroupIdOrderBySentAtAsc(groupId);
-            var result = messages.stream().map(m -> Map.of(
-                "id", (Object) m.getId(),
-                "senderId", m.getSender().getId(),
-                "senderName", m.getSender().getFirstName(),
-                "content", m.getContent(),
-                "sentAt", m.getSentAt().toString()
-            )).toList();
+            var result = messages.stream().map(m -> {
+                String senderRole = (associatedSellerUserId != null
+                        && m.getSender().getId().equals(associatedSellerUserId)) ? "SELLER" : "BUYER";
+                java.util.Map<String, Object> entry = new java.util.LinkedHashMap<>();
+                entry.put("id", m.getId());
+                entry.put("senderId", m.getSender().getId());
+                entry.put("senderName", m.getSender().getFirstName());
+                entry.put("senderRole", senderRole);
+                entry.put("content", m.getContent());
+                entry.put("sentAt", m.getSentAt().toString());
+                return entry;
+            }).toList();
             return ResponseEntity.ok(result);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
