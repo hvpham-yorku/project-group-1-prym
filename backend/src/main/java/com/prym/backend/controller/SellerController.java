@@ -56,17 +56,17 @@ public ResponseEntity<?> getSeller(@PathVariable Long userId,
         Seller seller = sellerService.getSellerProfile(userId);
         User user = seller.getUser();
 
-        return ResponseEntity.ok(Map.of(
-            "firstName", user.getFirstName(),
-            "lastName", user.getLastName(),
-            "username", user.getUsername(),
-            "email", user.getEmail(),
-            "phoneNumber", user.getPhoneNumber(),
-            "shopName", seller.getShopName() == null ? "" : seller.getShopName(),
-            "shopAddress", seller.getShopAddress() == null ? "" : seller.getShopAddress(),
-            "description", seller.getDescription() == null ? "" : seller.getDescription(),
-            "category", seller.getCategory() == null ? "" : seller.getCategory()
-        ));
+        java.util.Map<String, Object> profileMap = new java.util.LinkedHashMap<>();
+        profileMap.put("id", seller.getId());
+        profileMap.put("firstName", user.getFirstName());
+        profileMap.put("lastName", user.getLastName());
+        profileMap.put("username", user.getUsername());
+        profileMap.put("email", user.getEmail());
+        profileMap.put("phoneNumber", user.getPhoneNumber());
+        profileMap.put("shopName", seller.getShopName() == null ? "" : seller.getShopName());
+        profileMap.put("shopAddress", seller.getShopAddress() == null ? "" : seller.getShopAddress());
+        profileMap.put("description", seller.getDescription() == null ? "" : seller.getDescription());
+        return ResponseEntity.ok(profileMap);
     } catch (RuntimeException e) {
         return ResponseEntity.status(404).body(Map.of("error", "Profile not found"));
     }
@@ -88,9 +88,8 @@ public ResponseEntity<?> getSeller(@PathVariable Long userId,
         String phoneNumber = request.get("phoneNumber");
         String shopAddress = request.get("shopAddress");
         String description = request.get("description");
-        String category = request.get("category");
 
-        Seller updatedSeller = sellerService.updateSellerProfile(userId, shopName, phoneNumber, shopAddress, description, category);
+        Seller updatedSeller = sellerService.updateSellerProfile(userId, shopName, phoneNumber, shopAddress, description);
         return ResponseEntity.ok(updatedSeller);
 
     } catch (RuntimeException e) {
