@@ -1,7 +1,14 @@
 package com.prym.backend.unit.controller;
 import com.prym.backend.controller.GroupController;
 
+import com.prym.backend.model.AssociationStatus;
+import com.prym.backend.model.GroupMessage;
+import com.prym.backend.model.GroupSellerAssociation;
+import com.prym.backend.model.Seller;
 import com.prym.backend.model.User;
+import com.prym.backend.repository.GroupMessageRepository;
+import com.prym.backend.repository.GroupSellerAssociationRepository;
+import com.prym.backend.repository.SellerRepository;
 import com.prym.backend.repository.UserRepository;
 import com.prym.backend.service.GroupService;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,6 +28,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 public class GroupControllerTest {
@@ -30,6 +38,15 @@ public class GroupControllerTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private GroupMessageRepository groupMessageRepository;
+
+    @Mock
+    private GroupSellerAssociationRepository associationRepository;
+
+    @Mock
+    private SellerRepository sellerRepository;
 
     @InjectMocks
     private GroupController groupController;
@@ -295,5 +312,170 @@ public class GroupControllerTest {
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         Map<?, ?> responseBody = (Map<?, ?>) response.getBody();
         assertEquals("You are not a member of this group.", responseBody.get("error"));
+    }
+
+    // Test 20: getGroupByCode_Success — valid code returns group DTO
+    @Test
+    public void getGroupByCode_Success() {
+        Map<String, Object> dto = Map.of("groupId", 100L, "groupName", "Halal Crew");
+        when(groupService.getGroupByCode(1L, "ABC12345")).thenReturn(dto);
+
+        ResponseEntity<?> response = groupController.getGroupByCode("ABC12345", 1L);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        Map<?, ?> responseBody = (Map<?, ?>) response.getBody();
+        assertEquals("Halal Crew", responseBody.get("groupName"));
+    }
+
+    // Test 21: getGroupByCode_Forbidden — userId param doesn't match logged-in user
+    @Test
+    public void getGroupByCode_Forbidden() {
+        ResponseEntity<?> response = groupController.getGroupByCode("ABC12345", 99L);
+
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+    }
+
+    // Test 22: getGroupByCode_InvalidCode — service throws → 400
+    @Test
+    public void getGroupByCode_InvalidCode() {
+        when(groupService.getGroupByCode(1L, "BADCODE"))
+                .thenThrow(new RuntimeException("Group not found for code: BADCODE"));
+
+        ResponseEntity<?> response = groupController.getGroupByCode("BADCODE", 1L);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        Map<?, ?> responseBody = (Map<?, ?>) response.getBody();
+        assertTrue(responseBody.get("error").toString().contains("Group not found"));
+    }
+
+    // Test 23: regenerateInviteCode_Success — creator regenerates code → 200 with new code
+    @Test
+    public void regenerateInviteCode_Success() {
+        Map<String, Object> body = new HashMap<>();
+        body.put("userId", 1);
+        when(groupService.regenerateInviteCode(1L, 100L)).thenReturn(Map.of("inviteCode", "NEWCODE1"));
+
+        ResponseEntity<?> response = groupController.regenerateInviteCode(100L, body);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        Map<?, ?> responseBody = (Map<?, ?>) response.getBody();
+        assertEquals("NEWCODE1", responseBody.get("inviteCode"));
+    }
+
+    // Test 24: regenerateInviteCode_Forbidden — userId in body doesn't match logged-in user
+    @Test
+    public void regenerateInviteCode_Forbidden() {
+        Map<String, Object> body = new HashMap<>();
+        body.put("userId", 99);
+
+        ResponseEntity<?> response = groupController.regenerateInviteCode(100L, body);
+
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+    }
+
+    // Test 25: regenerateInviteCode_NotCreator — service throws because user is not creator → 400
+    @Test
+    public void regenerateInviteCode_NotCreator() {
+        Map<String, Object> body = new HashMap<>();
+        body.put("userId", 1);
+        when(groupService.regenerateInviteCode(1L, 100L))
+                .thenThrow(new RuntimeException("Only the group creator can regenerate the invite code."));
+
+        ResponseEntity<?> response = groupController.regenerateInviteCode(100L, body);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        Map<?, ?> responseBody = (Map<?, ?>) response.getBody();
+        assertTrue(responseBody.get("error").toString().contains("creator"));
+    }
+
+    // Test 26: getMatchingFarms_Success — returns matching farms DTO
+    @Test
+    public void getMatchingFarms_Success() {
+        Map<String, Object> dto = Map.of(
+                "perfectMatches", List.of(),
+                "partialMatches", List.of());
+        when(groupService.getMatchingFarms(1L, 100L)).thenReturn(dto);
+
+        ResponseEntity<?> response = groupController.getMatchingFarms(100L, 1L);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    // Test 27: getMatchingFarms_Forbidden — userId param doesn't match logged-in user
+    @Test
+    public void getMatchingFarms_Forbidden() {
+        ResponseEntity<?> response = groupController.getMatchingFarms(100L, 99L);
+
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+    }
+
+    // Test 28: getMessages_Success — returns messages list for a valid group member
+    @Test
+    public void getMessages_Success() {
+        // No active association → seller user ID is null
+        when(associationRepository.findByGroupIdAndStatusIn(eq(100L), anyList()))
+                .thenReturn(Optional.empty());
+        when(groupMessageRepository.findTop50ByGroupIdOrderBySentAtAsc(100L))
+                .thenReturn(Collections.emptyList());
+
+        ResponseEntity<?> response = groupController.getMessages(100L, 1L);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertTrue(((List<?>) response.getBody()).isEmpty());
+    }
+
+    // Test 29: getMessages_Forbidden — userId param doesn't match logged-in user
+    @Test
+    public void getMessages_Forbidden() {
+        ResponseEntity<?> response = groupController.getMessages(100L, 99L);
+
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+    }
+
+    // Test 30: getMessages_WithSenderRoles — messages tagged SELLER vs BUYER correctly
+    @Test
+    public void getMessages_WithSenderRoles() {
+        // Build a seller whose user ID is 2 (the associated seller)
+        User sellerUser = new User();
+        sellerUser.setId(2L);
+        sellerUser.setFirstName("Alice");
+
+        Seller seller = new Seller();
+        seller.setUser(sellerUser);
+
+        GroupSellerAssociation assoc = new GroupSellerAssociation();
+        assoc.setSeller(seller);
+        assoc.setStatus(AssociationStatus.ASSOCIATED);
+
+        when(associationRepository.findByGroupIdAndStatusIn(eq(100L), anyList()))
+                .thenReturn(Optional.of(assoc));
+
+        // Create two messages: one from the seller, one from a buyer
+        User buyerUser = new User();
+        buyerUser.setId(1L);
+        buyerUser.setFirstName("Bob");
+
+        GroupMessage sellerMsg = new GroupMessage();
+        sellerMsg.setId(1L);
+        sellerMsg.setSender(sellerUser);
+        sellerMsg.setContent("Hello buyers!");
+        sellerMsg.setSentAt(java.time.LocalDateTime.now());
+
+        GroupMessage buyerMsg = new GroupMessage();
+        buyerMsg.setId(2L);
+        buyerMsg.setSender(buyerUser);
+        buyerMsg.setContent("Hello seller!");
+        buyerMsg.setSentAt(java.time.LocalDateTime.now());
+
+        when(groupMessageRepository.findTop50ByGroupIdOrderBySentAtAsc(100L))
+                .thenReturn(List.of(sellerMsg, buyerMsg));
+
+        ResponseEntity<?> response = groupController.getMessages(100L, 1L);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        List<Map<String, Object>> messages = (List<Map<String, Object>>) response.getBody();
+        assertEquals(2, messages.size());
+        assertEquals("SELLER", messages.get(0).get("senderRole"));
+        assertEquals("BUYER", messages.get(1).get("senderRole"));
     }
 }

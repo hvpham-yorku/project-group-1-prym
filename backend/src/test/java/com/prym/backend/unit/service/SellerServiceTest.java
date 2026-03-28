@@ -12,6 +12,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -117,7 +118,7 @@ public class SellerServiceTest {
         when(sellerRepository.findByUserId(1L)).thenReturn(Optional.of(existingSeller));
         when(sellerRepository.save(any(Seller.class))).thenAnswer(i -> i.getArgument(0));
 
-        Seller result = sellerService.updateSellerProfile(1L, "New Shop", null, "New Address", "Great beef", null);
+        Seller result = sellerService.updateSellerProfile(1L, "New Shop", null, "New Address", "Great beef");
 
         assertEquals("New Shop", result.getShopName());
         assertEquals("New Address", result.getShopAddress());
@@ -136,7 +137,7 @@ public class SellerServiceTest {
         when(sellerRepository.save(any(Seller.class))).thenAnswer(i -> i.getArgument(0));
         when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
 
-        sellerService.updateSellerProfile(1L, "My Shop", "647-555-1234", "Same Address", null, null);
+        sellerService.updateSellerProfile(1L, "My Shop", "647-555-1234", "Same Address", null);
 
         assertEquals("647-555-1234", existingSeller.getUser().getPhoneNumber());
         verify(userRepository).save(any(User.class));
@@ -151,7 +152,7 @@ public class SellerServiceTest {
         when(sellerRepository.findByUserId(1L)).thenReturn(Optional.of(existingSeller));
         when(sellerRepository.save(any(Seller.class))).thenAnswer(i -> i.getArgument(0));
 
-        sellerService.updateSellerProfile(1L, "My Shop", "   ", "Address", null, null);
+        sellerService.updateSellerProfile(1L, "My Shop", "   ", "Address", null);
 
         assertEquals("416-555-0000", existingSeller.getUser().getPhoneNumber());
         verify(userRepository, never()).save(any(User.class));
@@ -163,6 +164,65 @@ public class SellerServiceTest {
         when(sellerRepository.findByUserId(999L)).thenReturn(Optional.empty());
 
         assertThrows(RuntimeException.class,
-                () -> sellerService.updateSellerProfile(999L, "Shop", null, "Addr", null, null));
+                () -> sellerService.updateSellerProfile(999L, "Shop", null, "Addr", null));
+    }
+
+    // Test 10: getAllFarms_ReturnsAllSellers
+    @Test
+    public void getAllFarms_ReturnsAllSellers() {
+        Seller s1 = new Seller();
+        s1.setUser(testUser);
+        s1.setShopName("Farm A");
+
+        Seller s2 = new Seller();
+        User user2 = new User();
+        user2.setId(2L);
+        s2.setUser(user2);
+        s2.setShopName("Farm B");
+
+        when(sellerRepository.findAll()).thenReturn(List.of(s1, s2));
+
+        List<Seller> result = sellerService.getAllFarms();
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertEquals("Farm A", result.get(0).getShopName());
+        assertEquals("Farm B", result.get(1).getShopName());
+    }
+
+    // Test 11: getAllFarms_ReturnsEmptyListWhenNoSellers
+    @Test
+    public void getAllFarms_ReturnsEmptyListWhenNoSellers() {
+        when(sellerRepository.findAll()).thenReturn(List.of());
+
+        List<Seller> result = sellerService.getAllFarms();
+
+        assertNotNull(result);
+        assertEquals(0, result.size());
+    }
+
+    // Test 12: setRating_Success
+    @Test
+    public void setRating_Success() {
+        Seller seller = new Seller();
+        seller.setUser(testUser);
+        seller.setAverageRating(0.0);
+        seller.setTotalRatings(0);
+        when(sellerRepository.findByUserId(1L)).thenReturn(Optional.of(seller));
+        when(sellerRepository.save(any(Seller.class))).thenAnswer(i -> i.getArgument(0));
+
+        Seller result = sellerService.setRating(1L, 4.5, 10);
+
+        assertEquals(4.5, result.getAverageRating());
+        assertEquals(10, result.getTotalRatings());
+        verify(sellerRepository).save(seller);
+    }
+
+    // Test 13: setRating_SellerNotFound
+    @Test
+    public void setRating_SellerNotFound() {
+        when(sellerRepository.findByUserId(999L)).thenReturn(Optional.empty());
+
+        assertThrows(RuntimeException.class, () -> sellerService.setRating(999L, 4.5, 10));
     }
 }

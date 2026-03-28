@@ -138,6 +138,33 @@ public class SellerControllerTest {
         assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
     }
 
+    // ---- Test 5b: getSeller_NotFound — service throws → 400 ----
+    @Test
+    void getSeller_NotFound() {
+        when(sellerService.getSellerProfile(1L))
+                .thenThrow(new RuntimeException("Seller profile not found"));
+
+        ResponseEntity<?> response = sellerController.getSeller(1L, validSessionId);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    }
+
+    // ---- Test 5c: createSeller_ServiceError — duplicate profile → 400 ----
+    @Test
+    void createSeller_ServiceError() {
+        Map<String, String> request = new HashMap<>();
+        request.put("userId", "1");
+        request.put("shopName", "New Shop");
+        request.put("shopAddress", "123 Main Street");
+
+        when(sellerService.createSellerProfile(1L, "New Shop", "123 Main Street", null))
+                .thenThrow(new RuntimeException("Seller profile already exists"));
+
+        ResponseEntity<?> response = sellerController.createSeller(request);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    }
+
     // ---- Test 6: getAllFarms returns the full list of sellers ----
     @Test
     void getAllFarms_Success() {
