@@ -44,9 +44,9 @@ function FarmListingsPage() {
 
 	//sorting filter
 	if(sortBy === 'name-asc'){
-		filteredFarms = [...filteredFarms].sort((a,b) => a.shopName.localeCompare(b.shopName));
+		filteredFarms = [...filteredFarms].sort((a,b) => (a.shopName || '').localeCompare(b.shopName || ''));
 	} else if (sortBy === 'name-desc'){
-		filteredFarms = [...filteredFarms].sort((a,b) => b.shopName.localeCompare(a.shopName));
+		filteredFarms = [...filteredFarms].sort((a,b) => (b.shopName || '').localeCompare(a.shopName || ''));
 	} else if (sortBy === 'rating-high'){
 		filteredFarms = [...filteredFarms].sort((a, b) => b.averageRating - a.averageRating);
 	} else if (sortBy === 'rating-low'){
@@ -66,7 +66,7 @@ function FarmListingsPage() {
 						<div style={styles.description}>{farm.description}</div>
 						<div style={styles.location}>{farm.shopAddress}</div>
 						<div style={styles.certifications}>{certs}</div>
-						<div style={styles.rating}>{'★'.repeat(Math.round(farm.averageRating))}{'☆'.repeat(5 - Math.round(farm.averageRating))} {farm.averageRating.toFixed(1)} ({farm.totalRatings} ratings)</div>
+						<div style={styles.rating}>{'★'.repeat(Math.round(farm.averageRating || 0))}{'☆'.repeat(5 - Math.round(farm.averageRating || 0))} {(farm.averageRating || 0).toFixed(1)} ({farm.totalRatings} ratings)</div>
 					</div>
 				</button>
 			</Link>
@@ -321,7 +321,7 @@ const styles = {
 	},
 	certifications: {
 		display: 'flex',
-		flex: 'column',
+		flexDirection: 'column',
 		flexWrap: "wrap",
 		margin: 5,
 		fontSize: 50,

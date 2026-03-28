@@ -77,9 +77,7 @@ public class SellerService {
         if (description != null) seller.setDescription(description);
 
         if (phoneNumber != null && !phoneNumber.isBlank()) {
-            User user = seller.getUser();
-            user.setPhoneNumber(phoneNumber);
-            userRepository.save(user);
+            seller.getUser().setPhoneNumber(phoneNumber);
         }
 
         return sellerRepository.save(seller);
