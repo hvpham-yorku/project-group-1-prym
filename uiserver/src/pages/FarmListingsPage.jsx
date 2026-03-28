@@ -15,15 +15,44 @@ function FarmListingsPage() {
 	
 	const [farms, setFarms] = useState([]);
 	const [searchQuery, setSearchQuery] = useState('');
+	const [showFilters, setShowFilters] = useState(false);
+	const [selectedCategory, setSelectedCategory] = useState('');
+	const [minRating, setMinRating] = useState(0);
+	const [sortBy, setSortBy] = useState('');
 	
 	useEffect(() => {
 		getAllFarms().then(setFarms).catch(console.error);
 	}, []);
 
-	const filteredFarms = farms.filter(farm =>
-    	farm.shopName.toLowerCase().includes(searchQuery.toLowerCase())
-	);
-	
+	let filteredFarms = farms.filter(farm => 
+		farm.shopName.toLowerCase().includes(searchQuery.toLowerCase())
+	)
+
+	//category filter
+	if(selectedCategory){
+		filteredFarms = filteredFarms.filter(farm=>
+			farm.category == selectedCategory
+		);
+	}
+
+	//minimum rating filter
+	if(minRating > 0){
+		filteredFarms = filteredFarms.filter(farm =>
+			farm.averageRating >= minRating
+		);
+	}
+
+	//sorting filter
+	if(sortBy == 'name-asc'){
+		filteredFarms = [...filteredFarms].sort((a,b) => a.shopName.localeCompare(b.shopName));
+	} else if (sortBy == 'name-desc'){
+		filteredFarms = [...filteredFarms].sort((a,b) => b.shopName.localeCompare(a.shopName));
+	} else if (sortBy == 'rating-high'){
+		filteredFarms = [...filteredFarms].sort((a, b) => b.averageRating - a.averageRating);
+	} else if (sortBy == 'rating-low'){
+		filteredFarms = [...filteredFarms].sort((a, b) => a.averageRating - b.averageRating);
+	}
+
 	const listItems = filteredFarms.map(farm => {
 		let certs = (farm.certifications || []).map(c => <li key={c.id} style={styles.cert}>{c.name}</li>);
 		return (<li key={farm.id}>
@@ -81,7 +110,53 @@ function FarmListingsPage() {
         			value={searchQuery}
         			onChange={e=> setSearchQuery(e.target.value)}
     			/>
+				<button
+					style={styles.filterBtn}
+					onClick={()=>setShowFilters(!showFilters)}
+				>Filters
+				</button>
 			</div>
+
+			{/*filter dropdown*/}
+			{showFilters &&(
+				<div style ={styles.filterPanel}>
+					{/*category filter*/}
+					<label style = {styles.filterLabel}>Category</label>
+					<select style={styles.filterSelect} value = {selectedCategory} onChange = {e => setSelectedCategory(e.target.value)}>
+						<option value="">ALL</option>
+						<option value="HALAL">Halal</option>
+						<option value="KOSHER">Kosher</option>
+						<option value="ORGANIC">Organic</option>
+						<option value="CONVENTIONAL">Conventional</option>
+					</select>
+
+					{/* Rating filter */}
+        			<label style={styles.filterLabel}>Min Rating</label>
+        			<select style={styles.filterSelect} value={minRating} onChange={e => setMinRating(Number(e.target.value))}>
+            			<option value={0}>Any</option>
+            			<option value={1}>1+</option>
+            			<option value={2}>2+</option>
+            			<option value={3}>3+</option>
+            			<option value={4}>4+</option>
+            			<option value={5}>5</option>
+        			</select>
+
+					{/*Sort filter*/}
+					<label style={styles.filterLabel}>Sort By</label>
+        			<select style={styles.filterSelect} value={sortBy} onChange={e => setSortBy(e.target.value)}>
+            			<option value="">Default</option>
+            			<option value="name-asc">Name A-Z</option>
+            			<option value="name-desc">Name Z-A</option>
+            			<option value="rating-high">Rating High-Low</option>
+            			<option value="rating-low">Rating Low-High</option>
+        			</select>
+
+					{/*Clear button*/}
+					<button style={styles.clearBtn} onClick={() => { setSelectedCategory(''); setMinRating(0); setSortBy(''); }}>
+            			Clear Filters
+        			</button>
+				</div>
+			)}
 
 			<div style={styles.containerMain}>
 				{/* where all the farm listings are shown */}
