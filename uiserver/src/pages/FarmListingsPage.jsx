@@ -43,13 +43,13 @@ function FarmListingsPage() {
 	}
 
 	//sorting filter
-	if(sortBy == 'name-asc'){
+	if(sortBy === 'name-asc'){
 		filteredFarms = [...filteredFarms].sort((a,b) => a.shopName.localeCompare(b.shopName));
-	} else if (sortBy == 'name-desc'){
+	} else if (sortBy === 'name-desc'){
 		filteredFarms = [...filteredFarms].sort((a,b) => b.shopName.localeCompare(a.shopName));
-	} else if (sortBy == 'rating-high'){
+	} else if (sortBy === 'rating-high'){
 		filteredFarms = [...filteredFarms].sort((a, b) => b.averageRating - a.averageRating);
-	} else if (sortBy == 'rating-low'){
+	} else if (sortBy === 'rating-low'){
 		filteredFarms = [...filteredFarms].sort((a, b) => a.averageRating - b.averageRating);
 	}
 
@@ -161,7 +161,10 @@ function FarmListingsPage() {
 			<div style={styles.containerMain}>
 				{/* where all the farm listings are shown */}
 				<div style={{...styles.containerSide, width: '80%'}}>
-					<ul>{listItems}</ul>
+					{filteredFarms.length === 0
+						? <p style={styles.emptyState}>No farms match your current filters.</p>
+						: <ul>{listItems}</ul>
+					}
 				</div>
 				<div style={{...styles.containerSide, width: '20%'}}>
 					{/* recently viewed farms and a button to navigate to saved farms */}
@@ -388,6 +391,13 @@ const styles = {
     	fontFamily: 'Roboto',
     	outline: 'none',
     	cursor: 'pointer',
+	},
+	emptyState: {
+    	color: '#666',
+    	fontSize: '20px',
+    	fontFamily: 'Roboto',
+    	textAlign: 'center',
+    	marginTop: 60,
 	},
 	clearBtn: {
     	padding: '8px 16px',
