@@ -1,14 +1,7 @@
 package com.prym.backend.controller;
 
-import com.prym.backend.model.Buyer;
-import com.prym.backend.model.BuyerGroup;
-import com.prym.backend.model.GroupMessage;
-import com.prym.backend.model.User;
-import com.prym.backend.repository.BuyerGroupMemberRepository;
-import com.prym.backend.repository.BuyerGroupRepository;
-import com.prym.backend.repository.BuyerRepository;
-import com.prym.backend.repository.GroupMessageRepository;
-import com.prym.backend.repository.UserRepository;
+import com.prym.backend.model.*;
+import com.prym.backend.repository.*;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -18,10 +11,13 @@ import org.springframework.stereotype.Controller;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 // Handles STOMP WebSocket messages for group chat.
-// Clients send to /app/chat/{groupId} and receive from /topic/group/{groupId}
+// Clients send to /app/chat/{groupId} and receive from /topic/group/{groupId}.
+// Authorized senders: group members (buyers) OR the group's associated seller.
 @Controller
 public class ChatController {
 
@@ -30,20 +26,26 @@ public class ChatController {
     private final BuyerGroupRepository buyerGroupRepository;
     private final BuyerGroupMemberRepository buyerGroupMemberRepository;
     private final BuyerRepository buyerRepository;
+    private final SellerRepository sellerRepository;
     private final UserRepository userRepository;
+    private final GroupSellerAssociationRepository associationRepository;
 
     public ChatController(SimpMessagingTemplate messagingTemplate,
                           GroupMessageRepository groupMessageRepository,
                           BuyerGroupRepository buyerGroupRepository,
                           BuyerGroupMemberRepository buyerGroupMemberRepository,
                           BuyerRepository buyerRepository,
-                          UserRepository userRepository) {
+                          SellerRepository sellerRepository,
+                          UserRepository userRepository,
+                          GroupSellerAssociationRepository associationRepository) {
         this.messagingTemplate = messagingTemplate;
         this.groupMessageRepository = groupMessageRepository;
         this.buyerGroupRepository = buyerGroupRepository;
         this.buyerGroupMemberRepository = buyerGroupMemberRepository;
         this.buyerRepository = buyerRepository;
+        this.sellerRepository = sellerRepository;
         this.userRepository = userRepository;
+        this.associationRepository = associationRepository;
     }
 
     // Client sends: { "content": "hello" } to /app/chat/{groupId}
@@ -57,17 +59,31 @@ public class ChatController {
         User sender = userRepository.findByEmail(principal.getName()).orElse(null);
         if (sender == null) return;
 
-        Buyer buyer = buyerRepository.findByUserId(sender.getId()).orElse(null);
-        if (buyer == null) return;
-
-        // Only group members can send messages
-        if (!buyerGroupMemberRepository.existsByGroupIdAndBuyerId(groupId, buyer.getId())) return;
-
         BuyerGroup group = buyerGroupRepository.findById(groupId).orElse(null);
         if (group == null) return;
 
         String content = payload.get("content");
         if (content == null || content.isBlank()) return;
+
+        // Determine if sender is an authorized buyer member
+        String senderRole;
+        Buyer buyer = buyerRepository.findByUserId(sender.getId()).orElse(null);
+        if (buyer != null && buyerGroupMemberRepository.existsByGroupIdAndBuyerId(groupId, buyer.getId())) {
+            senderRole = "BUYER";
+        } else {
+            // Check if sender is the group's associated seller (while association is active)
+            Seller seller = sellerRepository.findByUserId(sender.getId()).orElse(null);
+            if (seller == null) return;
+
+            boolean isAssociatedSeller = associationRepository
+                    .findByGroupIdAndStatusIn(groupId,
+                            List.of(AssociationStatus.ASSOCIATED, AssociationStatus.PENDING_DISASSOCIATION))
+                    .map(a -> a.getSeller().getId().equals(seller.getId()))
+                    .orElse(false);
+
+            if (!isAssociatedSeller) return;
+            senderRole = "SELLER";
+        }
 
         GroupMessage message = new GroupMessage();
         message.setGroup(group);
@@ -77,13 +93,13 @@ public class ChatController {
         groupMessageRepository.save(message);
 
         // Broadcast to all subscribers of this group's topic
-        Map<String, Object> response = Map.of(
-            "id", message.getId(),
-            "senderId", sender.getId(),
-            "senderName", sender.getFirstName(),
-            "content", message.getContent(),
-            "sentAt", message.getSentAt().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-        );
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("id", message.getId());
+        response.put("senderId", sender.getId());
+        response.put("senderName", sender.getFirstName());
+        response.put("senderRole", senderRole);
+        response.put("content", message.getContent());
+        response.put("sentAt", message.getSentAt().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
 
         messagingTemplate.convertAndSend("/topic/group/" + groupId, (Object) response);
     }
