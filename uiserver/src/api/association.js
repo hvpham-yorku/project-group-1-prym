@@ -15,10 +15,10 @@ export async function requestAssociation(userId, groupId, sellerId) {
     return data;
 }
 
-// DELETE /api/buyer/groups/{groupId}/associate
+// POST /api/buyer/groups/{groupId}/associate/cancel
 export async function cancelAssociation(userId, groupId) {
-    const res = await fetch(`/api/buyer/groups/${groupId}/associate`, {
-        method: 'DELETE',
+    const res = await fetch(`/api/buyer/groups/${groupId}/associate/cancel`, {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({ userId }),

@@ -38,6 +38,13 @@ public class AssociationController {
         this.groupMessageRepository = groupMessageRepository;
     }
 
+    private ResponseEntity<?> errorResponse(RuntimeException e) {
+        String msg = e.getMessage() == null ? "" : e.getMessage().toLowerCase();
+        if (msg.contains("not found")) return ResponseEntity.status(404).body(Map.of("error", e.getMessage()));
+        if (msg.contains("access denied")) return ResponseEntity.status(403).body(Map.of("error", e.getMessage()));
+        return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+    }
+
     private Long getLoggedInUserId() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByEmail(email)
@@ -60,13 +67,13 @@ public class AssociationController {
                 return ResponseEntity.status(403).body(Map.of("error", "Access denied"));
             return ResponseEntity.ok(associationService.requestAssociation(userId, groupId, sellerId));
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+            return errorResponse(e);
         }
     }
 
-    // DELETE /api/buyer/groups/{groupId}/associate
+    // POST /api/buyer/groups/{groupId}/associate/cancel
     // Cancel a pending association request.
-    @DeleteMapping("/api/buyer/groups/{groupId}/associate")
+    @PostMapping("/api/buyer/groups/{groupId}/associate/cancel")
     public ResponseEntity<?> cancelAssociation(
             @PathVariable Long groupId,
             @RequestBody Map<String, Object> body) {
@@ -76,7 +83,7 @@ public class AssociationController {
                 return ResponseEntity.status(403).body(Map.of("error", "Access denied"));
             return ResponseEntity.ok(associationService.cancelAssociation(userId, groupId));
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+            return errorResponse(e);
         }
     }
 
@@ -92,7 +99,7 @@ public class AssociationController {
                 return ResponseEntity.status(403).body(Map.of("error", "Access denied"));
             return ResponseEntity.ok(associationService.requestDisassociation(userId, groupId));
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+            return errorResponse(e);
         }
     }
 
@@ -105,10 +112,10 @@ public class AssociationController {
         try {
             if (!getLoggedInUserId().equals(userId))
                 return ResponseEntity.status(403).body(Map.of("error", "Access denied"));
-            Map<String, Object> result = associationService.getGroupAssociation(groupId);
+            Map<String, Object> result = associationService.getGroupAssociation(userId, groupId);
             return ResponseEntity.ok(result != null ? result : Map.of());
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+            return errorResponse(e);
         }
     }
 
@@ -123,7 +130,7 @@ public class AssociationController {
                 return ResponseEntity.status(403).body(Map.of("error", "Access denied"));
             return ResponseEntity.ok(associationService.getSellerPendingRequests(userId));
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+            return errorResponse(e);
         }
     }
 
@@ -136,7 +143,7 @@ public class AssociationController {
                 return ResponseEntity.status(403).body(Map.of("error", "Access denied"));
             return ResponseEntity.ok(associationService.getSellerAssociations(userId));
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+            return errorResponse(e);
         }
     }
 
@@ -154,7 +161,7 @@ public class AssociationController {
             String note = body.containsKey("note") ? (String) body.get("note") : null;
             return ResponseEntity.ok(associationService.respondToAssociation(userId, associationId, action, note));
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+            return errorResponse(e);
         }
     }
 
@@ -171,7 +178,7 @@ public class AssociationController {
             String action = (String) body.get("action");
             return ResponseEntity.ok(associationService.respondToDisassociation(userId, associationId, action));
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+            return errorResponse(e);
         }
     }
 
@@ -214,7 +221,7 @@ public class AssociationController {
 
             return ResponseEntity.ok(Map.of("groupId", groupId, "messages", result));
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+            return errorResponse(e);
         }
     }
 }

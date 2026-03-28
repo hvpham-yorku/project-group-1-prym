@@ -37,6 +37,8 @@ function SellerDashboard() {
   const [assocError, setAssocError] = useState("");
   const [denyNotes, setDenyNotes] = useState({}); // associationId → note string
   const stompClientRef = useRef(null);
+  const activeAssociationsRef = useRef([]);
+  const subscribedGroupsRef = useRef(new Set());
 
   // Chat state — keyed by groupId
   const [chatMessages, setChatMessages] = useState({});   // { [groupId]: [...] }
@@ -95,14 +97,37 @@ function SellerDashboard() {
     });
   }, [chatMessages]);
 
-  // WebSocket — notifications + group chat subscriptions
+  // Keep ref in sync so onConnect can read current associations without a dependency
+  useEffect(() => {
+    activeAssociationsRef.current = activeAssociations;
+  }, [activeAssociations]);
+
+  // Subscribe to any newly added group chat channels without reconnecting
+  useEffect(() => {
+    const client = stompClientRef.current;
+    if (!client?.connected) return;
+    activeAssociations.forEach((assoc) => {
+      if (!subscribedGroupsRef.current.has(assoc.groupId)) {
+        subscribedGroupsRef.current.add(assoc.groupId);
+        client.subscribe(`/topic/group/${assoc.groupId}`, (frame) => {
+          const msg = JSON.parse(frame.body);
+          setChatMessages((prev) => ({
+            ...prev,
+            [assoc.groupId]: [...(prev[assoc.groupId] || []), msg],
+          }));
+        });
+      }
+    });
+  }, [activeAssociations]);
+
+  // WebSocket connection — only reconnects when the seller profile changes
   useEffect(() => {
     if (!profile?.id) return;
+    const wsProtocol = window.location.protocol === "https:" ? "wss" : "ws";
     const client = new Client({
-      brokerURL: "ws://localhost:8080/ws/websocket",
+      brokerURL: `${wsProtocol}://${window.location.host}/ws/websocket`,
       reconnectDelay: 5000,
       onConnect: () => {
-        // Notification channel
         client.subscribe(`/topic/seller/${profile.id}/notifications`, () => {
           Promise.all([
             getSellerPendingRequests(user.id),
@@ -112,22 +137,29 @@ function SellerDashboard() {
             setActiveAssociations(active);
           }).catch(() => {});
         });
-        // Subscribe to each active group's chat channel
-        activeAssociations.forEach((assoc) => {
-          client.subscribe(`/topic/group/${assoc.groupId}`, (frame) => {
-            const msg = JSON.parse(frame.body);
-            setChatMessages((prev) => ({
-              ...prev,
-              [assoc.groupId]: [...(prev[assoc.groupId] || []), msg],
-            }));
-          });
+        // Subscribe to groups that were already active at connect time
+        activeAssociationsRef.current.forEach((assoc) => {
+          if (!subscribedGroupsRef.current.has(assoc.groupId)) {
+            subscribedGroupsRef.current.add(assoc.groupId);
+            client.subscribe(`/topic/group/${assoc.groupId}`, (frame) => {
+              const msg = JSON.parse(frame.body);
+              setChatMessages((prev) => ({
+                ...prev,
+                [assoc.groupId]: [...(prev[assoc.groupId] || []), msg],
+              }));
+            });
+          }
         });
       },
     });
     client.activate();
     stompClientRef.current = client;
-    return () => client.deactivate();
-  }, [profile?.id, user?.id, activeAssociations]);
+    const subscribedGroups = subscribedGroupsRef.current;
+    return () => {
+      client.deactivate();
+      subscribedGroups.clear();
+    };
+  }, [profile?.id, user?.id]);
 
   const handleSendMessage = (groupId) => {
     const content = (chatInputs[groupId] || "").trim();

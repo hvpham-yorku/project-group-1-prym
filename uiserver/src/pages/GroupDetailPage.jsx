@@ -141,7 +141,7 @@ function GroupDetailPage() {
 
     // Fetch message history
     fetch(
-      `http://localhost:8080/api/buyer/groups/${groupId}/messages?userId=${user.id}`,
+      `/api/buyer/groups/${groupId}/messages?userId=${user.id}`,
       { credentials: "include" },
     )
       .then((r) => r.json())
@@ -149,8 +149,9 @@ function GroupDetailPage() {
       .catch(() => {});
 
     // Connect to WebSocket — chat + association status updates
+    const wsProtocol = window.location.protocol === "https:" ? "wss" : "ws";
     const client = new Client({
-      brokerURL: "ws://localhost:8080/ws/websocket",
+      brokerURL: `${wsProtocol}://${window.location.host}/ws/websocket`,
       reconnectDelay: 5000,
       onConnect: () => {
         client.subscribe(`/topic/group/${groupId}`, (frame) => {

@@ -57,9 +57,9 @@ public class AssociationService {
             throw new RuntimeException("Only the group creator can request association.");
         }
 
-        // Block if group already has an active request/association
+        // Block if group already has an active request/association (locked to prevent race)
         Optional<GroupSellerAssociation> existing = associationRepository
-                .findByGroupIdAndStatusIn(groupId, ACTIVE_STATUSES);
+                .findByGroupIdAndStatusInForUpdate(groupId, ACTIVE_STATUSES);
         if (existing.isPresent()) {
             throw new RuntimeException("Group already has a pending or active association.");
         }
@@ -109,7 +109,7 @@ public class AssociationService {
         }
 
         GroupSellerAssociation assoc = associationRepository
-                .findByGroupIdAndStatusIn(groupId, List.of(AssociationStatus.PENDING_ASSOCIATION))
+                .findByGroupIdAndStatusInForUpdate(groupId, List.of(AssociationStatus.PENDING_ASSOCIATION))
                 .orElseThrow(() -> new RuntimeException("No pending association request to cancel."));
 
         assoc.setStatus(AssociationStatus.CANCELLED);
@@ -142,7 +142,7 @@ public class AssociationService {
         }
 
         GroupSellerAssociation assoc = associationRepository
-                .findByGroupIdAndStatusIn(groupId, List.of(AssociationStatus.ASSOCIATED))
+                .findByGroupIdAndStatusInForUpdate(groupId, List.of(AssociationStatus.ASSOCIATED))
                 .orElseThrow(() -> new RuntimeException("Group is not currently associated with a seller."));
 
         assoc.setStatus(AssociationStatus.PENDING_DISASSOCIATION);
@@ -164,8 +164,13 @@ public class AssociationService {
     }
 
     // Returns the current (non-terminal) association status for a group, or null if none.
+    // Requires the requesting user to be a member of the group.
     @Transactional(readOnly = true)
-    public Map<String, Object> getGroupAssociation(Long groupId) {
+    public Map<String, Object> getGroupAssociation(Long buyerUserId, Long groupId) {
+        Buyer buyer = buyerRepository.findByUserId(buyerUserId)
+                .orElseThrow(() -> new RuntimeException("Buyer not found"));
+        boolean isMember = memberRepository.existsByGroupIdAndBuyerId(groupId, buyer.getId());
+        if (!isMember) throw new RuntimeException("Access denied");
         return associationRepository
                 .findByGroupIdAndStatusIn(groupId, ACTIVE_STATUSES)
                 .map(this::buildAssociationDTO)
