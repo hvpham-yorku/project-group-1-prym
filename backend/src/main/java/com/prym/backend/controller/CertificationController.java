@@ -33,13 +33,10 @@ public class CertificationController {
             @RequestBody Map<String, String> request,
             @CookieValue(name = "SESSION_ID", required = false) String sessionId) {
 
-        Optional<User> sessionUser = sessionService.validateSession(sessionId);
-        if (sessionUser.isEmpty() || !sessionUser.get().getId().equals(userId)) {
-            return ResponseEntity.status(403).body(Map.of("error", "Access denied"));
-        }
-
-        if (sessionUser.get().getRole() != User.Role.SELLER) {
-            return ResponseEntity.status(403).body(Map.of("error", "Only sellers can update certifications"));
+    	try {
+        	validateIsSeller(sessionId, userId);
+        } catch (RuntimeException e) {
+        	return ResponseEntity.status(403).body(Map.of("error", e.getMessage()));
         }
 
         try {
@@ -60,9 +57,10 @@ public class CertificationController {
             @PathVariable Long userId,
             @CookieValue(name = "SESSION_ID", required = false) String sessionId) {
 
-        Optional<User> sessionUser = sessionService.validateSession(sessionId);
-        if (sessionUser.isEmpty() || !sessionUser.get().getId().equals(userId)) {
-            return ResponseEntity.status(403).body(Map.of("error", "Access denied"));
+    	try {
+        	validateIsSeller(sessionId, userId);
+        } catch (RuntimeException e) {
+        	return ResponseEntity.status(403).body(Map.of("error", e.getMessage()));
         }
 
         try {
@@ -81,13 +79,10 @@ public class CertificationController {
             @RequestBody List<String> certNames,
             @CookieValue(name = "SESSION_ID", required = false) String sessionId) {
 
-        Optional<User> sessionUser = sessionService.validateSession(sessionId);
-        if (sessionUser.isEmpty() || !sessionUser.get().getId().equals(userId)) {
-            return ResponseEntity.status(403).body(Map.of("error", "Access denied"));
-        }
-
-        if(sessionUser.get().getRole() != User.Role.SELLER){
-            return ResponseEntity.status(403).body(Map.of("error", "Only sellers can update certifications"));
+    	try {
+        	validateIsSeller(sessionId, userId);
+        } catch (RuntimeException e) {
+        	return ResponseEntity.status(403).body(Map.of("error", e.getMessage()));
         }
 
         try {
@@ -105,13 +100,10 @@ public class CertificationController {
             @PathVariable Long certId,
             @CookieValue(name = "SESSION_ID", required = false) String sessionId) {
 
-        Optional<User> sessionUser = sessionService.validateSession(sessionId);
-        if (sessionUser.isEmpty() || !sessionUser.get().getId().equals(userId)) {
-            return ResponseEntity.status(403).body(Map.of("error", "Access denied"));
-        }
-
-        if (sessionUser.get().getRole() != User.Role.SELLER) {
-            return ResponseEntity.status(403).body(Map.of("error", "Only sellers can update certifications"));
+        try {
+        	validateIsSeller(sessionId, userId);
+        } catch (RuntimeException e) {
+        	return ResponseEntity.status(403).body(Map.of("error", e.getMessage()));
         }
 
         try {
@@ -120,5 +112,17 @@ public class CertificationController {
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
+    }
+    
+    private void validateIsSeller(String sessionId, Long userId) throws RuntimeException{
+    	Optional<User> sessionUser = sessionService.validateSession(sessionId);
+        if (sessionUser.isEmpty() || !sessionUser.get().getId().equals(userId)) {
+        	throw new RuntimeException("Access denied");
+        }
+
+        if (sessionUser.get().getRole() != User.Role.SELLER) {
+        	throw new RuntimeException("Only sellers can update certifications");
+        }
+        
     }
 }
