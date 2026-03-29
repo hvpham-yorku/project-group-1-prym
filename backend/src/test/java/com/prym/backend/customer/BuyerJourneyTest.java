@@ -74,7 +74,7 @@ public class BuyerJourneyTest {
         assertTrue(farms.stream().anyMatch(s -> "Browse Farm".equals(s.getShopName())),
                 "Farm listings must include the newly created farm");
     }
-    
+
  /**
      * User Story: As a buyer, I want to view a farm's ratings before committing
      * so I can trust the seller's quality.
@@ -100,5 +100,43 @@ public class BuyerJourneyTest {
         @SuppressWarnings("unchecked")
         List<?> ratingList = (List<?>) ratings.get("ratings");
         assertEquals(2, ratingList.size());
+    }
+
+
+     /**
+     * User Story: As a buyer, I want to save farms I'm interested in
+     * so I can quickly find them later.
+     * Acceptance: After saving, the farm appears in my saved farms list.
+     */
+    @Test
+    void buyer_SavesAndRetrievesFarm() {
+        User buyer = registerBuyer("savebuyer@example.com", "savebuyer");
+        User sellerUser = registerSeller("savefarm@example.com", "savefarm", "Save Farm");
+        Seller farm = sellerService.getSellerProfile(sellerUser.getId());
+
+        buyerService.saveFarm(buyer.getId(), farm);
+        List<Seller> saved = buyerService.getSavedFarms(buyer.getId());
+
+        assertEquals(1, saved.size());
+        assertEquals("Save Farm", saved.get(0).getShopName());
+    }
+
+    /**
+     * User Story: As a buyer, I want to remove a farm from my saved list
+     * so I can keep my list relevant.
+     * Acceptance: After removal, the farm no longer appears in saved farms.
+     */
+    @Test
+    void buyer_RemovesSavedFarm() {
+        User buyer = registerBuyer("removebuyer@example.com", "removebuyer");
+        User sellerUser = registerSeller("removefarm@example.com", "removefarm", "Remove Farm");
+        Seller farm = sellerService.getSellerProfile(sellerUser.getId());
+
+        buyerService.saveFarm(buyer.getId(), farm);
+        assertEquals(1, buyerService.getSavedFarms(buyer.getId()).size());
+
+        buyerService.removeSavedFarm(buyer.getId(), farm.getId());
+        assertEquals(0, buyerService.getSavedFarms(buyer.getId()).size(),
+                "Farm must be removed from saved list");
     }
 }

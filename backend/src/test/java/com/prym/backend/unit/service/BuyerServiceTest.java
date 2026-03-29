@@ -2,6 +2,7 @@ package com.prym.backend.unit.service;
 import com.prym.backend.service.BuyerService;
 
 import com.prym.backend.model.Buyer;
+import com.prym.backend.model.Seller;
 import com.prym.backend.model.User;
 import com.prym.backend.repository.BuyerRepository;
 import com.prym.backend.repository.UserRepository;
@@ -12,6 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -174,5 +176,74 @@ public class BuyerServiceTest {
         buyerService.updateBuyerProfile(1L, "T-Bone", "          ");
         assertEquals("416-555-0000", existingBuyer.getUser().getPhoneNumber());
         verify(userRepository, never()).save(any(User.class));
+    }
+
+    // Test 10: getSavedFarms_Success
+    @Test
+    void getSavedFarms_Success() {
+        Seller seller = new Seller();
+        Buyer buyer = new Buyer();
+        buyer.getSavedFarms().add(seller);
+        when(buyerRepository.findByUserId(1L)).thenReturn(Optional.of(buyer));
+
+        List<Seller> result = buyerService.getSavedFarms(1L);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(seller, result.get(0));
+    }
+
+    // Test 11: getSavedFarms_BuyerNotFound
+    @Test
+    void getSavedFarms_BuyerNotFound() {
+        when(buyerRepository.findByUserId(999L)).thenReturn(Optional.empty());
+
+        assertThrows(RuntimeException.class, () -> buyerService.getSavedFarms(999L));
+    }
+
+    // Test 12: saveFarm_Success
+    @Test
+    void saveFarm_Success() {
+        Seller farm = new Seller();
+        Buyer buyer = new Buyer();
+        when(buyerRepository.findByUserId(1L)).thenReturn(Optional.of(buyer));
+        when(buyerRepository.save(any(Buyer.class))).thenAnswer(i -> i.getArgument(0));
+
+        Buyer result = buyerService.saveFarm(1L, farm);
+
+        assertTrue(result.getSavedFarms().contains(farm));
+        verify(buyerRepository).save(buyer);
+    }
+
+    // Test 13: saveFarm_BuyerNotFound
+    @Test
+    void saveFarm_BuyerNotFound() {
+        when(buyerRepository.findByUserId(999L)).thenReturn(Optional.empty());
+
+        assertThrows(RuntimeException.class, () -> buyerService.saveFarm(999L, new Seller()));
+    }
+
+    // Test 14: removeSavedFarm_Success
+    @Test
+    void removeSavedFarm_Success() {
+        Seller seller = new Seller();
+        seller.setId(10L);
+        Buyer buyer = new Buyer();
+        buyer.getSavedFarms().add(seller);
+        when(buyerRepository.findByUserId(1L)).thenReturn(Optional.of(buyer));
+        when(buyerRepository.save(any(Buyer.class))).thenAnswer(i -> i.getArgument(0));
+
+        Buyer result = buyerService.removeSavedFarm(1L, 10L);
+
+        assertTrue(result.getSavedFarms().isEmpty());
+        verify(buyerRepository).save(buyer);
+    }
+
+    // Test 15: removeSavedFarm_BuyerNotFound
+    @Test
+    void removeSavedFarm_BuyerNotFound() {
+        when(buyerRepository.findByUserId(999L)).thenReturn(Optional.empty());
+
+        assertThrows(RuntimeException.class, () -> buyerService.removeSavedFarm(999L, 10L));
     }
 }
