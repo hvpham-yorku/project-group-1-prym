@@ -24,10 +24,16 @@ function FarmListingsPage() {
 	const [minRating, setMinRating] = useState(0);
 	const [sortBy, setSortBy] = useState('');
 	const [page, setPage] = useState(1);
+	const [error, setError] = useState(null);
 	const PAGE_SIZE = 7;
 
 	useEffect(() => {
-		getAllFarms().then(setFarms).catch(console.error);
+		getAllFarms()
+			.then(setFarms)
+			.catch((err) => {
+				console.error(err);
+				setError('Could not load farm listings. Please try again later.');
+			});
 	}, []);
 
 	// Reset to page 1 whenever filters/search change
@@ -176,7 +182,9 @@ function FarmListingsPage() {
 			<div style={styles.containerMain}>
 				{/* where all the farm listings are shown */}
 				<div style={{...styles.containerSide, width: '80%'}}>
-					{filteredFarms.length === 0
+					{error
+						? <p style={styles.emptyState}>{error}</p>
+						: filteredFarms.length === 0
 						? <p style={styles.emptyState}>No farms match your current filters.</p>
 						: <>
 							<ul>{listItems}</ul>

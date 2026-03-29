@@ -6,7 +6,7 @@ import CertBadge from '../components/CertBadge';
 
 //Shows the list of farms a buyer has bookmarked/saved.
 //Basically the same layout as FarmListingsPage but only shows the saved ones.
-function savedFarms(){
+function SavedFarms(){
 
 	const { user } = useAuth();
 	const navigate = useNavigate();
@@ -16,10 +16,16 @@ function savedFarms(){
 	const profilePath = user?.role === 'BUYER' ? '/buyer/profile' : '/seller/dashboard';
 
 	const [farms, setFarms] = useState([]);
+	const [error, setError] = useState(null);
 
 	//fetch only this buyer's saved farms on mount
 	useEffect(() => {
-		getSavedFarms().then(setFarms).catch(console.error);
+		getSavedFarms()
+			.then(setFarms)
+			.catch((err) => {
+				console.error(err);
+				setError('Could not load saved farms. Please try again later.');
+			});
 	}, []);
 	
 	async function handleUnsave(farm){
@@ -70,7 +76,10 @@ function savedFarms(){
 			
 			<p style={styles.header}>Saved Farms</p>
 			<div style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-				<ul>{listItems}</ul>
+				{error
+					? <p style={styles.header}>{error}</p>
+					: <ul>{listItems}</ul>
+				}
 			</div>
 		</div>
 	);
@@ -216,4 +225,4 @@ const styles = {
 	},
 };
 
-export default savedFarms;
+export default SavedFarms;
