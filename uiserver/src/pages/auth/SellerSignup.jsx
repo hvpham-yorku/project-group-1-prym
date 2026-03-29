@@ -53,7 +53,7 @@ function SellerSignup() {
         e.preventDefault();
         setError('');
 
-        validateSignUp(formData, setError);
+        if (!validateSignUp(formData, setError)) return;
 
         setLoading(true);
 

@@ -56,7 +56,7 @@ function BuyerSignup() {
         e.preventDefault();
         setError('');
 
-        validateSetup(formData, setError);
+        if (!validateSignUp(formData, setError)) return;
 
         setLoading(true);
 
