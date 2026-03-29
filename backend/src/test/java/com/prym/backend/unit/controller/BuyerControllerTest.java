@@ -2,6 +2,7 @@ package com.prym.backend.unit.controller;
 import com.prym.backend.controller.BuyerController;
 
 import com.prym.backend.model.Buyer;
+import com.prym.backend.model.Seller;
 import com.prym.backend.model.User;
 import com.prym.backend.repository.UserRepository;
 import com.prym.backend.service.BuyerService;
@@ -12,7 +13,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
@@ -174,5 +177,108 @@ public class BuyerControllerTest {
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         Map<?, ?> body = (Map<?, ?>) response.getBody();
         assertEquals("Buyer profile not found", body.get("error"));
+    }
+
+    // Test 10: getSavedFarms_Success
+    @Test
+    public void getSavedFarms_Success() {
+        Seller seller = new Seller();
+        List<Seller> savedFarms = List.of(seller);
+        when(buyerService.getSavedFarms(1L)).thenReturn(savedFarms);
+
+        ResponseEntity<?> response = buyerController.getSavedFarms();
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(savedFarms, response.getBody());
+    }
+
+    // Test 11: getSavedFarms_ServiceError
+    @Test
+    public void getSavedFarms_ServiceError() {
+        when(buyerService.getSavedFarms(1L))
+                .thenThrow(new RuntimeException("Buyer profile not found"));
+
+        ResponseEntity<?> response = buyerController.getSavedFarms();
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+    }
+
+    // Test 12: saveFarm_Success
+    @Test
+    public void saveFarm_Success() {
+        Seller farm = new Seller();
+        Buyer buyerWithFarm = new Buyer();
+        buyerWithFarm.setUser(testUser);
+        // testBuyer has an empty savedFarms list so the farm is not yet saved
+        when(buyerService.getBuyerProfile(1L)).thenReturn(testBuyer);
+        when(buyerService.saveFarm(1L, farm)).thenReturn(buyerWithFarm);
+
+        ResponseEntity<?> response = buyerController.saveFarm(farm);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        verify(buyerService).saveFarm(1L, farm);
+    }
+
+    // Test 13: saveFarm_AlreadySaved_SkipsSave
+    @Test
+    public void saveFarm_AlreadySaved_SkipsSave() {
+        Seller farm = new Seller();
+        testBuyer.getSavedFarms().add(farm);
+        when(buyerService.getBuyerProfile(1L)).thenReturn(testBuyer);
+
+        ResponseEntity<?> response = buyerController.saveFarm(farm);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        verify(buyerService, never()).saveFarm(anyLong(), any(Seller.class));
+    }
+
+    // Test 14: saveFarm_ServiceError
+    @Test
+    public void saveFarm_ServiceError() {
+        Seller farm = new Seller();
+        when(buyerService.getBuyerProfile(1L))
+                .thenThrow(new RuntimeException("Buyer profile not found"));
+
+        ResponseEntity<?> response = buyerController.saveFarm(farm);
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+    }
+
+    // Test 15: removeSavedFarm_Success
+    @Test
+    public void removeSavedFarm_Success() {
+        Map<String, Long> body = new HashMap<>();
+        body.put("sellerId", 10L);
+        when(buyerService.removeSavedFarm(1L, 10L)).thenReturn(testBuyer);
+
+        ResponseEntity<?> response = buyerController.removeSavedFarm(body);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        verify(buyerService).removeSavedFarm(1L, 10L);
+    }
+
+    // Test 16: removeSavedFarm_MissingSellerId
+    @Test
+    public void removeSavedFarm_MissingSellerId() {
+        Map<String, Long> body = new HashMap<>();
+
+        ResponseEntity<?> response = buyerController.removeSavedFarm(body);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        Map<?, ?> respBody = (Map<?, ?>) response.getBody();
+        assertEquals("sellerId is required", respBody.get("error"));
+    }
+
+    // Test 17: removeSavedFarm_ServiceError
+    @Test
+    public void removeSavedFarm_ServiceError() {
+        Map<String, Long> body = new HashMap<>();
+        body.put("sellerId", 10L);
+        when(buyerService.removeSavedFarm(1L, 10L))
+                .thenThrow(new RuntimeException("Buyer profile not found"));
+
+        ResponseEntity<?> response = buyerController.removeSavedFarm(body);
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
     }
 }
