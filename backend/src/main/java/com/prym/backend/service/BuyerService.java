@@ -1,5 +1,7 @@
 package com.prym.backend.service;
 
+import com.prym.backend.exception.DuplicateEntityException;
+import com.prym.backend.exception.ResourceNotFoundException;
 import com.prym.backend.model.Buyer;
 import com.prym.backend.model.User;
 import com.prym.backend.repository.BuyerRepository;
@@ -29,11 +31,11 @@ public class BuyerService {
     public Buyer createBuyerProfile(Long userId, String preferredCuts) {
         // Rule 1: The user must exist in the database before we can create a buyer profile
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         // Rule 2: A user can only have one buyer profile, so no duplicates allowed
         if (buyerRepository.existsByUserId(userId)) {
-            throw new RuntimeException("Buyer profile already exists");
+            throw new DuplicateEntityException("Buyer profile already exists");
         }
 
         // All rules passed. Create the buyer profile and link it to the user
@@ -49,7 +51,7 @@ public class BuyerService {
     // Called when a buyer navigates to their profile page
     public Buyer getBuyerProfile(Long userId) {
         return buyerRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("Buyer profile not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Buyer profile not found"));
     }
 
     // Updates an existing buyer's meat preferences
@@ -58,7 +60,7 @@ public class BuyerService {
     public Buyer updateBuyerProfile(Long userId, String preferredCuts, String phoneNumber) {
         // Find the existing profile, can't update something that doesn't exist
         Buyer buyer = buyerRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("Buyer profile not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Buyer profile not found"));
 
         // Overwrite the old values with the new ones
         buyer.setPreferredCuts(preferredCuts);
@@ -74,7 +76,7 @@ public class BuyerService {
     //returns the list of farms this buyer has bookmarked
     public List<Seller> getSavedFarms(Long userId){
     	Buyer buyer = buyerRepository.findByUserId(userId)
-    			.orElseThrow(() -> new RuntimeException("Buyer profile not found"));
+    			.orElseThrow(() -> new ResourceNotFoundException("Buyer profile not found"));
 
     	return buyer.getSavedFarms();
     }
@@ -83,7 +85,7 @@ public class BuyerService {
     @Transactional
     public Buyer saveFarm(Long userId, Seller farm){
     	Buyer buyer = buyerRepository.findByUserId(userId)
-    			.orElseThrow(() -> new RuntimeException("Buyer profile not found"));
+    			.orElseThrow(() -> new ResourceNotFoundException("Buyer profile not found"));
     	buyer.saveFarm(farm);
     	return buyerRepository.save(buyer);
     }
@@ -91,7 +93,7 @@ public class BuyerService {
     @Transactional
     public Buyer removeSavedFarm(Long userId, Long sellerId){
     	Buyer buyer = buyerRepository.findByUserId(userId)
-    			.orElseThrow(() -> new RuntimeException("Buyer profile not found"));
+    			.orElseThrow(() -> new ResourceNotFoundException("Buyer profile not found"));
     	buyer.getSavedFarms().removeIf(s -> s.getId().equals(sellerId));
     	return buyerRepository.save(buyer);
     }
