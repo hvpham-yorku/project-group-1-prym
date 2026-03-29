@@ -4,6 +4,7 @@ import { logout } from "../api/auth";
 import { useState, useEffect } from "react";
 import { getBuyerProfile, updateBuyerProfile } from "../api/buyer";
 import { getAvailableGroups, getMyGroups, joinGroup, getGroupByCode } from "../api/groups";
+import { submitRating } from "../api/ratings";
 import CowDiagram from "../components/CowDiagram";
 import EditAccountModal from "../components/EditAccountModal";
 
@@ -50,6 +51,16 @@ function BuyerDashboard() {
   const [joiningGroupId, setJoiningGroupId] = useState(null);
   const [inviteCode, setInviteCode] = useState("");
   const [codeError, setCodeError] = useState("");
+  const [availPage, setAvailPage] = useState(1);
+  const GROUPS_PAGE_SIZE = 6;
+
+  const [showRatingModal, setShowRatingModal] = useState(false);
+  const [ratingCode, setRatingCode] = useState("");
+  const [ratingScore, setRatingScore] = useState(0);
+  const [hoveredStar, setHoveredStar] = useState(0);
+  const [ratingError, setRatingError] = useState("");
+  const [ratingSuccess, setRatingSuccess] = useState("");
+  const [ratingSubmitting, setRatingSubmitting] = useState(false);
 
   //loads the buyer profile on mount so we can show their preferred cuts
   useEffect(() => {
@@ -184,6 +195,32 @@ function BuyerDashboard() {
       navigate(`/buyer/groups/${group.groupId}`);
     } catch (err) {
       setCodeError(err.message || "Invalid invite code.");
+    }
+  };
+
+  const handleSubmitRating = async () => {
+    setRatingError("");
+    setRatingSuccess("");
+    if (!ratingCode.trim()) { setRatingError("Please enter the code from the seller."); return; }
+    if (ratingScore === 0) { setRatingError("Please select a star rating."); return; }
+    setRatingSubmitting(true);
+    try {
+      const result = await submitRating(user.id, ratingCode.trim(), ratingScore);
+      if (result.error) {
+        setRatingError(result.error);
+      } else {
+        setRatingSuccess("Rating submitted successfully.");
+        setTimeout(() => {
+          setShowRatingModal(false);
+          setRatingCode("");
+          setRatingScore(0);
+          setRatingSuccess("");
+        }, 1500);
+      }
+    } catch {
+      setRatingError("Something went wrong. Please try again.");
+    } finally {
+      setRatingSubmitting(false);
     }
   };
 
@@ -370,7 +407,10 @@ function BuyerDashboard() {
                   </button>
                 </>
               ) : (
-                <Link to={`/buyer/farmlistings`}><button style={styles.primaryButton}>View Farm Listings</button></Link>
+                <>
+                  <Link to={`/buyer/farmlistings`}><button style={styles.primaryButton}>View Farm Listings</button></Link>
+                  <button style={styles.primaryButton} onClick={() => setShowRatingModal(true)}>⭐ Rate a Farm</button>
+                </>
               )}
             </div>
           </div>
@@ -471,9 +511,12 @@ function BuyerDashboard() {
                 <p style={styles.emptyText}>Loading available groups...</p>
               ) : availableGroups.length === 0 ? (
                 <p style={styles.emptyText}>No groups available yet. Start one!</p>
-              ) : (
+              ) : (() => {
+                const availTotalPages = Math.max(1, Math.ceil(availableGroups.length / GROUPS_PAGE_SIZE));
+                const pagedGroups = availableGroups.slice((availPage - 1) * GROUPS_PAGE_SIZE, availPage * GROUPS_PAGE_SIZE);
+                return (<>
                 <div style={styles.groupCardGrid}>
-                  {availableGroups.map((g) => (
+                  {pagedGroups.map((g) => (
                     <div
                       key={g.groupId}
                       style={{ ...styles.groupCard, cursor: 'pointer' }}
@@ -522,13 +565,63 @@ function BuyerDashboard() {
                     </div>
                   ))}
                 </div>
-              )}
+                {availTotalPages > 1 && (
+                  <div style={styles.pagination}>
+                    <button style={{...styles.pageBtn, opacity: availPage === 1 ? 0.4 : 1}} onClick={() => setAvailPage(p => p - 1)} disabled={availPage === 1}>← Prev</button>
+                    <span style={styles.pageInfo}>Page {availPage} of {availTotalPages}</span>
+                    <button style={{...styles.pageBtn, opacity: availPage === availTotalPages ? 0.4 : 1}} onClick={() => setAvailPage(p => p + 1)} disabled={availPage === availTotalPages}>Next →</button>
+                  </div>
+                )}
+                </>);
+              })()}
             </>
           )}
         </div>
           </div>
         </div>
       </div>
+
+      {showRatingModal && (
+        <div style={styles.modalOverlay}>
+          <div style={styles.ratingModal}>
+            <h2 style={styles.modalTitle}>Rate a Farm</h2>
+            <p style={styles.modalSubtitle}>Enter the code you received from the seller</p>
+            <input
+              style={styles.ratingCodeInput}
+              placeholder="Enter seller code (e.g. PRYM-ABC123)"
+              value={ratingCode}
+              onChange={(e) => setRatingCode(e.target.value.toUpperCase())}
+            />
+            <div style={styles.starRow}>
+              {[1, 2, 3, 4, 5].map((star) => (
+                <span
+                  key={star}
+                  style={{ fontSize: "40px", cursor: "pointer", color: star <= (hoveredStar || ratingScore) ? "#f5a623" : "#ccc", transition: "color 0.1s" }}
+                  onMouseEnter={() => setHoveredStar(star)}
+                  onMouseLeave={() => setHoveredStar(0)}
+                  onClick={() => setRatingScore(star)}
+                >★</span>
+              ))}
+            </div>
+            <p style={styles.scoreLabel}>
+              {ratingScore > 0 ? `You selected: ${ratingScore} star${ratingScore !== 1 ? "s" : ""}` : "Select a rating"}
+            </p>
+            {ratingError && <p style={styles.modalError}>{ratingError}</p>}
+            {ratingSuccess && <p style={styles.modalSuccess}>{ratingSuccess}</p>}
+            <div style={styles.modalButtons}>
+              <button
+                style={styles.ratingCancelBtn}
+                onClick={() => { setShowRatingModal(false); setRatingCode(""); setRatingScore(0); setRatingError(""); }}
+              >Cancel</button>
+              <button
+                style={{ ...styles.ratingSubmitBtn, ...(ratingSubmitting ? { opacity: 0.6, cursor: "not-allowed" } : {}) }}
+                onClick={handleSubmitRating}
+                disabled={ratingSubmitting}
+              >{ratingSubmitting ? "Submitting..." : "Submit Rating"}</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -942,6 +1035,46 @@ const styles = {
   joinButtonDisabled: {
     opacity: 0.6,
     cursor: "not-allowed",
+  },
+  pagination: {
+    display: "flex", alignItems: "center", justifyContent: "center",
+    gap: "16px", marginTop: "16px",
+  },
+  pageBtn: {
+    padding: "8px 20px", backgroundColor: BUYER_COLOR, color: "white",
+    border: "none", borderRadius: "8px", fontSize: "13px", fontWeight: "600", cursor: "pointer",
+  },
+  pageInfo: { fontSize: "13px", color: "#444" },
+  modalOverlay: {
+    position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.5)", display: "flex",
+    alignItems: "center", justifyContent: "center", zIndex: 1000,
+  },
+  ratingModal: {
+    backgroundColor: "white", borderRadius: "12px", padding: "36px",
+    width: "400px", boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
+    display: "flex", flexDirection: "column", alignItems: "center", gap: "16px",
+  },
+  modalTitle: { fontSize: "22px", fontWeight: "700", color: BROWN, margin: 0 },
+  modalSubtitle: { fontSize: "14px", color: "#666", margin: 0, textAlign: "center" },
+  ratingCodeInput: {
+    width: "100%", padding: "10px 14px", border: "2px solid #ddd",
+    borderRadius: "6px", fontSize: "15px", boxSizing: "border-box",
+    letterSpacing: "0.05em", outline: "none",
+  },
+  starRow: { display: "flex", gap: "8px" },
+  scoreLabel: { fontSize: "14px", color: "#555", margin: 0 },
+  modalError: { color: "#c00", fontSize: "14px", margin: 0 },
+  modalSuccess: { color: BUYER_COLOR, fontSize: "14px", fontWeight: "600", margin: 0 },
+  modalButtons: { display: "flex", gap: "12px", width: "100%" },
+  ratingCancelBtn: {
+    flex: 1, padding: "10px", backgroundColor: "white", color: BROWN,
+    border: `2px solid ${BROWN}`, borderRadius: "6px", fontSize: "15px",
+    fontWeight: "600", cursor: "pointer",
+  },
+  ratingSubmitBtn: {
+    flex: 1, padding: "10px", backgroundColor: BUYER_COLOR, color: "white",
+    border: "none", borderRadius: "6px", fontSize: "15px", fontWeight: "600", cursor: "pointer",
   },
   editAccountBtn: {
     background: "rgba(255,255,255,0.15)",

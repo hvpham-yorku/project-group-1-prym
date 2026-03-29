@@ -114,7 +114,7 @@ public class AuthService {
         }
 
         if (profilePicture != null) {
-            user.setProfilePicture(profilePicture);
+            user.setProfilePicture(profilePicture.isEmpty() ? null : profilePicture);
         }
 
         //Update ZIP/postal code and coordinates if provided and changed
