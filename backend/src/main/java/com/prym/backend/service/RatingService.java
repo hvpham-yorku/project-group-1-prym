@@ -1,5 +1,7 @@
 package com.prym.backend.service;
 
+import com.prym.backend.exception.ResourceNotFoundException;
+import com.prym.backend.exception.ValidationException;
 import com.prym.backend.model.*;
 import com.prym.backend.repository.*;
 import org.springframework.stereotype.Service;
@@ -42,7 +44,7 @@ public class RatingService {
     @Transactional
     public Map<String, Object> generateRatingCode(Long sellerUserId){
         Seller seller = sellerRepository.findByUserId(sellerUserId)
-                .orElseThrow(() -> new RuntimeException("Seller not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Seller not found"));
         RatingCode ratingCode = new RatingCode();
         ratingCode.setSeller(seller);
         ratingCode.setCode(generateCode());
@@ -55,10 +57,10 @@ public class RatingService {
     @Transactional
     public Map<String, Object> submitRating(Long buyerUserId, String code, int score){
         Buyer buyer = buyerRepository.findByUserId(buyerUserId)
-                .orElseThrow(() -> new RuntimeException("Buyer not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Buyer not found"));
 
         if(score < 1 || score > 5){
-            throw new RuntimeException("Score must be between 1 and 5.");
+            throw new ValidationException("Score must be between 1 and 5.");
         }
 
         String normalizedCode = code.trim().toUpperCase();
@@ -67,19 +69,19 @@ public class RatingService {
         // If 0 rows are affected, the code either doesn't exist or was already used.
         int claimed = ratingCodeRepository.markAsUsed(normalizedCode);
         if(claimed == 0){
-            throw new RuntimeException("Invalid or already-used code.");
+            throw new ValidationException("Invalid or already-used code.");
         }
 
         RatingCode ratingCode = ratingCodeRepository.findByCode(normalizedCode)
-                .orElseThrow(() -> new RuntimeException("Code not found after claim."));
+                .orElseThrow(() -> new ResourceNotFoundException("Code not found after claim."));
 
         // Re-fetch seller with a pessimistic write lock so concurrent submissions
         // can't produce a lost-update on averageRating / totalRatings.
         Seller seller = sellerRepository.findByIdForUpdate(ratingCode.getSeller().getId())
-                .orElseThrow(() -> new RuntimeException("Seller not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Seller not found"));
 
         if(ratingRepository.existsBySellerAndBuyer(seller, buyer)){
-            throw new RuntimeException("You have already rated this seller.");
+            throw new ValidationException("You have already rated this seller.");
         }
 
         Rating rating = new Rating();
@@ -102,7 +104,7 @@ public class RatingService {
     @Transactional
     public Map<String, Object> getFarmRatings(String sellerUsername){
         Seller seller = sellerRepository.findByUserUsername(sellerUsername)
-                .orElseThrow(() -> new RuntimeException("Seller not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Seller not found"));
         List<Rating> ratings = ratingRepository.findBySeller(seller);
         //build a list of simple DTOs with just the score and timestamp
         List<Map<String, Object>> ratingDTOs = ratings.stream().map(r -> {

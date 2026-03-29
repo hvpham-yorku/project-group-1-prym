@@ -2,10 +2,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getSavedFarms, removeSavedFarm } from '../api/farm';
 import { useState, useEffect } from 'react';
+import CertBadge from '../components/CertBadge';
 
 //Shows the list of farms a buyer has bookmarked/saved.
 //Basically the same layout as FarmListingsPage but only shows the saved ones.
-function savedFarms(){
+function SavedFarms(){
 
 	const { user } = useAuth();
 	const navigate = useNavigate();
@@ -15,10 +16,16 @@ function savedFarms(){
 	const profilePath = user?.role === 'BUYER' ? '/buyer/profile' : '/seller/dashboard';
 
 	const [farms, setFarms] = useState([]);
+	const [error, setError] = useState(null);
 
 	//fetch only this buyer's saved farms on mount
 	useEffect(() => {
-		getSavedFarms().then(setFarms).catch(console.error);
+		getSavedFarms()
+			.then(setFarms)
+			.catch((err) => {
+				console.error(err);
+				setError('Could not load saved farms. Please try again later.');
+			});
 	}, []);
 	
 	async function handleUnsave(farm){
@@ -28,31 +35,15 @@ function savedFarms(){
 	
 	{/*making the list of farms to display */}
 	const listItems = farms.map(farm => {
-			let certs = (farm.certifications || []).map(c => 
-				<li key={c.id}>
-					{c.name === "KOSHER" && (
-						<span style={{ ...styles.badge, ...styles.badgeKosher }}>Kosher</span>
-					)}
-					{c.name === "HALAL" && (
-						<span style={{ ...styles.badge, ...styles.badgeHalal }}>Halal</span>
-					)}
-					{c.name === "ORGANIC" && (
-						<span style={{ ...styles.badge, ...styles.badgeOrganic }}>Organic</span>
-					)}
-					{c.name === "GRASS_FED" && (
-						<span style={{ ...styles.badge, ...styles.badgeGrassFed }}>Grass-Fed</span>
-					)}
-					{c.name === "NON_GMO" && (
-						<span style={{ ...styles.badge, ...styles.badgeNonGmo }}>Non-GMO</span>
-					)}
-				</li>
+			let certs = (farm.certifications || []).map(c =>
+				<li key={c.id}><CertBadge certName={c.name} /></li>
 			);
 			return (<li key={farm.id}>
 				<Link to={`/buyer/farmlistings/${farm.id}`}>
 					<button style={{...styles.button, borderLeft: '10px solid #2e7d32'}}>
 						<div style={styles.colContainer}>
-							<div style={styles.farmImage}>{user?.profilePicture ? (
-								<img src={farm.getUser().getProfilePicture()} alt="farm_photo" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />) : ( 'no image found' )}
+							<div style={styles.farmImage}>{farm.user?.profilePicture ? (
+								<img src={farm.user.profilePicture} alt="farm_photo" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />) : ( 'no image found' )}
 							</div>
 							<div style={styles.farmName}>{farm.shopName}</div>
 							<div style={styles.certBadges}>{certs}</div>
@@ -85,7 +76,10 @@ function savedFarms(){
 			
 			<p style={styles.header}>Saved Farms</p>
 			<div style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-				<ul>{listItems}</ul>
+				{error
+					? <p style={styles.header}>{error}</p>
+					: <ul>{listItems}</ul>
+				}
 			</div>
 		</div>
 	);
@@ -224,28 +218,11 @@ const styles = {
 			margin: 5,
 			padding: '4px 8px',
 	},
-	badge: {
-			display: 'flex',
-			alignItems: 'center',
-			justifyContent: 'center',
-			height: 25,
-			backgroundColor: 'green',
-			fontSize: 20,
-			margin: 5,
-			padding: '4px 8px',
-			borderRadius: 99,
-		    textTransform: "uppercase",
-	},
 	certBadges: {
 		    display: "flex",
 		    gap: "6px",
 		    flexWrap: "wrap",
 	},
-	badgeKosher:   { backgroundColor: "#e3f2fd", color: "#1565c0" },
-	badgeHalal:    { backgroundColor: "#fff3e0", color: "#e65100" },
-	badgeOrganic:  { backgroundColor: "#e8f5e9", color: "#2e7d32" },
-	badgeGrassFed: { backgroundColor: "#f1f8e9", color: "#558b2f" },
-	badgeNonGmo:   { backgroundColor: "#fce4ec", color: "#880e4f" },
 };
 
-export default savedFarms;
+export default SavedFarms;

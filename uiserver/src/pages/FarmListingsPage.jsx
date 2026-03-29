@@ -2,7 +2,15 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getAllFarms } from '../api/farm';
+import CertBadge from '../components/CertBadge';
 
+
+const SORT_COMPARATORS = {
+	'name-asc':    (a, b) => (a.shopName || '').localeCompare(b.shopName || ''),
+	'name-desc':   (a, b) => (b.shopName || '').localeCompare(a.shopName || ''),
+	'rating-high': (a, b) => b.averageRating - a.averageRating,
+	'rating-low':  (a, b) => a.averageRating - b.averageRating,
+};
 
 //Browse all available farms page. Shows every farm in the system as a list
 //of clickable cards. Buyers use this to find farms they want to buy from.
@@ -23,10 +31,16 @@ function FarmListingsPage() {
 	const [minRating, setMinRating] = useState(0);
 	const [sortBy, setSortBy] = useState('');
 	const [page, setPage] = useState(1);
+	const [error, setError] = useState(null);
 	const PAGE_SIZE = 7;
 
 	useEffect(() => {
-		getAllFarms().then(setFarms).catch(console.error);
+		getAllFarms()
+			.then(setFarms)
+			.catch((err) => {
+				console.error(err);
+				setError('Could not load farm listings. Please try again later.');
+			});
 	}, []);
 
 	// Reset to page 1 whenever filters/search change
@@ -50,46 +64,23 @@ function FarmListingsPage() {
 		);
 	}
 
-	//sorting filter
-	if(sortBy === 'name-asc'){
-		filteredFarms = [...filteredFarms].sort((a,b) => (a.shopName || '').localeCompare(b.shopName || ''));
-	} else if (sortBy === 'name-desc'){
-		filteredFarms = [...filteredFarms].sort((a,b) => (b.shopName || '').localeCompare(a.shopName || ''));
-	} else if (sortBy === 'rating-high'){
-		filteredFarms = [...filteredFarms].sort((a, b) => b.averageRating - a.averageRating);
-	} else if (sortBy === 'rating-low'){
-		filteredFarms = [...filteredFarms].sort((a, b) => a.averageRating - b.averageRating);
-	}
+	//sorting
+	const comparator = SORT_COMPARATORS[sortBy];
+	if (comparator) filteredFarms = [...filteredFarms].sort(comparator);
 
 	const totalPages = Math.max(1, Math.ceil(filteredFarms.length / PAGE_SIZE));
 	const pagedFarms = filteredFarms.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
 	const listItems = pagedFarms.map(farm => {
 		let certs = (farm.certifications || []).map(c =>
-			 <li key={c.id}>
-			 {c.name === "KOSHER" && (
-			 	<span style={{ ...styles.badge, ...styles.badgeKosher }}>Kosher</span>
-			 )}
-			 {c.name === "HALAL" && (
-			 	<span style={{ ...styles.badge, ...styles.badgeHalal }}>Halal</span>
-			 )}
-			 {c.name === "ORGANIC" && (
-			 	<span style={{ ...styles.badge, ...styles.badgeOrganic }}>Organic</span>
-			 )}
-			 {c.name === "GRASS_FED" && (
-			 	<span style={{ ...styles.badge, ...styles.badgeGrassFed }}>Grass-Fed</span>
-			 )}
-			 {c.name === "NON_GMO" && (
-			 	<span style={{ ...styles.badge, ...styles.badgeNonGmo }}>Non-GMO</span>
-			 )}
-			 </li>
-		 );
+			<li key={c.id}><CertBadge certName={c.name} /></li>
+		);
 		return (<li key={farm.id}>
 			<Link to={`/buyer/farmlistings/${farm.id}`}>
 				<button style={{...styles.button, borderLeft: '10px solid #2e7d32'}}>
 					<div style={{...styles.colContainer, width: "40%"}}>
-						<div style={styles.farmImage}>{user?.profilePicture ? (
-							<img src={farm.getUser().getProfilePicture()} alt="farm_photo" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />) : ( 'no image found' )}
+						<div style={styles.farmImage}>{farm.user?.profilePicture ? (
+							<img src={farm.user.profilePicture} alt="farm_photo" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />) : ( 'no image found' )}
 						</div>
 						<div style={styles.farmName}>{farm.shopName}</div>
 						<div style ={styles.certBadges}>{certs}</div>
@@ -97,6 +88,7 @@ function FarmListingsPage() {
 					<div style={{...styles.colContainer, width: "60%"}}>
 						<div style={styles.description}>{farm.description}</div>
 						<div style={styles.location}>{farm.shopAddress}</div>
+						<div style={styles.rating}>{'★'.repeat(Math.round(farm.averageRating))}{'☆'.repeat(5 - Math.round(farm.averageRating))} {farm.averageRating?.toFixed(1)} ({farm.totalRatings} ratings)</div>
 					</div>
 				</button>
 			</Link>
@@ -191,7 +183,9 @@ function FarmListingsPage() {
 			<div style={styles.containerMain}>
 				{/* where all the farm listings are shown */}
 				<div style={{...styles.containerSide, width: '80%'}}>
-					{filteredFarms.length === 0
+					{error
+						? <p style={styles.emptyState}>{error}</p>
+						: filteredFarms.length === 0
 						? <p style={styles.emptyState}>No farms match your current filters.</p>
 						: <>
 							<ul>{listItems}</ul>
@@ -380,29 +374,11 @@ const styles = {
 		padding: '4px 8px',
 		fontFamily: 'Roboto, sans-serif',
 	},
-	badge: {
-		display: 'flex',
-		alignItems: 'center',
-		justifyContent: 'center',
-		height: 25,
-		backgroundColor: 'green',
-		fontSize: 20,
-		margin: 5,
-		padding: '4px 8px',
-		borderRadius: 99,
-		textTransform: "uppercase",
-		fontFamily: 'Roboto, sans-serif',
-	},
 	certBadges: {
 	    display: "flex",
 	    gap: "6px",
 	    flexWrap: "wrap",
 	 },
-	 badgeKosher:   { backgroundColor: "#e3f2fd", color: "#1565c0" },
-	 badgeHalal:    { backgroundColor: "#fff3e0", color: "#e65100" },
-	 badgeOrganic:  { backgroundColor: "#e8f5e9", color: "#2e7d32" },
-	 badgeGrassFed: { backgroundColor: "#f1f8e9", color: "#558b2f" },
-	 badgeNonGmo:   { backgroundColor: "#fce4ec", color: "#880e4f" },
 	searchContainer: {
     	display: 'flex',
     	justifyContent: 'center',

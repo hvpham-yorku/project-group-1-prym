@@ -1,5 +1,7 @@
 package com.prym.backend.service;
 
+import com.prym.backend.exception.DuplicateEntityException;
+import com.prym.backend.exception.ResourceNotFoundException;
 import com.prym.backend.model.Seller;
 import com.prym.backend.model.User;
 import com.prym.backend.repository.SellerRepository;
@@ -28,11 +30,10 @@ public class SellerService {
     public Seller createSellerProfile(Long userId, String shopName, String shopAddress, String description) {
   
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-  
         if (sellerRepository.existsByUserId(userId)) {
-            throw new RuntimeException("Seller profile already exists");
+            throw new DuplicateEntityException("Seller profile already exists");
         }
 
      // Create seller profile and link to user
@@ -48,7 +49,7 @@ public class SellerService {
     // Retrieves the seller profile for a given user
     public Seller getSellerProfile(Long userId) {
         return sellerRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("Seller profile not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Seller profile not found"));
     }
 
     // Returns all seller profiles (used for the farm listings page)
@@ -60,7 +61,7 @@ public class SellerService {
     @Transactional
     public Seller setRating(Long userId, double averageRating, int totalRatings) {
         Seller seller = sellerRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("Seller profile not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Seller profile not found"));
         seller.setAverageRating(averageRating);
         seller.setTotalRatings(totalRatings);
         return sellerRepository.save(seller);
@@ -70,7 +71,7 @@ public class SellerService {
     @Transactional
 	public Seller updateSellerProfile(Long userId, String shopName, String phoneNumber, String shopAddress, String description) {
         Seller seller = sellerRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("Seller profile not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Seller profile not found"));
 
         if (shopName != null) seller.setShopName(shopName);
         if (shopAddress != null) seller.setShopAddress(shopAddress);

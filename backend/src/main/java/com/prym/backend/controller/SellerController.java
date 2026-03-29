@@ -115,6 +115,20 @@ public ResponseEntity<?> getAllFarms() {
     }
 }
 
+// returns a single farm by its seller profile id, public endpoint for the farm detail page
+@GetMapping("/farm/{sellerId}")
+public ResponseEntity<?> getFarmById(@PathVariable Long sellerId) {
+    try {
+        Seller seller = sellerService.getAllFarms().stream()
+            .filter(s -> s.getId().equals(sellerId))
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException("Farm not found"));
+        return ResponseEntity.ok(seller);
+    } catch (RuntimeException e) {
+        return ResponseEntity.status(404).body(Map.of("error", e.getMessage()));
+    }
+}
+
 // Public endpoint — buyers can see a farm's cow types without being logged in as that seller
 @GetMapping("/{sellerId}/cow-types")
 public ResponseEntity<?> getCowTypes(@PathVariable Long sellerId) {

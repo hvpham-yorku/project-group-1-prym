@@ -38,6 +38,7 @@ function FarmListing() {
   const [farm, setFarm] = useState(null);
   const [savedIds, setSavedIds] = useState(new Set());
   const [cowTypes, setCowTypes] = useState([]);
+  const [error, setError] = useState(null);
 
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [ratingCode, setRatingCode] = useState('');
@@ -51,9 +52,12 @@ function FarmListing() {
   useEffect(() => {
     getFarm(farmname).then((f) => {
       setFarm(f);
-      if (f) getCowTypes(f.id).then(setCowTypes).catch(console.error);
-    }).catch(console.error);
-    getSavedFarms().then((saved) => setSavedIds(new Set(saved.map((f) => f.id)))).catch(console.error);
+      if (f) getCowTypes(f.id).then(setCowTypes).catch((err) => console.error(err));
+    }).catch((err) => {
+      console.error(err);
+      setError('Could not load farm details. Please try again later.');
+    });
+    getSavedFarms().then((saved) => setSavedIds(new Set(saved.map((f) => f.id)))).catch((err) => console.error(err));
   }, [farmname]);
 
   async function handleSave(e) {
@@ -96,6 +100,7 @@ function FarmListing() {
     setSavedIds((prev) => { const next = new Set(prev); next.delete(farm.id); return next; });
   }
 
+  if (error) return <div style={styles.loadingPage}><p style={styles.loadingText}>{error}</p></div>;
   if (!farm) return <div style={styles.loadingPage}><p style={styles.loadingText}>Loading...</p></div>;
 
   const isSaved = savedIds.has(farm.id);
