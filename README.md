@@ -1,6 +1,6 @@
 # PRYM
 
-A marketplace platform that connects buyers looking to purchase bulk beef directly from local farms. Buyers can browse farm listings, select preferred meat cuts, join or create groups to share a cow, and get matched with other buyers who have compatible preferences. Sellers can list their farms, manage available cows, and view buyer groups.
+A marketplace platform that connects buyers looking to purchase bulk beef directly from local farms. Buyers can browse farm listings, select preferred meat cuts, join or create groups to share a cow, and get matched with sellers who have compatible certifications. Sellers can list their farms, manage available cows and cow types, generate rating codes, and partner with buyer groups through an association system.
 
 ---
 
@@ -23,18 +23,37 @@ A marketplace platform that connects buyers looking to purchase bulk beef direct
 | Frontend | React, Vite |
 | Database | PostgreSQL (production), H2 (unit tests) |
 | Auth | Cookie-based session authentication |
+| Real-time | WebSocket (STOMP over SockJS) |
 | Build | Maven (backend), npm (frontend) |
 
 ---
 
 ## Features
 
-- Buyer and seller registration with role-based access
-- Seller farm listings with breed, pricing, and availability
-- Buyer group creation, search, and matching based on meat cut preferences
-- Join/leave groups and view group details
-- Profile management for both buyers and sellers
-- Farm detail pages with ratings
+### Buyers
+- Register and manage a buyer profile with location (ZIP/postal code)
+- Browse farm listings with search, certification filters, and sort options
+- View individual farm pages with cow types, pricing, certifications, and ratings
+- Save and unsave farms to a personal bookmarks list
+- Submit farm ratings using a one-time code obtained from the seller
+- Create or join buyer groups using an invite code
+- Select preferred meat cuts within a group using an interactive cow diagram
+- Get matched with farms based on group certification preferences and distance
+
+### Sellers
+- Register and manage a seller farm profile (shop name, address, description, ZIP/postal code)
+- Add and manage certifications (Organic, Halal, Kosher, Grass-Fed, etc.)
+- Add cow types with breed, description, and price per kg
+- Add individual cows linked to a cow type (auto-generates 22 standard cuts)
+- Generate one-time rating codes to give to buyers after a purchase
+- View and respond to association requests from buyer groups (accept or reject)
+
+### Groups
+- Create groups with a name and preferred certifications
+- Invite buyers via a unique invite code (regeneratable by the group creator)
+- Live group chat powered by WebSockets
+- View farms that match the group's certifications, sorted by distance
+- Send association requests to matched farms and track request status
 
 ---
 
@@ -112,6 +131,15 @@ cd backend
 
 All integration tests use `@Transactional` to roll back changes automatically after each test.
 
+### System & Customer Journey Tests
+
+End-to-end tests that exercise full application flows against a real database:
+
+```bash
+cd backend
+./mvnw test "-Dspring.profiles.active=integration" -Dtest="*SystemTest,*JourneyTest"
+```
+
 For full testing details, see the [Testing Strategy](../../wiki/Testing-Strategy) wiki page.
 
 ---
@@ -120,14 +148,33 @@ For full testing details, see the [Testing Strategy](../../wiki/Testing-Strategy
 
 ```
 project-group-1-prym/
-├── backend/                  # Spring Boot API
-│   ├── src/main/java/        # Application source
+├── backend/                        # Spring Boot API
+│   ├── src/main/java/
+│   │   └── com/prym/backend/
+│   │       ├── config/             # Security, WebSocket, data initializers
+│   │       ├── controller/         # REST controllers
+│   │       ├── exception/          # Custom exception classes + GlobalExceptionHandler
+│   │       ├── model/              # JPA entities
+│   │       ├── repository/         # Spring Data repositories
+│   │       ├── service/            # Business logic
+│   │       └── util/               # ZipCodeUtil, DistanceUtil
 │   └── src/test/java/
-│       ├── unit/             # Unit tests (H2 + Mockito)
-│       └── integration/      # Integration tests (PostgreSQL)
-├── uiserver/                 # React + Vite frontend
-├── database/                 # DB setup and README
-└── Submissions/              # ITR submissions and project log
+│       ├── unit/
+│       │   ├── controller/         # Controller unit tests (Mockito)
+│       │   ├── service/            # Service unit tests (Mockito)
+│       │   └── util/               # Utility unit tests
+│       ├── integration/            # Integration tests (PostgreSQL + @Transactional)
+│       ├── system/                 # System tests (full Spring context)
+│       └── customer/               # Customer journey tests (end-to-end flows)
+├── uiserver/                       # React + Vite frontend
+│   └── src/
+│       ├── api/                    # Backend API helper modules
+│       ├── components/             # Shared UI components (CertBadge, CowDiagram, etc.)
+│       ├── constants/              # Shared constants (certifications list)
+│       ├── context/                # React context (AuthContext)
+│       └── pages/                  # Page components
+├── database/                       # DB setup and README
+└── Submissions/                    # ITR submissions and project log
 ```
 
 ---
@@ -141,3 +188,4 @@ Full documentation is available on the [Project Wiki](../../wiki):
 - [Database Schema](../../wiki/Database-Schema)
 - [Testing Strategy](../../wiki/Testing-Strategy)
 - [Major Changes in ITR2](../../wiki/Major-Changes-ITR2)
+- [Major Changes in ITR3](../../wiki/Major-Changes-ITR3)
