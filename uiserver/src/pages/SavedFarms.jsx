@@ -3,17 +3,20 @@ import { useAuth } from '../context/AuthContext';
 import { getSavedFarms, removeSavedFarm } from '../api/farm';
 import { useState, useEffect } from 'react';
 
+//Shows the list of farms a buyer has bookmarked/saved.
+//Basically the same layout as FarmListingsPage but only shows the saved ones.
 function savedFarms(){
-	
+
 	const { user } = useAuth();
 	const navigate = useNavigate();
 
 	const initials =
 		(user?.firstName?.charAt(0) || '') + (user?.lastName?.charAt(0) || '');
 	const profilePath = user?.role === 'BUYER' ? '/buyer/profile' : '/seller/dashboard';
-	
+
 	const [farms, setFarms] = useState([]);
-		
+
+	//fetch only this buyer's saved farms on mount
 	useEffect(() => {
 		getSavedFarms().then(setFarms).catch(console.error);
 	}, []);

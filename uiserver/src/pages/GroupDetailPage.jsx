@@ -61,6 +61,9 @@ function serializeCuts(cutsObj) {
     .join(", ");
 }
 
+//The big group detail page. Shows the cow diagram, members list,
+//chat panel, matching farms, invite code, rating modal... basically
+//everything related to a single group lives here. It's a lot.
 function GroupDetailPage() {
   const { groupId } = useParams();
   const { user } = useAuth();
@@ -110,6 +113,8 @@ function GroupDetailPage() {
   const [ratingSuccess, setRatingSuccess] = useState("");
   const [ratingSubmitting, setRatingSubmitting] = useState(false);
 
+  //grabs the group data and matching farms in parallel, then
+  //pre-fills the diagram with whatever cuts the user already saved
   const fetchGroup = async () => {
     if (!user?.id) return;
     try {
@@ -229,6 +234,7 @@ function GroupDetailPage() {
     }
   };
 
+  //publishes the chat message over the websocket stomp connection
   const handleSendMessage = () => {
     const content = chatInput.trim();
     if (!content || !stompClientRef.current?.connected) return;
@@ -239,6 +245,7 @@ function GroupDetailPage() {
     setChatInput("");
   };
 
+  //enter key sends the message, shift+enter lets you do a newline
   const handleChatKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -246,7 +253,7 @@ function GroupDetailPage() {
     }
   };
 
-  // Diagram interaction
+  //toggles a cut section on or off in the local diagram state
   const handleToggle = (id) => {
     setSelectedCuts((prev) => {
       const cuts = { ...prev };
@@ -257,6 +264,8 @@ function GroupDetailPage() {
     setSaveSuccess(false);
   };
 
+  //bumps quantity up or down, but caps it so you can't exceed what's
+  //available after accounting for what other members already claimed
   const handleQtyChange = (id, delta) => {
     setSaveSuccess(false);
     setSelectedCuts((prev) => {
@@ -269,6 +278,7 @@ function GroupDetailPage() {
     });
   };
 
+  //serializes the selected cuts back to a string and POSTs them
   const handleSave = async () => {
     setSaveLoading(true);
     setError("");
@@ -298,12 +308,14 @@ function GroupDetailPage() {
     }
   };
 
+  //copies invite code to clipboard with a little "Copied!" feedback
   const handleCopyCode = () => {
     navigator.clipboard.writeText(group.inviteCode);
     setCodeCopied(true);
     setTimeout(() => setCodeCopied(false), 2000);
   };
 
+  //generates a fresh invite code, old one dies immediately
   const handleRegenCode = async () => {
     if (
       !window.confirm(
@@ -336,6 +348,7 @@ function GroupDetailPage() {
     }
   };
 
+  //validates the code + star score and sends the rating to the backend
   const handleSubmitRating = async () => {
     setRatingError("");
     setRatingSuccess("");

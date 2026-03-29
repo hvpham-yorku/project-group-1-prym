@@ -12,6 +12,9 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 
+//Seeds the database with test seller/farm accounts on startup.
+//Runs at Order(1) so sellers exist before buyers get created.
+//Each seller gets a profile, shop info, and some certifications.
 @Component
 @Order(1)
 public class SellerDataInitializer implements CommandLineRunner {
@@ -36,6 +39,7 @@ public class SellerDataInitializer implements CommandLineRunner {
         cowTypeService.createCowType(userId, breed, description, pricePerPound, availableCount);
     }
 
+    //helper to bulk-add certifications with a dummy expiry date
     private void addCerts(Long userId, String... certs) {
         LocalDate expiry = LocalDate.of(2028, 1, 1);
         for (String cert : certs) {

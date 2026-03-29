@@ -8,6 +8,9 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+//Seeds the database with test buyer accounts on startup.
+//Runs at Order(2) so sellers exist first (buyers might need them for saved farms etc).
+//Only creates a buyer if the email doesnt already exist so its safe to restart.
 @Component
 @Order(2)
 public class BuyerDataInitializer implements CommandLineRunner {

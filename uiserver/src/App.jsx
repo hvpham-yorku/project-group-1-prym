@@ -14,6 +14,8 @@ import CreateGroupPage from './pages/CreateGroupPage';
 import BrowseGroupsPage from './pages/BrowseGroupsPage';
 import SavedFarms from './pages/SavedFarms';
 
+//guard wrapper that redirects to login if not authenticated,
+//or sends you to the right dashboard if your role doesn't match
 function ProtectedRoute({ children, allowedRole }) {
     const { user } = useAuth();
 
@@ -28,6 +30,8 @@ function ProtectedRoute({ children, allowedRole }) {
     return children;
 }
 
+//all the route definitions live here, grouped by auth pages,
+//buyer pages, seller pages, and some legacy redirects at the bottom
 function AppRoutes() {
     const { user } = useAuth();
 
@@ -110,6 +114,7 @@ function AppRoutes() {
     );
 }
 
+//top-level component, just wires up the router and auth provider
 function App() {
     return (
         <BrowserRouter>

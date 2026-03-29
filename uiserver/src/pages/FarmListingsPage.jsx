@@ -4,22 +4,25 @@ import { useAuth } from '../context/AuthContext';
 import { getAllFarms } from '../api/farm';
 
 
+//Browse all available farms page. Shows every farm in the system as a list
+//of clickable cards. Buyers use this to find farms they want to buy from.
 function FarmListingsPage() {
 	const { user } = useAuth();
 	const navigate = useNavigate();
 
+	//build initials for the avatar circle in the navbar
 	const initials =
 		(user?.firstName?.charAt(0) || '') + (user?.lastName?.charAt(0) || '');
 
 	const profilePath = user?.role === 'BUYER' ? '/buyer/profile' : '/seller/dashboard';
-	
+
 	const [farms, setFarms] = useState([]);
 	const [searchQuery, setSearchQuery] = useState('');
 	const [showFilters, setShowFilters] = useState(false);
 	const [selectedCategory, setSelectedCategory] = useState('');
 	const [minRating, setMinRating] = useState(0);
 	const [sortBy, setSortBy] = useState('');
-	
+
 	useEffect(() => {
 		getAllFarms().then(setFarms).catch(console.error);
 	}, []);

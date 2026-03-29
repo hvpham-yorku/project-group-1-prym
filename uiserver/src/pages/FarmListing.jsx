@@ -4,8 +4,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getFarm, saveFarm, getSavedFarms, removeSavedFarm, getCowTypes } from '../api/farm';
 
+//Individual farm detail page. Shows a single farm's info, certs, and cows.
+//The farmname param is actually the farm id from the URL, naming is a bit misleading
 function FarmListing(){
-	
+
 	const { user } = useAuth();
 	const navigate = useNavigate();
 
@@ -13,13 +15,15 @@ function FarmListing(){
 		(user?.firstName?.charAt(0) || '') + (user?.lastName?.charAt(0) || '');
 
 	const profilePath = user?.role === 'BUYER' ? '/buyer/profile' : '/seller/dashboard';
-	
+
+	//grab the farm id from the route params
 	let {farmname} = useParams();
-	
+
 	const [farm, setFarm] = useState(null);
 	const [savedIds, setSavedIds] = useState(new Set());
 	const [cowTypes, setCowTypes] = useState([]);
 
+	//fetch the farm data when the component loads or the id changes
 	useEffect(() => {
 		getFarm(farmname).then((f) => {
 			setFarm(f);

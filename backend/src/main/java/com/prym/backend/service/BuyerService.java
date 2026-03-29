@@ -71,13 +71,15 @@ public class BuyerService {
         return buyerRepository.save(buyer);
     }
     
+    //returns the list of farms this buyer has bookmarked
     public List<Seller> getSavedFarms(Long userId){
     	Buyer buyer = buyerRepository.findByUserId(userId)
     			.orElseThrow(() -> new RuntimeException("Buyer profile not found"));
-    	
+
     	return buyer.getSavedFarms();
     }
-    
+
+    //adds a farm to the buyer's saved farms list, persists it to the db
     @Transactional
     public Buyer saveFarm(Long userId, Seller farm){
     	Buyer buyer = buyerRepository.findByUserId(userId)

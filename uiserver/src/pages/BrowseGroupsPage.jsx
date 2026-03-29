@@ -1,3 +1,4 @@
+//page where buyers can browse and join existing groups, also has cert filtering
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';

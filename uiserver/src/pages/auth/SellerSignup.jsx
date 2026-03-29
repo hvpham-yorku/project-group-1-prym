@@ -3,6 +3,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import { registerSeller } from "../../api/auth";
 import { useAuth } from '../../context/AuthContext';
 
+//Seller registration page. Pretty similar to buyer signup but also collects
+//the shop name. After registering, redirects to the seller profile setup page.
 function SellerSignup() {
     const [formData, setFormData] = useState({
         email: '',
