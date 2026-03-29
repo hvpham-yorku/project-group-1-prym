@@ -99,7 +99,10 @@ You should see these tables (auto-created by Hibernate):
 | `buyer_groups` | Group buying groups created by buyers |
 | `buyer_group_members` | Membership + claimed cuts per group |
 | `buyer_matches` | Buyer-to-seller matching records |
-| `items` | General item listings |
+| `ratings` | Star ratings buyers leave for sellers |
+| `rating_codes` | One-time codes sellers generate to allow a buyer to rate them |
+| `group_seller_associations` | Lifecycle of group ↔ seller association requests |
+| `group_messages` | Chat messages between a buyer group and their associated seller |
 
 ---
 
