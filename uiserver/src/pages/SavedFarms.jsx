@@ -2,6 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getSavedFarms, removeSavedFarm } from '../api/farm';
 import { useState, useEffect } from 'react';
+import CertBadge from '../components/CertBadge';
 
 //Shows the list of farms a buyer has bookmarked/saved.
 //Basically the same layout as FarmListingsPage but only shows the saved ones.
@@ -28,24 +29,8 @@ function savedFarms(){
 	
 	{/*making the list of farms to display */}
 	const listItems = farms.map(farm => {
-			let certs = (farm.certifications || []).map(c => 
-				<li key={c.id}>
-					{c.name === "KOSHER" && (
-						<span style={{ ...styles.badge, ...styles.badgeKosher }}>Kosher</span>
-					)}
-					{c.name === "HALAL" && (
-						<span style={{ ...styles.badge, ...styles.badgeHalal }}>Halal</span>
-					)}
-					{c.name === "ORGANIC" && (
-						<span style={{ ...styles.badge, ...styles.badgeOrganic }}>Organic</span>
-					)}
-					{c.name === "GRASS_FED" && (
-						<span style={{ ...styles.badge, ...styles.badgeGrassFed }}>Grass-Fed</span>
-					)}
-					{c.name === "NON_GMO" && (
-						<span style={{ ...styles.badge, ...styles.badgeNonGmo }}>Non-GMO</span>
-					)}
-				</li>
+			let certs = (farm.certifications || []).map(c =>
+				<li key={c.id}><CertBadge certName={c.name} /></li>
 			);
 			return (<li key={farm.id}>
 				<Link to={`/buyer/farmlistings/${farm.id}`}>
@@ -224,28 +209,11 @@ const styles = {
 			margin: 5,
 			padding: '4px 8px',
 	},
-	badge: {
-			display: 'flex',
-			alignItems: 'center',
-			justifyContent: 'center',
-			height: 25,
-			backgroundColor: 'green',
-			fontSize: 20,
-			margin: 5,
-			padding: '4px 8px',
-			borderRadius: 99,
-		    textTransform: "uppercase",
-	},
 	certBadges: {
 		    display: "flex",
 		    gap: "6px",
 		    flexWrap: "wrap",
 	},
-	badgeKosher:   { backgroundColor: "#e3f2fd", color: "#1565c0" },
-	badgeHalal:    { backgroundColor: "#fff3e0", color: "#e65100" },
-	badgeOrganic:  { backgroundColor: "#e8f5e9", color: "#2e7d32" },
-	badgeGrassFed: { backgroundColor: "#f1f8e9", color: "#558b2f" },
-	badgeNonGmo:   { backgroundColor: "#fce4ec", color: "#880e4f" },
 };
 
 export default savedFarms;
