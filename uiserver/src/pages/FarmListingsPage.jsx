@@ -73,8 +73,8 @@ function FarmListingsPage() {
 			<Link to={`/buyer/farmlistings/${farm.id}`}>
 				<button style={{...styles.button, borderLeft: '10px solid #2e7d32'}}>
 					<div style={{...styles.colContainer, width: "40%"}}>
-						<div style={styles.farmImage}>{user?.profilePicture ? (
-							<img src={farm.getUser().getProfilePicture()} alt="farm_photo" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />) : ( 'no image found' )}
+						<div style={styles.farmImage}>{farm.user?.profilePicture ? (
+							<img src={farm.user.profilePicture} alt="farm_photo" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />) : ( 'no image found' )}
 						</div>
 						<div style={styles.farmName}>{farm.shopName}</div>
 						<div style ={styles.certBadges}>{certs}</div>
