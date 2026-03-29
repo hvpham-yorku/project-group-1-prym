@@ -36,7 +36,7 @@ public class CertificationController {
     	try {
         	validateIsSeller(sessionId, userId);
         } catch (RuntimeException e) {
-        	return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        	return ResponseEntity.status(403).body(Map.of("error", e.getMessage()));
         }
 
         try {
@@ -60,7 +60,7 @@ public class CertificationController {
     	try {
         	validateIsSeller(sessionId, userId);
         } catch (RuntimeException e) {
-        	return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        	return ResponseEntity.status(403).body(Map.of("error", e.getMessage()));
         }
 
         try {
@@ -82,7 +82,7 @@ public class CertificationController {
     	try {
         	validateIsSeller(sessionId, userId);
         } catch (RuntimeException e) {
-        	return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        	return ResponseEntity.status(403).body(Map.of("error", e.getMessage()));
         }
 
         try {
@@ -103,7 +103,7 @@ public class CertificationController {
         try {
         	validateIsSeller(sessionId, userId);
         } catch (RuntimeException e) {
-        	return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        	return ResponseEntity.status(403).body(Map.of("error", e.getMessage()));
         }
 
         try {
