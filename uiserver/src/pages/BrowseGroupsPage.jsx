@@ -42,6 +42,8 @@ function BrowseGroupsPage() {
   const [selectedCerts, setSelectedCerts] = useState(new Set());
   const [joiningId, setJoiningId]   = useState(null);
   const [error, setError]           = useState('');
+  const [page, setPage]             = useState(1);
+  const PAGE_SIZE = 7;
 
   useEffect(() => {
     const load = async () => {
@@ -76,6 +78,12 @@ function BrowseGroupsPage() {
     if (selectedCerts.size === 0) return true;
     return [...selectedCerts].every((c) => g.certifications.includes(c));
   });
+
+  // Reset to page 1 when filters or group list changes
+  useEffect(() => { setPage(1); }, [selectedCerts, groups]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const pagedGroups = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const handleJoin = async (groupId) => {
     setJoiningId(groupId);
@@ -154,7 +162,7 @@ function BrowseGroupsPage() {
           </div>
         ) : (
           <div style={styles.list}>
-            {filtered.map((g) => (
+            {pagedGroups.map((g) => (
               <div
                 key={g.groupId}
                 style={{ ...styles.row, cursor: alreadyInGroup ? 'default' : 'pointer' }}
@@ -200,6 +208,14 @@ function BrowseGroupsPage() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {!loading && filtered.length > 0 && totalPages > 1 && (
+          <div style={styles.pagination}>
+            <button style={{...styles.pageBtn, opacity: page === 1 ? 0.4 : 1}} onClick={() => setPage(p => p - 1)} disabled={page === 1}>← Prev</button>
+            <span style={styles.pageInfo}>Page {page} of {totalPages}</span>
+            <button style={{...styles.pageBtn, opacity: page === totalPages ? 0.4 : 1}} onClick={() => setPage(p => p + 1)} disabled={page === totalPages}>Next →</button>
           </div>
         )}
 
@@ -294,6 +310,15 @@ const styles = {
   },
   joinBtnDisabled: { opacity: 0.6, cursor: 'not-allowed' },
   lockedNote: { fontSize: '12px', color: '#bbb', fontStyle: 'italic' },
+  pagination: {
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    gap: '16px', marginTop: '16px',
+  },
+  pageBtn: {
+    padding: '8px 20px', backgroundColor: BUYER_COLOR, color: 'white',
+    border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: '600', cursor: 'pointer',
+  },
+  pageInfo: { fontSize: '14px', color: '#444' },
 };
 
 export default BrowseGroupsPage;

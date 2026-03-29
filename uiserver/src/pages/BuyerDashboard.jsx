@@ -50,6 +50,8 @@ function BuyerDashboard() {
   const [joiningGroupId, setJoiningGroupId] = useState(null);
   const [inviteCode, setInviteCode] = useState("");
   const [codeError, setCodeError] = useState("");
+  const [availPage, setAvailPage] = useState(1);
+  const GROUPS_PAGE_SIZE = 6;
 
   //loads the buyer profile on mount so we can show their preferred cuts
   useEffect(() => {
@@ -471,9 +473,12 @@ function BuyerDashboard() {
                 <p style={styles.emptyText}>Loading available groups...</p>
               ) : availableGroups.length === 0 ? (
                 <p style={styles.emptyText}>No groups available yet. Start one!</p>
-              ) : (
+              ) : (() => {
+                const availTotalPages = Math.max(1, Math.ceil(availableGroups.length / GROUPS_PAGE_SIZE));
+                const pagedGroups = availableGroups.slice((availPage - 1) * GROUPS_PAGE_SIZE, availPage * GROUPS_PAGE_SIZE);
+                return (<>
                 <div style={styles.groupCardGrid}>
-                  {availableGroups.map((g) => (
+                  {pagedGroups.map((g) => (
                     <div
                       key={g.groupId}
                       style={{ ...styles.groupCard, cursor: 'pointer' }}
@@ -522,7 +527,15 @@ function BuyerDashboard() {
                     </div>
                   ))}
                 </div>
-              )}
+                {availTotalPages > 1 && (
+                  <div style={styles.pagination}>
+                    <button style={{...styles.pageBtn, opacity: availPage === 1 ? 0.4 : 1}} onClick={() => setAvailPage(p => p - 1)} disabled={availPage === 1}>← Prev</button>
+                    <span style={styles.pageInfo}>Page {availPage} of {availTotalPages}</span>
+                    <button style={{...styles.pageBtn, opacity: availPage === availTotalPages ? 0.4 : 1}} onClick={() => setAvailPage(p => p + 1)} disabled={availPage === availTotalPages}>Next →</button>
+                  </div>
+                )}
+                </>);
+              })()}
             </>
           )}
         </div>
@@ -943,6 +956,15 @@ const styles = {
     opacity: 0.6,
     cursor: "not-allowed",
   },
+  pagination: {
+    display: "flex", alignItems: "center", justifyContent: "center",
+    gap: "16px", marginTop: "16px",
+  },
+  pageBtn: {
+    padding: "8px 20px", backgroundColor: BUYER_COLOR, color: "white",
+    border: "none", borderRadius: "8px", fontSize: "13px", fontWeight: "600", cursor: "pointer",
+  },
+  pageInfo: { fontSize: "13px", color: "#444" },
   editAccountBtn: {
     background: "rgba(255,255,255,0.15)",
     border: "2px solid rgba(255,255,255,0.5)",

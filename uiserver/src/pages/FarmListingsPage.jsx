@@ -22,10 +22,15 @@ function FarmListingsPage() {
 	const [selectedCategory, setSelectedCategory] = useState('');
 	const [minRating, setMinRating] = useState(0);
 	const [sortBy, setSortBy] = useState('');
+	const [page, setPage] = useState(1);
+	const PAGE_SIZE = 7;
 
 	useEffect(() => {
 		getAllFarms().then(setFarms).catch(console.error);
 	}, []);
+
+	// Reset to page 1 whenever filters/search change
+	useEffect(() => { setPage(1); }, [searchQuery, selectedCategory, minRating, sortBy]);
 
 	let filteredFarms = farms.filter(farm =>
 		(farm.shopName || '').toLowerCase().includes(searchQuery.toLowerCase())
@@ -56,7 +61,10 @@ function FarmListingsPage() {
 		filteredFarms = [...filteredFarms].sort((a, b) => a.averageRating - b.averageRating);
 	}
 
-	const listItems = filteredFarms.map(farm => {
+	const totalPages = Math.max(1, Math.ceil(filteredFarms.length / PAGE_SIZE));
+	const pagedFarms = filteredFarms.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+	const listItems = pagedFarms.map(farm => {
 		let certs = (farm.certifications || []).map(c =>
 			 <li key={c.id}>
 			 {c.name === "KOSHER" && (
@@ -185,7 +193,16 @@ function FarmListingsPage() {
 				<div style={{...styles.containerSide, width: '80%'}}>
 					{filteredFarms.length === 0
 						? <p style={styles.emptyState}>No farms match your current filters.</p>
-						: <ul>{listItems}</ul>
+						: <>
+							<ul>{listItems}</ul>
+							{totalPages > 1 && (
+								<div style={styles.pagination}>
+									<button style={styles.pageBtn} onClick={() => setPage(p => p - 1)} disabled={page === 1}>← Prev</button>
+									<span style={styles.pageInfo}>Page {page} of {totalPages}</span>
+									<button style={styles.pageBtn} onClick={() => setPage(p => p + 1)} disabled={page === totalPages}>Next →</button>
+								</div>
+							)}
+						</>
 					}
 				</div>
 				<div style={{...styles.containerSide, width: '20%'}}>
@@ -458,6 +475,30 @@ const styles = {
     	fontWeight: '600',
     	cursor: 'pointer',
     	fontFamily: 'Roboto',
+	},
+	pagination: {
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+		gap: '16px',
+		margin: '24px 0',
+	},
+	pageBtn: {
+		padding: '8px 20px',
+		backgroundColor: '#4a7c59',
+		color: 'white',
+		border: 'none',
+		borderRadius: '8px',
+		fontSize: '14px',
+		fontWeight: '600',
+		cursor: 'pointer',
+		fontFamily: 'Roboto',
+		opacity: 1,
+	},
+	pageInfo: {
+		fontSize: '15px',
+		fontFamily: 'Roboto',
+		color: '#444',
 	},
 };
 
