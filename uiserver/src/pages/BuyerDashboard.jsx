@@ -37,7 +37,7 @@ function BuyerDashboard() {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     phoneNumber: "",
-    selectedCuts: {}, // { [cutId]: quantity }
+    selectedCuts: {}, 
   });
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);

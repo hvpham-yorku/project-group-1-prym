@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { registerBuyer } from '../../api/auth';
 import { useAuth } from '../../context/AuthContext';
+import { validateSignUp } from '../../api/signUpValidation';
 
 //Buyer registration page. Collects personal info, profile pic, zip code, etc.
 //After registering, sends the user to the buyer profile setup page to pick preferred cuts.
@@ -54,35 +55,7 @@ function BuyerSignup() {
         e.preventDefault();
         setError('');
 
-        // Validation
-        if (formData.password !== formData.confirmPassword) {
-            setError('Passwords do not match');
-            return;
-        }
-
-        if (formData.password.length < 8) {
-            setError('Password must be at least 8 characters');
-            return;
-        }
-
-        if (formData.username.length < 3) {
-            setError('Username must be at least 3 characters');
-            return;
-        }
-
-        // Basic phone validation (adjust regex as needed)
-      const phoneRegex = /^(\+?1[\s.\-]?)?(\(?\d{3}\)?[\s.\-]?)\d{3}[\s.\-]?\d{4}$/;
-
-        if (!phoneRegex.test(formData.phoneNumber)) {
-            setError('Please enter a valid phone number');
-            return;
-        }
-
-        // Basic postal code format check (3-10 alphanumeric chars; backend validates via Nominatim)
-        if (!formData.zipCode || formData.zipCode.trim().length < 3) {
-            setError('Please enter a valid postal/ZIP code');
-            return;
-        }
+        validateSetup(formData, setError);
 
         setLoading(true);
 

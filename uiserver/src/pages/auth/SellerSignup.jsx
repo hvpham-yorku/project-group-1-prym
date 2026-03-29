@@ -51,34 +51,7 @@ function SellerSignup() {
         e.preventDefault();
         setError('');
 
-        // Basic validations
-        if (formData.password !== formData.confirmPassword) {
-            setError('Passwords do not match');
-            return;
-        }
-
-        if (formData.password.length < 8) {
-            setError('Password must be at least 8 characters');
-            return;
-        }
-
-        if (formData.username.length < 3) {
-            setError('Username must be at least 3 characters');
-            return;
-        }
-
-       const phoneRegex = /^(\+?1[\s.\-]?)?(\(?\d{3}\)?[\s.\-]?)\d{3}[\s.\-]?\d{4}$/;
-
-        if (!phoneRegex.test(formData.phoneNumber)) {
-            setError('Please enter a valid phone number');
-            return;
-        }
-
-        // Basic postal code format check (3-10 alphanumeric chars; backend validates via Nominatim)
-        if (!formData.zipCode || formData.zipCode.trim().length < 3) {
-            setError('Please enter a valid postal/ZIP code');
-            return;
-        }
+        validateSignUp(formData, setError);
 
         setLoading(true);
 

@@ -22,23 +22,18 @@ function Login() {
 
         try {
             const user = await login(email, password);
-          
-
-	if (!user || typeof user !== 'object') {
-		throw new Error('Invalid login response (missing user).'); }
-	
-
-            
-	if (user.role === 'BUYER') {
-		saveUser(user);
+			if (!user || typeof user !== 'object') {
+				throw new Error('Invalid login response (missing user).'); }
+			if (user.role === 'BUYER') {
+				saveUser(user);
                 navigate('/farmlistings');
             } else if (user.role === 'SELLER') {
-		saveUser(user);
+				saveUser(user);
                 navigate('/seller/dashboard');
             }
-else {
-//Explicitly reject unexpected roles
-throw new Error('Your account role is not supported. Please contact support'); }
+			else {
+			//Explicitly reject unexpected roles
+			throw new Error('Your account role is not supported. Please contact support'); }
         } catch (err) {
 		const message = err instanceof Error ? err.message : 'Login failed. Please try again.';
             setError(message);
