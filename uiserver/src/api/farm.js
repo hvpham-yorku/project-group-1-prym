@@ -7,11 +7,11 @@ export async function getAllFarms() {
 	return response.json();
 }
 
-//finds one farm by id from the full list. Not super efficient but works
-//since we dont have a dedicated single-farm endpoint
+//finds one farm by id using the dedicated single-farm endpoint
 export async function getFarm(id) {
-	const farms = await getAllFarms();
-	return farms.find((f) => f.id === Number(id));
+	const response = await fetch(`/api/seller/farm/${id}`);
+	if (!response.ok) throw new Error('Farm not found');
+	return response.json();
 }
 
 //gets the list of farms this buyer has bookmarked
