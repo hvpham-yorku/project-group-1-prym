@@ -88,17 +88,19 @@ ___
 | Move logout button to top of page | Jacob |
 | Geographic location matching | Jacob |
 | Save/bookmark farms | Katelyn |
-| View farm details and ratings | Katelyn |
+| View farm details and ratings on listing | Katelyn |
+| View farm details and ratings on farm page | Katelyn |
 | Seller dashboard modification | Sufyan |
 | Cow icon integration with farm listings | Sufyan |
 | Submit ratings | Harleen |
+| Search & Filter farms | Harleen |
 
 ---
 
 ## Development Tasks Per User Story
 | User Story | Details |
 |------|-------------|
-| Farm listings | save/bookmark farms, see the details in the listing icon (photograph, description, rating, certifications, location), submit ratings for farms |
+| Farm listings | save/bookmark farms, see the details in the listing icon (photograph, description, rating, certifications, location), see details on the unique farm page, submit ratings for farms |
 | Group chat | | 
 
 ---
@@ -111,10 +113,12 @@ ___
 | Move logout button to top of page | Jacob | | |
 | Geographic location matching | Jacob | | |
 | Save/bookmark farms | Katelyn | 1 day | 0.5 days |
-| View farm details and ratings | Katelyn | 1 day | 1.5 days |
+| View farm details and ratings on listing | Katelyn | 1 day | 1.5 days |
+| View farm details and ratings on farm page | Katelyn | 1 day | 1.5 days |
 | Seller dashboard modification | Sufyan | | |
 | Cow icon integration with farm listings | Sufyan | | |
 | Submit ratings | Harleen | | |
+| Search & Filter farms | Harleen | | |
 
 ---
 **some of the tasks here were done in parallel, so there are a lot of cases where times overlap.**
