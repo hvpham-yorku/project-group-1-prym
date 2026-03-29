@@ -5,6 +5,13 @@ import { getAllFarms } from '../api/farm';
 import CertBadge from '../components/CertBadge';
 
 
+const SORT_COMPARATORS = {
+	'name-asc':    (a, b) => (a.shopName || '').localeCompare(b.shopName || ''),
+	'name-desc':   (a, b) => (b.shopName || '').localeCompare(a.shopName || ''),
+	'rating-high': (a, b) => b.averageRating - a.averageRating,
+	'rating-low':  (a, b) => a.averageRating - b.averageRating,
+};
+
 //Browse all available farms page. Shows every farm in the system as a list
 //of clickable cards. Buyers use this to find farms they want to buy from.
 function FarmListingsPage() {
@@ -57,16 +64,9 @@ function FarmListingsPage() {
 		);
 	}
 
-	//sorting filter
-	if(sortBy === 'name-asc'){
-		filteredFarms = [...filteredFarms].sort((a,b) => (a.shopName || '').localeCompare(b.shopName || ''));
-	} else if (sortBy === 'name-desc'){
-		filteredFarms = [...filteredFarms].sort((a,b) => (b.shopName || '').localeCompare(a.shopName || ''));
-	} else if (sortBy === 'rating-high'){
-		filteredFarms = [...filteredFarms].sort((a, b) => b.averageRating - a.averageRating);
-	} else if (sortBy === 'rating-low'){
-		filteredFarms = [...filteredFarms].sort((a, b) => a.averageRating - b.averageRating);
-	}
+	//sorting
+	const comparator = SORT_COMPARATORS[sortBy];
+	if (comparator) filteredFarms = [...filteredFarms].sort(comparator);
 
 	const totalPages = Math.max(1, Math.ceil(filteredFarms.length / PAGE_SIZE));
 	const pagedFarms = filteredFarms.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -88,6 +88,7 @@ function FarmListingsPage() {
 					<div style={{...styles.colContainer, width: "60%"}}>
 						<div style={styles.description}>{farm.description}</div>
 						<div style={styles.location}>{farm.shopAddress}</div>
+						<div style={styles.rating}>{'★'.repeat(Math.round(farm.averageRating))}{'☆'.repeat(5 - Math.round(farm.averageRating))} {farm.averageRating?.toFixed(1)} ({farm.totalRatings} ratings)</div>
 					</div>
 				</button>
 			</Link>
