@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-
+import java.util.ArrayList;
 import java.util.List;
 
 // Represents seller-specific data. Each seller IS a farm.
@@ -29,7 +29,6 @@ public class Seller {
     private String shopName;       // Name of the farm/shop
     private String shopAddress;    // Address of the farm
     private String description;    // Description of the farm and its practices
-    private String category;       // Category of meat (e.g. Beef, Poultry, Lamb)
     @Column(nullable = false)
     private double averageRating = 0.0;
 
@@ -39,5 +38,6 @@ public class Seller {
     // A seller can hold multiple certifications (e.g. Organic + Halal at the same time)
     @OneToMany(mappedBy = "seller", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
-    private List<Certification> certifications;
+    private List<Certification> certifications = new ArrayList<>(); 
+    
 }

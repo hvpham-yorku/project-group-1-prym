@@ -296,4 +296,26 @@ public class GroupControllerTest {
         Map<?, ?> responseBody = (Map<?, ?>) response.getBody();
         assertEquals("You are not a member of this group.", responseBody.get("error"));
     }
+
+
+     // Test 26: getMatchingFarms_Success — returns matching farms DTO
+    @Test
+    public void getMatchingFarms_Success() {
+        Map<String, Object> dto = Map.of(
+                "perfectMatches", List.of(),
+                "partialMatches", List.of());
+        when(groupService.getMatchingFarms(1L, 100L)).thenReturn(dto);
+
+        ResponseEntity<?> response = groupController.getMatchingFarms(100L, 1L);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    // Test 27: getMatchingFarms_Forbidden — userId param doesn't match logged-in user
+    @Test
+    public void getMatchingFarms_Forbidden() {
+        ResponseEntity<?> response = groupController.getMatchingFarms(100L, 99L);
+
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+    }
 }
