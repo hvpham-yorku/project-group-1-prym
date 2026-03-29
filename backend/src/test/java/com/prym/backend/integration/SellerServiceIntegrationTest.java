@@ -81,13 +81,12 @@ public class SellerServiceIntegrationTest {
         sellerService.createSellerProfile(user.getId(), "Old Name", "Old Addr", "Old desc");
 
         Seller updated = sellerService.updateSellerProfile(
-                user.getId(), "New Name", null, "New Addr", "New desc", "Beef"
+                user.getId(), "New Name", null, "New Addr", "New desc"
         );
 
         assertEquals("New Name", updated.getShopName());
         assertEquals("New Addr", updated.getShopAddress());
         assertEquals("New desc", updated.getDescription());
-        assertEquals("Beef", updated.getCategory());
     }
 
     // Test 5: updateSellerProfile_WithPhoneNumber_UpdatesUser — phone number change is persisted on User
@@ -97,7 +96,7 @@ public class SellerServiceIntegrationTest {
         sellerService.createSellerProfile(user.getId(), "Farm", "Addr", "Desc");
 
         sellerService.updateSellerProfile(
-                user.getId(), "Farm", "647-999-1234", "Addr", "Desc", null
+                user.getId(), "Farm", "647-999-1234", "Addr", "Desc"
         );
 
         // Re-fetch the seller profile and check the user's phone number was updated

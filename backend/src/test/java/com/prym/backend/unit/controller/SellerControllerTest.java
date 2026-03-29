@@ -137,6 +137,16 @@ public class SellerControllerTest {
 
         assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
     }
+      // ---- Test 5b: getSeller_NotFound — service throws → 400 ----
+    @Test
+    void getSeller_NotFound() {
+        when(sellerService.getSellerProfile(1L))
+                .thenThrow(new RuntimeException("Seller profile not found"));
+
+        ResponseEntity<?> response = sellerController.getSeller(1L, validSessionId);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    }
 
     // ---- Test 6: getAllFarms returns the full list of sellers ----
     @Test
