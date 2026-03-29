@@ -4,7 +4,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.*;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
-import org.springframework.web.client.ResponseErrorHandler;
+import org.springframework.web.client.NoOpResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
@@ -30,10 +30,7 @@ public abstract class SystemTestBase {
 
     private static RestTemplate buildRestTemplate() {
         RestTemplate rt = new RestTemplate(new JdkClientHttpRequestFactory());
-        rt.setErrorHandler(new ResponseErrorHandler() {
-            @Override public boolean hasError(org.springframework.http.client.ClientHttpResponse r) { return false; }
-            @Override public void handleError(java.net.URI url, org.springframework.http.HttpMethod method, org.springframework.http.client.ClientHttpResponse r) {}
-        });
+        rt.setErrorHandler(new NoOpResponseErrorHandler());
         return rt;
     }
 
