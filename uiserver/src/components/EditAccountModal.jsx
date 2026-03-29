@@ -157,7 +157,7 @@ function EditAccountModal({ onClose, accentColor }) {
               <button
                 style={styles.removeBtn}
                 onClick={() => {
-                  setForm((prev) => ({ ...prev, profilePicture: null }));
+                  setForm((prev) => ({ ...prev, profilePicture: "" }));
                   setImagePreview(null);
                 }}
                 disabled={saving}
