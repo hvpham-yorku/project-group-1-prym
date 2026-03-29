@@ -1,4 +1,4 @@
-YM Project Log
+PRYM Project Log
 
 ## Wiki
 For detailed documentation, visit the [Project Wiki](../../wiki)
@@ -85,13 +85,15 @@ ___
 | Task | Assigned To|
 |------|------------|
 | Fix seller "complete signup" page | Sufyan |
+| Group-seller association system | Sufyan |
+| Group farm matching | Sufyan |
+| Group chat |Sufyan|
+| Seller dashboard modification | Sufyan |
 | Move logout button to top of page | Jacob |
 | Geographic location matching | Jacob |
 | Save/bookmark farms | Katelyn |
 | View farm details and ratings on listing | Katelyn |
 | View farm details and ratings on farm page | Katelyn |
-| Seller dashboard modification | Sufyan |
-| Cow icon integration with farm listings | Sufyan |
 | Submit ratings | Harleen |
 | Search & Filter farms | Harleen |
 
@@ -100,8 +102,10 @@ ___
 ## Development Tasks Per User Story
 | User Story | Details |
 |------|-------------|
-| Farm listings | save/bookmark farms, see the details in the listing icon (photograph, description, rating, certifications, location), see details on the unique farm page, submit ratings for farms |
-| Group chat | | 
+| Farm listings | save/bookmark farms, see the details in the listing icon (photograph, description, rating, certifications, location), submit ratings for farms |
+| Group chat | Set up WebSocket config (STOMP broker, SockJS fallback), created `ChatController` to handle incoming messages, validate sender is a group member, persist messages, and broadcast to group topic; added `GroupMessage` entity and repository; integrated live chat UI into `GroupDetailPage` |
+| Group–seller association system | Created full association feature end-to-end: `GroupSellerAssociation` entity, `AssociationStatus` enum, `GroupSellerAssociationRepository`, `AssociationService`, `AssociationController`; created `association.js` frontend API helper; integrated association request panel into `GroupDetailPage` and seller association inbox into `SellerDashboard` |
+| Group farm matching | Added `getMatchingFarms` to `GroupService` — finds farms with perfect/partial certification match and sorts results by distance using `DistanceUtil`; added matching farms panel in `GroupDetailPage` with perfect match / partial match tabs |
 
 ---
 
@@ -109,17 +113,19 @@ ___
 
 | Task | Assigned To | Time Allocated | Time Spent |
 |------|-------------|----------------|------------|
-| Fix seller "complete signup" page | Sufyan | | |
+| Group-seller association system | Sufyan | 1 day | 1 day |
+| Group farm matching | Sufyan | 1 day | 1 day |
+| Seller dashboard modification | Sufyan | 0.5 days | 0.5 days |
+| Group chat | Sufyan | 1.5 days | 1 day |
 | Move logout button to top of page | Jacob | | |
 | Geographic location matching | Jacob | | |
 | Save/bookmark farms | Katelyn | 1 day | 0.5 days |
 | View farm details and ratings on listing | Katelyn | 1 day | 1.5 days |
 | View farm details and ratings on farm page | Katelyn | 1 day | 1.5 days |
-| Seller dashboard modification | Sufyan | | |
-| Cow icon integration with farm listings | Sufyan | | |
 | Submit ratings | Harleen | | |
 | Search & Filter farms | Harleen | | |
 
 ---
 **some of the tasks here were done in parallel, so there are a lot of cases where times overlap.**
 **some tasks were similar with minor changes like Buyer login and Seller login, you implement it for one and just copy it for the other while doing minor changes. So the allocated time for the tasks was split up evenly.**
+
