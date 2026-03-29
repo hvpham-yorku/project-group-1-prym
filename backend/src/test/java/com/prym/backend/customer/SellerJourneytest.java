@@ -56,6 +56,24 @@ public class SellerJourneyTest {
         buyerService.createBuyerProfile(user.getId(), "Chuck");
         return user;
     }
+  // ─── Journey 1: Seller registers and sets up their farm ───────────────────
+
+    /**
+     * User Story: As a seller, I want to register and set up my farm profile
+     * so buyers can discover my farm.
+     * Acceptance: After registration, the farm profile is accessible with the correct details.
+     */
+    @Test
+    void seller_RegistersAndFarmProfileIsAccessible() {
+        User user = registerSeller("newfarm@example.com", "newfarm", "New Farm");
+
+        Seller profile = sellerService.getSellerProfile(user.getId());
+
+        assertNotNull(profile.getId());
+        assertEquals("New Farm", profile.getShopName());
+        assertEquals("456 Farm Lane", profile.getShopAddress());
+        assertEquals("Fresh from the farm", profile.getDescription());
+    }
 
   
     /**

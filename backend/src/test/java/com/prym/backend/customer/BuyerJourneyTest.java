@@ -74,5 +74,31 @@ public class BuyerJourneyTest {
         assertTrue(farms.stream().anyMatch(s -> "Browse Farm".equals(s.getShopName())),
                 "Farm listings must include the newly created farm");
     }
+    
+ /**
+     * User Story: As a buyer, I want to view a farm's ratings before committing
+     * so I can trust the seller's quality.
+     * Acceptance: Farm ratings page shows shop name, average, total count, and individual scores.
+     */
+    @Test
+    void buyer_ViewsFarmRatings() {
+        User sellerUser = registerSeller("viewrateseller@example.com", "viewrateseller", "Reviewed Farm");
+        User buyer1 = registerBuyer("reviewer1@example.com", "reviewer1");
+        User buyer2 = registerBuyer("reviewer2@example.com", "reviewer2");
 
+        String code1 = (String) ratingService.generateRatingCode(sellerUser.getId()).get("code");
+        String code2 = (String) ratingService.generateRatingCode(sellerUser.getId()).get("code");
+
+        ratingService.submitRating(buyer1.getId(), code1, 4);
+        ratingService.submitRating(buyer2.getId(), code2, 2);
+
+        Map<String, Object> ratings = ratingService.getFarmRatings("viewrateseller");
+
+        assertEquals("Reviewed Farm", ratings.get("shopName"));
+        assertEquals(3.0, (double) ratings.get("averageRating"), 0.001, "Average of 4 and 2 must be 3.0");
+        assertEquals(2, ratings.get("totalRatings"));
+        @SuppressWarnings("unchecked")
+        List<?> ratingList = (List<?>) ratings.get("ratings");
+        assertEquals(2, ratingList.size());
+    }
 }
