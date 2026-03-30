@@ -118,8 +118,8 @@ ___
 | Group farm matching | Sufyan | 1 day | 1 day |
 | Seller dashboard modification | Sufyan | 0.5 days | 0.5 days |
 | Group chat | Sufyan | 1.5 days | 1 day |
-| Move logout button to top of page | Jacob | | |
-| Geographic location matching | Jacob | | |
+| Move logout button to top of page | Jacob | 0.5 days | 0.5 days |
+| Geographic location matching | Jacob | 3 days | 2 days|
 | Save/bookmark farms | Katelyn | 1 day | 0.5 days |
 | View farm details and ratings on listing | Katelyn | 1 day | 1.5 days |
 | View farm details and ratings on farm page | Katelyn | 1 day | 1.5 days |
