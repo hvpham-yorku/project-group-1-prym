@@ -64,6 +64,8 @@ public class ChatController {
 
         String content = payload.get("content");
         if (content == null || content.isBlank()) return;
+        content = content.trim();
+        if (content.length() > 1000) return;
 
         // Determine if sender is an authorized buyer member
         String senderRole;
@@ -88,7 +90,7 @@ public class ChatController {
         GroupMessage message = new GroupMessage();
         message.setGroup(group);
         message.setSender(sender);
-        message.setContent(content.trim());
+        message.setContent(content);
         message.setSentAt(LocalDateTime.now());
         groupMessageRepository.save(message);
 
