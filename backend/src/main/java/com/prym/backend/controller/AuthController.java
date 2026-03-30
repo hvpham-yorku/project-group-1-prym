@@ -208,6 +208,7 @@ public class AuthController {
 				request.get("lastName"),
 				request.get("email"),
 				request.get("username"),
+				request.get("phoneNumber"),
 				request.get("profilePicture"),
 				request.get("zipCode")
 			);

@@ -83,7 +83,7 @@ public class AuthService {
     }
 
     public User updateUserInfo(Long userId, String firstName, String lastName, String email, String username,
-            String profilePicture, String zipCode) {
+            String phoneNumber, String profilePicture, String zipCode) {
         //find the user
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -92,6 +92,9 @@ public class AuthService {
         }
         if (lastName != null && !lastName.isBlank()) {
             user.setLastName(lastName.trim());
+        }
+        if (phoneNumber != null && !phoneNumber.isBlank()) {
+            user.setPhoneNumber(phoneNumber.trim());
         }
         if (email != null && !email.isBlank()) {
             String trimmed = email.trim();

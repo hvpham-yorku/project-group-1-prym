@@ -103,12 +103,12 @@ export async function getCurrentUser() {
 
 //updates basic account info like name, email, pic, zip code etc
 //used by the edit account modal on both dashboards
-export async function updateUserInfo({firstName, lastName, email, username, profilePicture, zipCode}){
+export async function updateUserInfo({firstName, lastName, email, username, phoneNumber, profilePicture, zipCode}){
     const response = await fetch(`${API_URL}/user`,{
         method: 'PATCH',
         headers: {'Content-Type': 'application/json'},
         credentials: 'include',
-        body: JSON.stringify({firstName, lastName, email, username, profilePicture, zipCode})
+        body: JSON.stringify({firstName, lastName, email, username, phoneNumber, profilePicture, zipCode})
     });
     
     const data = await response.json();
