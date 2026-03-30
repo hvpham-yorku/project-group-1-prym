@@ -171,6 +171,7 @@ public class AuthServiceIntegrationTest {
                 "update_test@example.com",
                 "update_test_user",
                 null,
+                null,
                 null
         );
 

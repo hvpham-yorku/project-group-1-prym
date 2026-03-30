@@ -127,7 +127,7 @@ public class AuthServiceTest {
         when(userRepository.existsByUsername("newusername")).thenReturn(false);
         when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
 
-        User result = authService.updateUserInfo(1L, "Jane", "Doe", "new@example.com", "newusername", null, null);
+        User result = authService.updateUserInfo(1L, "Jane", "Doe", "new@example.com", "newusername", null, null, null);
 
         assertEquals("Jane", result.getFirstName());
         assertEquals("Doe", result.getLastName());
@@ -142,7 +142,7 @@ public class AuthServiceTest {
         when(userRepository.findById(99L)).thenReturn(Optional.empty());
 
         RuntimeException ex = assertThrows(RuntimeException.class,
-                () -> authService.updateUserInfo(99L, "Jane", "Doe", "new@example.com", "newusername", null, null));
+                () -> authService.updateUserInfo(99L, "Jane", "Doe", "new@example.com", "newusername", null, null, null));
 
         assertEquals("User not found", ex.getMessage());
         verify(userRepository, never()).save(any());
@@ -155,7 +155,7 @@ public class AuthServiceTest {
         when(userRepository.existsByEmail("taken@example.com")).thenReturn(true);
 
         RuntimeException ex = assertThrows(RuntimeException.class,
-                () -> authService.updateUserInfo(1L, "Test", "User", "taken@example.com", "testuser", null, null));
+                () -> authService.updateUserInfo(1L, "Test", "User", "taken@example.com", "testuser", null, null, null));
 
         assertEquals("Email already in use", ex.getMessage());
         verify(userRepository, never()).save(any());
@@ -168,7 +168,7 @@ public class AuthServiceTest {
         when(userRepository.existsByUsername("takenuser")).thenReturn(true);
 
         RuntimeException ex = assertThrows(RuntimeException.class,
-                () -> authService.updateUserInfo(1L, "Test", "User", "test@example.com", "takenuser", null, null));
+                () -> authService.updateUserInfo(1L, "Test", "User", "test@example.com", "takenuser", null, null, null));
 
         assertEquals("Username already taken", ex.getMessage());
         verify(userRepository, never()).save(any());
@@ -179,7 +179,7 @@ public class AuthServiceTest {
     public void updateUserInfo_IgnoresBlankFields() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
         when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
-        User result = authService.updateUserInfo(1L, "  ", "  ", "test@example.com", "testuser", null, null);
+        User result = authService.updateUserInfo(1L, "  ", "  ", "test@example.com", "testuser", null, null, null);
 
         assertEquals("Test", result.getFirstName());
         assertEquals("User", result.getLastName());
