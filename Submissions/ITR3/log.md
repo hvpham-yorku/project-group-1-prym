@@ -95,7 +95,8 @@ ___
 | View farm details and ratings on listing | Katelyn |
 | View farm details and ratings on farm page | Katelyn |
 | Submit ratings | Harleen |
-| Search & Filter farms | Harleen |
+| Search bar for farm listings | Harleen |
+| Filter farms | Harleen |
 
 ---
 
@@ -122,8 +123,9 @@ ___
 | Save/bookmark farms | Katelyn | 1 day | 0.5 days |
 | View farm details and ratings on listing | Katelyn | 1 day | 1.5 days |
 | View farm details and ratings on farm page | Katelyn | 1 day | 1.5 days |
-| Submit ratings | Harleen | | |
-| Search & Filter farms | Harleen | | |
+| Submit ratings | Harleen | 1 day | 1.5 days |
+| Search bar for farm listings | Harleen | 0.5 day | 0.5 day |
+| Filter farms | Harleen | 0.5 day | 0.5 day |
 
 ---
 **some of the tasks here were done in parallel, so there are a lot of cases where times overlap.**
