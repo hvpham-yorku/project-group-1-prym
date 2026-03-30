@@ -284,7 +284,7 @@ class AuthControllerExtendedTest {
 
         when(sessionService.validateSession("valid-session")).thenReturn(Optional.of(existingUser));
         when(authService.updateUserInfo(eq(1L), eq("NewFirst"), eq("NewLast"),
-                eq("new@example.com"), eq("newuser"), isNull(), isNull()))
+                eq("new@example.com"), eq("newuser"), isNull(), isNull(), isNull()))
                 .thenReturn(updatedUser);
 
         mockMvc.perform(patch("/api/auth/user")
@@ -334,7 +334,7 @@ class AuthControllerExtendedTest {
         User currentUser = buildUser(1L, "current@example.com", "currentuser", User.Role.BUYER);
         when(sessionService.validateSession("sess")).thenReturn(Optional.of(currentUser));
         when(authService.updateUserInfo(anyLong(), anyString(), anyString(), anyString(),
-                anyString(), any(), any()))
+                anyString(), any(), any(), any()))
                 .thenThrow(new RuntimeException("Email already in use"));
 
         mockMvc.perform(patch("/api/auth/user")
@@ -351,7 +351,7 @@ class AuthControllerExtendedTest {
         User currentUser = buildUser(1L, "me@example.com", "me", User.Role.BUYER);
         when(sessionService.validateSession("sess2")).thenReturn(Optional.of(currentUser));
         when(authService.updateUserInfo(anyLong(), anyString(), anyString(), anyString(),
-                anyString(), any(), any()))
+                anyString(), any(), any(), any()))
                 .thenThrow(new RuntimeException("Username already taken"));
 
         mockMvc.perform(patch("/api/auth/user")
@@ -371,7 +371,7 @@ class AuthControllerExtendedTest {
 
         when(sessionService.validateSession("pic-sess")).thenReturn(Optional.of(currentUser));
         when(authService.updateUserInfo(eq(5L), anyString(), anyString(), anyString(),
-                anyString(), eq("https://img.example.com/pic.jpg"), eq("M5V2T6")))
+                anyString(), isNull(), eq("https://img.example.com/pic.jpg"), eq("M5V2T6")))
                 .thenReturn(updatedUser);
 
         mockMvc.perform(patch("/api/auth/user")
@@ -390,7 +390,7 @@ class AuthControllerExtendedTest {
                 .andExpect(status().isOk());
 
         verify(authService).updateUserInfo(eq(5L), anyString(), anyString(), anyString(),
-                anyString(), eq("https://img.example.com/pic.jpg"), eq("M5V2T6"));
+                anyString(), isNull(), eq("https://img.example.com/pic.jpg"), eq("M5V2T6"));
     }
 
     // ─── Helpers ──────────────────────────────────────────────────────
